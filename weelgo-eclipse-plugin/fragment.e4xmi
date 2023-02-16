@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="ASCII"?>
+<fragment:ModelFragments xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:basic="http://www.eclipse.org/ui/2010/UIModel/application/descriptor/basic" xmlns:commands="http://www.eclipse.org/ui/2010/UIModel/application/commands" xmlns:fragment="http://www.eclipse.org/ui/2010/UIModel/fragment" xmlns:menu="http://www.eclipse.org/ui/2010/UIModel/application/ui/menu" xmi:id="_wrQeIKq1Ee2NJJH086dcvw">
+  <imports xsi:type="commands:Command" xmi:id="_Z8hnQK41Ee2LUdqnK6Q47w" elementId="org.eclipse.ui.edit.undo"/>
+  <imports xsi:type="commands:Command" xmi:id="_hjRgwK42Ee2LUdqnK6Q47w" elementId="org.eclipse.ui.edit.redo"/>
+  <imports xsi:type="commands:Command" xmi:id="_Uy8zcK43Ee2LUdqnK6Q47w" elementId="org.eclipse.ui.edit.copy"/>
+  <imports xsi:type="commands:Command" xmi:id="_YGIbcK43Ee2LUdqnK6Q47w" elementId="org.eclipse.ui.edit.cut"/>
+  <imports xsi:type="commands:Command" xmi:id="_YbIbEK43Ee2LUdqnK6Q47w" elementId="org.eclipse.ui.edit.paste"/>
+  <imports xsi:type="commands:Command" xmi:id="_YsnMoK43Ee2LUdqnK6Q47w" elementId="org.eclipse.ui.edit.selectAll"/>
+  <imports xsi:type="commands:Command" xmi:id="_b-VcEK43Ee2LUdqnK6Q47w" elementId="org.eclipse.ui.file.save"/>
+  <imports xsi:type="commands:Command" xmi:id="_cVqW8K43Ee2LUdqnK6Q47w" elementId="org.eclipse.ui.file.saveAll"/>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_yazwMKq1Ee2NJJH086dcvw" featurename="descriptors" parentElementId="xpath:/">
+    <elements xsi:type="basic:PartDescriptor" xmi:id="_3-VqMKq1Ee2NJJH086dcvw" elementId="com.weelgo.eclipse.plugin.navigator.WeelgoNavigatorViewPart" label="Weelgo Navigator" iconURI="platform:/plugin/com.weelgo.eclipse.plugin/icons/weelgo.png" category="Weelgo" closeable="true" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.navigator.WeelgoNavigatorViewPart">
+      <tags>View</tags>
+      <tags>categoryTag:Weelgo</tags>
+      <handlers xmi:id="_81ACAK41Ee2LUdqnK6Q47w" elementId="com.weelgo.eclipse.plugin.handlers.UndoHandler" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.handlers.UndoHandler" command="_Z8hnQK41Ee2LUdqnK6Q47w"/>
+      <handlers xmi:id="_ytiF8K45Ee2LUdqnK6Q47w" elementId="com.weelgo.eclipse.plugin.handlers.RedoHandler" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.handlers.RedoHandler" command="_hjRgwK42Ee2LUdqnK6Q47w"/>
+      <menus xsi:type="menu:PopupMenu" xmi:id="_5TOE0KyqEe2Yx_P2nyaC7A" elementId="com.weelgo.eclipse.plugin.navigator.ContextMenu" accessibilityPhrase="" label="Context menu">
+        <children xsi:type="menu:DynamicMenuContribution" xmi:id="_GvkDQKytEe2Yx_P2nyaC7A" elementId="com.weelgo.eclipse.plugin.navigator.DynamicContextMenu" label="Dynamic menu" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.navigator.DynamicContextMenu"/>
+      </menus>
+      <toolbar xmi:id="_mIS6QK1pEe2CHMmgcvMd4w" elementId="com.weelgo.eclipse.plugin.navigator.toolbar">
+        <children xsi:type="menu:HandledToolItem" xmi:id="_zNJDoK34Ee2LUdqnK6Q47w" elementId="com.weelgo.eclipse.plugin.navigator.toolbar.saveAllModules" label="Save all modules" iconURI="platform:/plugin/com.weelgo.eclipse.plugin/icons/save_all.png" command="_2kFxUK34Ee2LUdqnK6Q47w"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_BamYYK1rEe2CHMmgcvMd4w" elementId="com.weelgo.eclipse.plugin.navigator.toolbar.loadAllModules" label="Load all modules" iconURI="platform:/plugin/com.weelgo.eclipse.plugin/icons/refresh.png" command="_06EQAK1qEe2CHMmgcvMd4w"/>
+      </toolbar>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_MlCRcKuzEe29xcc-jYjrcA" featurename="menuContributions" parentElementId="xpath:/">
+    <elements xsi:type="menu:MenuContribution" xmi:id="_Q-HxkKuzEe29xcc-jYjrcA" elementId="com.weelgo.eclipse.plugin.menucontribution.0" parentId="org.eclipse.ui.main.menu">
+      <children xsi:type="menu:DirectMenuItem" xmi:id="_TzzlQKuzEe29xcc-jYjrcA" elementId="ButtonTester" label="Test le truc" iconURI="platform:/plugin/com.weelgo.eclipse.plugin/icons/sample.png" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.TestButtonHandler"/>
+    </elements>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_TKeMIKyqEe2Yx_P2nyaC7A" featurename="commands" parentElementId="xpath:/">
+    <elements xsi:type="commands:Command" xmi:id="_UfSqAKyqEe2Yx_P2nyaC7A" elementId="com.weelgo.eclipse.plugin.commands.CreateCMGroupCommand" commandName="Create group"/>
+    <elements xsi:type="commands:Command" xmi:id="_06EQAK1qEe2CHMmgcvMd4w" elementId="com.weelgo.eclipse.plugin.commands.CMLoadAllModulesCommand" commandName="Load all modules"/>
+    <elements xsi:type="commands:Command" xmi:id="_2kFxUK34Ee2LUdqnK6Q47w" elementId="com.weelgo.eclipse.plugin.commands.saveAllModulesCommand" commandName="Save all modules"/>
+  </fragments>
+  <fragments xsi:type="fragment:StringModelFragment" xmi:id="_fBwjMKyqEe2Yx_P2nyaC7A" featurename="handlers" parentElementId="xpath:/">
+    <elements xsi:type="commands:Handler" xmi:id="_gRhh8KyqEe2Yx_P2nyaC7A" elementId="com.weelgo.eclipse.plugin.job.CMCreateGroupJob" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.job.CMCreateGroupJob" command="_UfSqAKyqEe2Yx_P2nyaC7A"/>
+    <elements xsi:type="commands:Handler" xmi:id="__7krEK1pEe2CHMmgcvMd4w" elementId="com.weelgo.eclipse.plugin.job.CMLoadAllModulesJob" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.job.CMLoadAllModulesJob" command="_06EQAK1qEe2CHMmgcvMd4w"/>
+    <elements xsi:type="commands:Handler" xmi:id="_9rRPYK34Ee2LUdqnK6Q47w" elementId="com.weelgo.eclipse.plugin.job.CMSaveAllModulesJob" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.job.CMSaveAllModulesJob" command="_2kFxUK34Ee2LUdqnK6Q47w"/>
+  </fragments>
+</fragment:ModelFragments>

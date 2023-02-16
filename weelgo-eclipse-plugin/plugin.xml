@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin>
+
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            id="com.weelgo.eclipse.plugin.wizard.category.weelgo"
+            name="Weelgo">
+      </category>
+      <wizard
+            category="com.weelgo.eclipse.plugin.wizard.category.weelgo"
+            class="com.weelgo.eclipse.plugin.wizard.NewCMModuleWizard"
+            icon="icons/chain_mapping.png"
+            id="com.weelgo.eclipse.plugin.wizard.NewCMModuleWizard"
+            name="Chain-mapping module">
+      </wizard>
+   </extension>
+   <extension
+         id="com.weelgo.eclipse.plugin.fragment"
+         point="org.eclipse.e4.workbench.model">
+      <fragment
+            uri="fragment.e4xmi"
+            apply="always">
+      </fragment>
+   </extension>
+
+</plugin>
