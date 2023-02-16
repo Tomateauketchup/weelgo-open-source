@@ -77,6 +77,7 @@ public class Factory {
 
 					if (Factory.getFactory().isWorkspaceModified()) {
 						CMLoadAllModulesJob j = CMLoadAllModulesJob.CREATE();
+						
 						j.doSchedule();
 					}
 				}
