@@ -25,7 +25,7 @@ public class TestCore {
 		assertTrue(ValidatorUtils.isValidPackageName("refetgtg_gtgfer_erfgt"));
 		assertFalse(ValidatorUtils.isValidPackageName("refetgtg_gtg.fer_erfgt"));
 		assertFalse(ValidatorUtils.isValidPackageName("refetgtg gtgfer_erfgt"));
-		assertFalse(ValidatorUtils.isValidPackageName("refetgtg@gtgfer_erfgt"));ferf
+		assertFalse(ValidatorUtils.isValidPackageName("refetgtg@gtgfer_erfgt"));
 		
 		
 	}
