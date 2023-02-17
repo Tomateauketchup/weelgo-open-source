@@ -1,9 +1,13 @@
 package com.weelgo.chainmapping.core;
 
+import com.weelgo.core.ICloneableObject;
 import com.weelgo.core.INamedObject;
+import com.weelgo.core.IUpdatableUuidObject;
+import com.weelgo.core.IUpdatablebject;
 import com.weelgo.core.IUuidObject;
 
-public class CMTask implements IUuidObject, INamedObject, IModuleUniqueIdentifierObject {
+public class CMTask implements IUuidObject, INamedObject, IModuleUniqueIdentifierObject, ICloneableObject<CMTask>,
+		IUpdatableUuidObject<CMTask> {
 
 	private String uuid;
 	private String moduleUniqueIdentifier;
@@ -11,6 +15,28 @@ public class CMTask implements IUuidObject, INamedObject, IModuleUniqueIdentifie
 	private String groupUuid;
 	private int posX;
 	private int posY;
+
+	@Override
+	public void populateObject(CMTask toPopulate) {
+		if (toPopulate != null) {
+			toPopulate.setUuid(getUuid());
+			toPopulate.setModuleUniqueIdentifier(getModuleUniqueIdentifier());
+			toPopulate.setName(getName());
+			toPopulate.setGroupUuid(getGroupUuid());
+			toPopulate.setPosX(getPosX());
+			toPopulate.setPosY(getPosY());
+		}
+	}
+
+	@Override
+	public void updateObject(CMTask objectToUpdate) {
+		populateObject(objectToUpdate);
+	}
+
+	@Override
+	public CMTask createThisObject() {
+		return CMFactory.create(CMTask.class);
+	}
 
 	@Override
 	public String getUuid() {

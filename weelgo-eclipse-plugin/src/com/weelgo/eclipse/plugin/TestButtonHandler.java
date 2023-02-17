@@ -29,7 +29,7 @@ public class TestButtonHandler {
 	// is used for the part descriptor
 	@Execute
 	public void execute(EPartService partService, EModelService modelService, MApplication application, MWindow window,
-			CMServices myService, UISynchronize sync, @Named(IServiceConstants.ACTIVE_SHELL) Shell shell,
+			CMService myService, UISynchronize sync, @Named(IServiceConstants.ACTIVE_SHELL) Shell shell,
 			IEventBroker eventBroker) {
 
 		CMLoadAllModulesJob job = CMLoadAllModulesJob.CREATE();

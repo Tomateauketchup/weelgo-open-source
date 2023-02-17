@@ -8,12 +8,119 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import com.weelgo.core.exceptions.AssertNotNullOrEmpty;
 import com.weelgo.core.exceptions.AssertNotNullOrEmptyCustomFatal;
 import com.weelgo.core.exceptions.ExceptionsUtils;
 
 public class CoreUtils {
+
+	public static <T extends IUpdatableUuidObject> void updateList(List<T> listToUpdate, List<T> newList) {
+		updateList(listToUpdate, newList, true);
+	}
+
+	private static <T extends IUpdatableUuidObject> void updateList(List<T> listToUpdate, List<T> newList,
+			boolean updateEvenNotChanged) {
+
+		BiFunction<T, T, Void> notChangedElements = null;
+		BiFunction<T, T, Void> changedElements = (oldObj, newObj) -> {
+
+			if (oldObj != null && newObj != null) {
+				newObj.updateObject(oldObj);
+			}
+			return null;
+		};
+
+		if (updateEvenNotChanged) {
+			notChangedElements = changedElements;
+		}
+		updateList(listToUpdate, newList, changedElements, notChangedElements);
+
+	}
+
+	public static <T extends IUpdatableUuidObject> void updateList(List<T> listToUpdate, List<T> newList,
+			BiFunction<T, T, Void> changedElementRunnable, BiFunction<T, T, Void> notChangedElementRunnable) {
+		IUuidUpdateListProcessor<T> servicesUpdator = new IUuidUpdateListProcessor<T>(listToUpdate, newList) {
+
+			@Override
+			public String generateUUid() {
+				return null;
+			}
+		};
+
+		servicesUpdator.compileList();
+
+		List<T> toRemoveGp = servicesUpdator.getToRemoveElements();
+		List<T> toAddGp = servicesUpdator.getNewElements();
+		List<T> toUpdate = servicesUpdator.getChangedElements();
+		List<T> notChanged = servicesUpdator.getNotChangedElements();
+
+		if (listToUpdate != null) {
+			if (toRemoveGp != null) {
+				listToUpdate.removeAll(toRemoveGp);
+			}
+			if (toAddGp != null) {
+				listToUpdate.addAll(toAddGp);
+			}
+		}
+
+		Map<String, T> map = putIntoMap(newList);
+
+		if (toUpdate != null && changedElementRunnable != null) {
+			toUpdate.forEach(oldObj -> {
+
+				if (oldObj != null) {
+					T newObs = map.get(oldObj.getUuid());
+					changedElementRunnable.apply(oldObj, newObs);
+				}
+
+			});
+		}
+		if (notChanged != null && notChangedElementRunnable != null) {
+			notChanged.forEach(oldObj -> {
+
+				if (oldObj != null) {
+					T newObs = map.get(oldObj.getUuid());
+					notChangedElementRunnable.apply(oldObj, newObs);
+				}
+
+			});
+		}
+
+	}
+
+	public static <T extends ICloneableObject<T>> T cloneObject(T o) {
+		if (o != null) {
+			return o.cloneObject();
+		}
+		return null;
+	}
+
+	public static <T extends ICloneableObject<T>> List<T> cloneList(List<T> o) {
+		return cloneList(o, t -> {
+
+			return cloneObject(t);
+
+		});
+	}
+
+	public static <T> T cloneObject(T o, Function<T, T> c) {
+		return c.apply(o);
+	}
+
+	public static <T> List<T> cloneList(List<T> o, Function<T, T> c) {
+		if (o == null) {
+			return null;
+		}
+		ArrayList<T> arl = new ArrayList<>();
+
+		for (T object : o) {
+			arl.add(c.apply(object));
+		}
+		return arl;
+	}
 
 	public static boolean isAllNull(Object... a) {
 		if (a != null) {

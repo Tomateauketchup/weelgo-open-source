@@ -18,17 +18,20 @@ import org.slf4j.LoggerFactory;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.exceptions.ExceptionsUtils;
-import com.weelgo.eclipse.plugin.CMServices;
+import com.weelgo.eclipse.plugin.CMService;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.ProgressMonitorAdapter;
+import com.weelgo.eclipse.plugin.UndoRedoService;
 
 public abstract class CMJob extends Job {
 
 	private static Logger logger = LoggerFactory.getLogger(CMJob.class);
 	@Inject
-	private CMServices services;
+	private CMService services;
 	@Inject
 	private IEventBroker eventBroker;
+	@Inject
+	private UndoRedoService undoRedoService;
 	private String moduleUniqueIdentifier;
 	private String beginTaskMessage = "Starting Weelgo job ...";
 
@@ -56,7 +59,15 @@ public abstract class CMJob extends Job {
 
 		try {
 			doRun(ProgressMonitorAdapter.beginTask(getBeginTaskMessage(), 100, monitor));
+
+			if (isUndoRedoJob()) {
+				undoRedoService.saveModel(getModuleUniqueIdentifier());
+			}
 		} catch (Exception e) {
+
+			if (isUndoRedoJob()) {
+				undoRedoService.restoreModel(getModuleUniqueIdentifier());
+			}
 			ExceptionsUtils.ManageException(e, logger);
 		}
 
@@ -66,6 +77,10 @@ public abstract class CMJob extends Job {
 	public void createServices() {
 		services = Factory.getCMServices();
 		eventBroker = Factory.getEventBroker();
+	}
+
+	public boolean isUndoRedoJob() {
+		return false;
 	}
 
 	public void addRule(ISchedulingRule... rules) {
@@ -83,18 +98,16 @@ public abstract class CMJob extends Job {
 			}
 		}
 		setRule(combinedRule);
-		
-		
+
 	}
 
-	public void doSchedule()
-	{
+	public void doSchedule() {
+
 		schedule();
 	}
-	
-	
+
 	public CMModuleService getModuleService(Object o) {
-		return getServices().getModuleService(o);
+		return getServices().findModuleService(o);
 	}
 
 	public boolean sentEvent(String topic) {
@@ -123,11 +136,11 @@ public abstract class CMJob extends Job {
 		this.eventBroker = eventBroker;
 	}
 
-	public CMServices getServices() {
+	public CMService getServices() {
 		return services;
 	}
 
-	public void setServices(CMServices services) {
+	public void setServices(CMService services) {
 		this.services = services;
 	}
 

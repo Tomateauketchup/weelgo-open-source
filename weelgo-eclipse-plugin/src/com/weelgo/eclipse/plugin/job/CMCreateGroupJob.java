@@ -13,6 +13,11 @@ public class CMCreateGroupJob extends CMJob {
 
 	private Object selectedParent;
 
+	@Override
+	public boolean isUndoRedoJob() {
+		return true;
+	}
+
 	public Object getSelectedParent() {
 		return selectedParent;
 	}
@@ -34,6 +39,7 @@ public class CMCreateGroupJob extends CMJob {
 
 		CMModuleService ser = getModuleService(selectedParent);
 		if (ser != null && selectedParent instanceof CMGroup) {
+			setModuleUniqueIdentifier(ser.getModuleUniqueIdentifier());
 			CMGroup gp = (CMGroup) selectedParent;
 			String[] ret = ser.findNameForNewGroup(gp.getUuid());
 			if (ret != null && ret.length > 1) {

@@ -10,17 +10,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.weelgo.chainmapping.core.CMFileSystemDataSource;
-import com.weelgo.chainmapping.core.CMGenericDataSource;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMModulesManager;
-import com.weelgo.chainmapping.core.IModuleUniqueIdentifierObject;
 import com.weelgo.core.IProgressMonitor;
 
 @Creatable
 @Singleton
-public class CMServices {
+public class CMService {
 
-	private static Logger logger = LoggerFactory.getLogger(CMServices.class);
+	private static Logger logger = LoggerFactory.getLogger(CMService.class);
 	private CMFileSystemDataSource workspaceDataSource;
 	private CMModulesManager modulesManager;
 
@@ -74,17 +72,16 @@ public class CMServices {
 		modulesManager.getSources().add(workspaceDataSource);
 	}
 
-	public CMModuleService getModuleService(Object o) {
-		if (o != null && o instanceof IModuleUniqueIdentifierObject) {
-			IModuleUniqueIdentifierObject ob = (IModuleUniqueIdentifierObject) o;
-			return getModulesManager().getServiceByModuleUniqueIdentifierId(ob.getModuleUniqueIdentifier());
-		}
-		return null;
+	public String findModuleUniqueIdentifierId(Object o) {
+		return getModulesManager().findModuleUniqueIdentifierId(o);
+	}
+	public CMModuleService findModuleService(Object o) {
+		return getModulesManager().findModuleService(o);
 	}
 
 	public boolean isModulePackageFreeForEclipseWorkspace(IProgressMonitor progressMonitor, Object moduleParentFolder,
 			String packageName) {
-		return modulesManager.isModulePackageFree(progressMonitor, workspaceDataSource, moduleParentFolder,
+		return getModulesManager().isModulePackageFree(progressMonitor, workspaceDataSource, moduleParentFolder,
 				packageName);
-	}
+	}	
 }

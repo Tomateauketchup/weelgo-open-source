@@ -16,12 +16,12 @@ import com.weelgo.chainmapping.core.CMReturnObj;
 import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.IUuidObject;
-import com.weelgo.eclipse.plugin.CMServices;
+import com.weelgo.eclipse.plugin.CMService;
 
 public class TreeContentProvider implements ITreeContentProvider {
 
 	@Inject
-	private CMServices cmServices;
+	private CMService cmServices;
 
 	@Override
 	public Object[] getChildren(Object element) {
@@ -35,7 +35,7 @@ public class TreeContentProvider implements ITreeContentProvider {
 
 		if (CoreUtils.isAllNull(modManager, dataSource, modService, gp, tsk, del)) {
 			// We look if the element is a matching module
-			modService = getModulesManager().getCorrespondingModule(element);
+			modService = getModulesManager().getCorrespondingModuleServiceOfFolder(element);
 		}
 
 		ArrayList<Object> arl = new ArrayList<>();
@@ -77,11 +77,11 @@ public class TreeContentProvider implements ITreeContentProvider {
 
 		if (CoreUtils.isAllNull(modManager, dataSource, modService, gp, tsk, del)) {
 			// We look if the element is a matching module
-			modService = getModulesManager().getCorrespondingModule(element);
+			modService = getModulesManager().getCorrespondingModuleServiceOfFolder(element);
 		}
 
 		if (modService == null) {
-			CMGenericDataSource e = getModulesManager().isRootContainerFromSource(element);
+			CMGenericDataSource e = getModulesManager().isRootContainerOfDataSource(element);
 			if (e != null) {
 				return null;
 			}
@@ -186,11 +186,11 @@ public class TreeContentProvider implements ITreeContentProvider {
 		return null;
 	}
 
-	public CMServices getCmServices() {
+	public CMService getCmServices() {
 		return cmServices;
 	}
 
-	public void setCmServices(CMServices cmServices) {
+	public void setCmServices(CMService cmServices) {
 		this.cmServices = cmServices;
 	}
 

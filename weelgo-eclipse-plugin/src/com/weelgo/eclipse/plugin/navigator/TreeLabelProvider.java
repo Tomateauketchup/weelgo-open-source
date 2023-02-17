@@ -13,19 +13,19 @@ import com.weelgo.chainmapping.core.CMModulesManager;
 import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.INamedObject;
-import com.weelgo.eclipse.plugin.CMServices;
+import com.weelgo.eclipse.plugin.CMService;
 import com.weelgo.eclipse.plugin.ImagesFactory;
 
 public class TreeLabelProvider extends LabelProvider {
 
 	@Inject
-	private CMServices cmServices;
+	private CMService cmServices;
 
-	public CMServices getCmServices() {
+	public CMService getCmServices() {
 		return cmServices;
 	}
 
-	public void setCmServices(CMServices cmServices) {
+	public void setCmServices(CMService cmServices) {
 		this.cmServices = cmServices;
 	}
 
@@ -41,7 +41,7 @@ public class TreeLabelProvider extends LabelProvider {
 
 		if (CoreUtils.isAllNull(modManager, dataSource, modService, gp, tsk, del)) {
 			// We look if the element is a matching module
-			modService = getModulesManager().getCorrespondingModule(element);
+			modService = getModulesManager().getCorrespondingModuleServiceOfFolder(element);
 		}
 
 		if (gp != null) {
@@ -69,11 +69,11 @@ public class TreeLabelProvider extends LabelProvider {
 
 		if (CoreUtils.isAllNull(modManager, dataSource, modService, gp, tsk, del)) {
 			// We look if the element is a matching module
-			modService = getModulesManager().getCorrespondingModule(element);
+			modService = getModulesManager().getCorrespondingModuleServiceOfFolder(element);
 		}
 
 		if (modService == null) {
-			CMGenericDataSource e = getModulesManager().isRootContainerFromSource(element);
+			CMGenericDataSource e = getModulesManager().isRootContainerOfDataSource(element);
 			if (e != null) {
 				return ImagesFactory.getIconImage(ImagesFactory.GROUP_PROJECT);
 			}

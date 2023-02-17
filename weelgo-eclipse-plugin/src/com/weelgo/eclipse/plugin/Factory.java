@@ -44,13 +44,15 @@ public class Factory {
 
 	private static Factory factory = null;
 	@Inject
-	private CMServices cmServices;
+	private CMService cmServices;
 	@Inject
 	private IEventBroker eventBroker;
 	@Inject
 	private UISynchronize uiSynchronize;
 	@Inject
 	private CurrentSelectionService currentSelection;
+	@Inject
+	private UndoRedoService undoRedoService;
 
 	private List<String> openedProjects = new ArrayList<>();
 
@@ -97,9 +99,14 @@ public class Factory {
 		return factory.currentSelection.getCurrentSelection();
 	}
 
-	public static CMServices getCMServices() {
+	public static CMService getCMServices() {
 		loadFactory();
 		return factory.cmServices;
+	}
+
+	public static UndoRedoService getUndoRedoService() {
+		loadFactory();
+		return factory.undoRedoService;
 	}
 
 	public static IEventBroker getEventBroker() {
@@ -163,8 +170,10 @@ public class Factory {
 	}
 
 	public boolean isWorkspaceModified() {
-		
-		//TODO améliorer la détection de ressource : quand un nouveau projet arrive ou est supprimé, il faut uniquement loader pour ce projet et pas loader les autres car il est possible que le modèle soit modifié
+
+		// TODO améliorer la détection de ressource : quand un nouveau projet arrive ou
+		// est supprimé, il faut uniquement loader pour ce projet et pas loader les
+		// autres car il est possible que le modèle soit modifié
 		List<String> oldList = openedProjects;
 		List<String> newList = findOpenedProjects();
 		openedProjects = newList;

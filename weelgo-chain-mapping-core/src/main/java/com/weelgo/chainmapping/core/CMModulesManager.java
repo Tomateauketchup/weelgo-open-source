@@ -43,6 +43,40 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		return null;
 	}
 
+	public CMGenericDataSource findDataSource(Object o) {
+		if (sources != null) {
+			for (CMGenericDataSource src : sources) {
+				if (src != null && src.isMine(o)) {
+					return src;
+				}
+			}
+		}
+		return null;
+	}
+
+	public CMModuleService findModuleService(Object o) {
+
+		if (o != null && o instanceof IModuleUniqueIdentifierObject) {
+			IModuleUniqueIdentifierObject ob = (IModuleUniqueIdentifierObject) o;
+			return getServiceByModuleUniqueIdentifierId(ob.getModuleUniqueIdentifier());
+		}
+
+		CMModuleService ser = findServiceFromResourceObject(o);
+		if (ser != null) {
+			return ser;
+		}
+
+		return null;
+	}
+
+	public String findModuleUniqueIdentifierId(Object o) {
+		CMModuleService ser = findModuleService(o);
+		if (ser != null) {
+			return ser.getModuleUniqueIdentifier();
+		}
+		return "";
+	}
+
 	public CMModuleService getServiceByModuleUniqueIdentifierId(String id) {
 		if (servicesMap != null && CoreUtils.isNotNullOrEmpty(id)) {
 			return servicesMap.get(id);
@@ -105,7 +139,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		this.services = services;
 	}
 
-	public void createModule(IProgressMonitor progressMonitor, CMGenericDataSource ds, Object moduleParentFolder,
+	public String createModule(IProgressMonitor progressMonitor, CMGenericDataSource ds, Object moduleParentFolder,
 			String moduleName, String modulePackageName) {
 		CMModuleService service = new CMModuleService();
 		CMGroup gp = new CMGroup();
@@ -117,7 +151,8 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		gp.setType(CMGroup.TYPE_MODULE);
 		service.check();
 
-		ds.createModule(progressMonitor, moduleParentFolder, service);
+		ds.createModule(progressMonitor, moduleParentFolder, service);		
+		return gp.getModuleUniqueIdentifier();
 	}
 
 	public boolean isModulePackageFree(IProgressMonitor progressMonitor, CMGenericDataSource ds,
@@ -132,7 +167,23 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		return new CMFileSystemDataSource();
 	}
 
-	public CMModuleService getCorrespondingModule(Object o) {
+	public CMModuleService findServiceFromResourceObject(Object o) {
+		CMModuleService ser = getCorrespondingModuleServiceOfFolder(o);
+		if (ser != null) {
+			return ser;
+		}
+		Object parent = getParentFolder(o);
+		if (parent == null) {
+			return null;
+		} else if (isRootContainerOfDataSource(parent) != null) {
+			// We stop here the digging because next is root
+			return getCorrespondingModuleServiceOfFolder(parent);
+		} else {
+			return findServiceFromResourceObject(parent);
+		}
+	}
+
+	public CMModuleService getCorrespondingModuleServiceOfFolder(Object o) {
 		if (o != null && services != null) {
 			for (CMModuleService ser : services) {
 				if (ser != null && ser.getParentContainer() != null && isSameFolder(o, ser.getParentContainer())) {
@@ -143,7 +194,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		return null;
 	}
 
-	public CMGenericDataSource isRootContainerFromSource(Object o) {
+	public CMGenericDataSource isRootContainerOfDataSource(Object o) {
 		if (sources != null) {
 			for (CMGenericDataSource src : sources) {
 				if (src != null && src.getContainers() != null) {
@@ -194,7 +245,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		if (lst != null) {
 			for (int i = 0; i < lst.size(); i++) {
 				Object o = lst.get(i);
-				CMModuleService mod = getCorrespondingModule(o);
+				CMModuleService mod = getCorrespondingModuleServiceOfFolder(o);
 				if (mod != null) {
 					lst.set(i, mod);
 				}
@@ -290,6 +341,34 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 			}
 		}
 		return null;
+	}
+
+	public void saveModelForUndoRedo(String moduleUniqueidentifier) {
+		CMModuleService serv = getServiceByModuleUniqueIdentifierId(moduleUniqueidentifier);
+		if (serv != null && serv.getUndoRedoManager() != null) {
+			serv.getUndoRedoManager().saveModel();
+		}
+	}
+
+	public void restoreModelForUndoRedo(String moduleUniqueidentifier) {
+		CMModuleService serv = getServiceByModuleUniqueIdentifierId(moduleUniqueidentifier);
+		if (serv != null && serv.getUndoRedoManager() != null) {
+			serv.getUndoRedoManager().restore();
+		}
+	}
+
+	public void undoModelForUndoRedo(String moduleUniqueidentifier) {
+		CMModuleService serv = getServiceByModuleUniqueIdentifierId(moduleUniqueidentifier);
+		if (serv != null && serv.getUndoRedoManager() != null) {
+			serv.getUndoRedoManager().undo();
+		}
+	}
+
+	public void redoModelForUndoRedo(String moduleUniqueidentifier) {
+		CMModuleService serv = getServiceByModuleUniqueIdentifierId(moduleUniqueidentifier);
+		if (serv != null && serv.getUndoRedoManager() != null) {
+			serv.getUndoRedoManager().redo();
+		}
 	}
 
 }

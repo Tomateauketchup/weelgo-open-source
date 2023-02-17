@@ -1,7 +1,11 @@
 package com.weelgo.chainmapping.core;
 
+import static com.weelgo.core.CoreUtils.assertNotNullOrEmpty;
+import static com.weelgo.core.CoreUtils.assertNotNullOrEmptyFatal;
 import static com.weelgo.core.CoreUtils.cleanString;
 import static com.weelgo.core.CoreUtils.isNotNullOrEmpty;
+import static com.weelgo.core.ValidatorUtils.checkGroupName;
+import static com.weelgo.core.ValidatorUtils.checkPackageName;
 import static com.weelgo.core.ValidatorUtils.checkTaskName;
 
 import java.util.ArrayList;
@@ -11,15 +15,19 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 import com.weelgo.core.CoreUtils;
+import com.weelgo.core.ICloneableObject;
 import com.weelgo.core.INamedObject;
+import com.weelgo.core.IUpdatablebject;
 import com.weelgo.core.IUuidObject;
 import com.weelgo.core.exceptions.ExceptionsUtils;
 import com.weelgo.core.exceptions.WeelgoException;
-import static com.weelgo.core.CoreUtils.*;
-import static com.weelgo.core.ValidatorUtils.*;
+import com.weelgo.core.undoredo.IUndoRedoModelProvider;
+import com.weelgo.core.undoredo.UndoRedoManager;
 
-public class CMModuleService implements IUuidObject, INamedObject {
+public class CMModuleService implements IUuidObject, INamedObject, IModuleUniqueIdentifierObject,
+		ICloneableObject<CMModuleService>, IUpdatablebject<CMModuleService> {
 
+	private UndoRedoManager undoRedoManager = CMFactory.create(UndoRedoManager.class);
 	private Object parentContainer;
 	private CMGroup rootGroup;
 	private List<CMGroup> groups = new ArrayList<>();
@@ -35,6 +43,28 @@ public class CMModuleService implements IUuidObject, INamedObject {
 	private Map<String, List<CMDeliverable>> deliverableChilds;
 	private Map<String, List<CMGroup>> groupChilds;
 
+	public CMModuleService() {
+		IUndoRedoModelProvider<CMModuleService> undoRedoProvider = new IUndoRedoModelProvider<CMModuleService>() {
+
+			@Override
+			public void pushToModel(CMModuleService o) {
+				if (o != null) {
+					o.updateObject(getThisModuleService());
+				}
+			}
+
+			@Override
+			public CMModuleService getClonedModel() {
+				return CoreUtils.cloneObject(getThisModuleService());
+			}
+		};
+		undoRedoManager.setUndoRedoModelProvider(undoRedoProvider);
+	}
+
+	public CMModuleService getThisModuleService() {
+		return this;
+	}
+
 	public static CMModuleService createModule(String name) {
 		CMGroup gp = new CMGroup();
 		gp.setName(name);
@@ -45,6 +75,7 @@ public class CMModuleService implements IUuidObject, INamedObject {
 		return module;
 	}
 
+	@Override
 	public String getModuleUniqueIdentifier() {
 		if (rootGroup != null) {
 			return rootGroup.getModuleUniqueIdentifier();
@@ -223,6 +254,14 @@ public class CMModuleService implements IUuidObject, INamedObject {
 		return null;
 	}
 
+	public <T extends IUuidObject> T getObject(T o) {
+		loadObjectsIntoMap(false);
+		if (o != null) {
+			return (T) getObjectByUuid(o.getUuid());
+		}
+		return null;
+	}
+
 	public CMGroup getGroupByPackageFullPath(String packageFullPath) {
 		loadObjectsIntoMap(false);
 		if (groupMapByPackagePath != null) {
@@ -246,13 +285,6 @@ public class CMModuleService implements IUuidObject, INamedObject {
 			taskChilds = new HashMap<>();
 			deliverableChilds = new HashMap<>();
 			groupChilds = new HashMap<>();
-
-			CoreUtils.putIntoMap(groups, groupMapByUuid);
-			CoreUtils.putIntoMap(tasks, taskMapByUuid);
-			CoreUtils.putIntoMap(deliverables, deliverableMapByUuid);
-			CoreUtils.putIntoMap(groups, objectMapByUuid);
-			CoreUtils.putIntoMap(tasks, objectMapByUuid);
-			CoreUtils.putIntoMap(deliverables, objectMapByUuid);
 
 			if (groups != null) {
 				for (CMGroup obj : groups) {
@@ -343,6 +375,38 @@ public class CMModuleService implements IUuidObject, INamedObject {
 		return null;
 	}
 
+	@Override
+	public void populateObject(CMModuleService toPopulate) {
+		if (toPopulate != null) {
+			toPopulate.setGroups(CoreUtils.cloneList(groups));
+			toPopulate.setTasks(CoreUtils.cloneList(tasks));
+			toPopulate.setDeliverables(CoreUtils.cloneList(deliverables));
+
+			Map map = CoreUtils.putIntoMap(groups);
+			if (rootGroup != null) {
+				CMGroup root = (CMGroup) map.get(rootGroup.getUuid());
+				toPopulate.setRootGroup(root);
+			}
+		}
+	}
+
+	@Override
+	public void updateObject(CMModuleService objectToUpdate) {
+		if (objectToUpdate != null) {
+			objectToUpdate.needReloadObjects();
+			objectToUpdate.setParentContainer(getParentContainer());
+
+			CoreUtils.updateList(objectToUpdate.groups, groups);
+			CoreUtils.updateList(objectToUpdate.tasks, tasks);
+			CoreUtils.updateList(objectToUpdate.deliverables, deliverables);
+		}
+	}
+
+	@Override
+	public CMModuleService createThisObject() {
+		return CMFactory.create(CMModuleService.class);
+	}
+
 	public List<CMGroup> getGroups() {
 		return groups;
 	}
@@ -357,6 +421,22 @@ public class CMModuleService implements IUuidObject, INamedObject {
 
 	public void throwDynamicException(String type) {
 		ExceptionsUtils.throwDynamicException(type);
+	}
+
+	public List<CMTask> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(List<CMTask> tasks) {
+		this.tasks = tasks;
+	}
+
+	public List<CMDeliverable> getDeliverables() {
+		return deliverables;
+	}
+
+	public void setDeliverables(List<CMDeliverable> deliverables) {
+		this.deliverables = deliverables;
 	}
 
 	@Override
@@ -380,6 +460,19 @@ public class CMModuleService implements IUuidObject, INamedObject {
 	@Override
 	public void setName(String name) {
 
+	}
+
+	@Override
+	public void setModuleUniqueIdentifier(String moduleUniqueIdentifier) {
+
+	}
+
+	public UndoRedoManager getUndoRedoManager() {
+		return undoRedoManager;
+	}
+
+	public void setUndoRedoManager(UndoRedoManager undoRedoManager) {
+		this.undoRedoManager = undoRedoManager;
 	}
 
 }

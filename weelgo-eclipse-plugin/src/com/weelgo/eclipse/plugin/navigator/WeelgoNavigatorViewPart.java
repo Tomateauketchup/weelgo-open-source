@@ -16,7 +16,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.eclipse.plugin.CMEvents;
-import com.weelgo.eclipse.plugin.CMServices;
+import com.weelgo.eclipse.plugin.CMService;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.job.CMJob;
 import com.weelgo.eclipse.plugin.job.CMLoadAllModulesJob;
@@ -26,7 +26,7 @@ public class WeelgoNavigatorViewPart {
 	private TreeViewer viewer;
 
 	@PostConstruct
-	public void postConstruct(Composite parent, CMServices services, EMenuService menuService,
+	public void postConstruct(Composite parent, CMService services, EMenuService menuService,
 			IEclipseContext eclipseContext, ESelectionService selectionService) {
 		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 

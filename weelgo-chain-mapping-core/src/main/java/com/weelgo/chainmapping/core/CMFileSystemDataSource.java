@@ -85,43 +85,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 						CMModuleService newServ = loadedServices.get(oldServ.getUuid());
 						if (newServ != null) {
 
-							oldServ.setParentContainer(newServ.getParentContainer());
-
-							oldServ.needReloadObjects();
-							// On vérifie les dossiers
-							List<CMGroup> oldGroups = oldServ.getGroups();
-							List<CMGroup> newGroups = newServ.getGroups();
-
-							CMUpdateListProcessor<CMGroup> gpUpdator = new CMUpdateListProcessor<>(oldGroups,
-									newGroups);
-							gpUpdator.compileList();
-							List<CMGroup> toRemoveGp = gpUpdator.getToRemoveElements();
-							List<CMGroup> toAddGp = gpUpdator.getNewElements();
-							List<CMGroup> toUpdate1 = gpUpdator.getChangedElements();
-							List<CMGroup> toUpdate2 = gpUpdator.getNotChangedElements();
-							List<CMGroup> toUpdate = new ArrayList<>();
-							if (toUpdate1 != null) {
-								toUpdate.addAll(toUpdate1);
-							}
-							if (toUpdate2 != null) {
-								toUpdate.addAll(toUpdate2);
-							}
-
-							oldServ.getGroups().removeAll(toRemoveGp);
-							oldServ.getGroups().addAll(toAddGp);
-
-							for (CMGroup gp : toUpdate) {
-								if (gp != null) {
-									CMGroup oldGp = oldServ.getGroupByUuid(gp.getUuid());
-									CMGroup newGp = newServ.getGroupByUuid(gp.getUuid());
-									if (oldGp != null && newGp != null) {
-										oldGp.setName(newGp.getName());
-										oldGp.setPackageName(newGp.getPackageName());
-										oldGp.setPackageParentPath(newGp.getPackageParentPath());
-										oldGp.setType(newGp.getType());
-									}
-								}
-							}
+							newServ.updateObject(oldServ);
 						}
 					}
 				}
@@ -339,7 +303,8 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 	}
 
 	@Override
-	public boolean isModulePackageFree(IProgressMonitor progressMonitor, Object moduleParentFolder, String packageName) {
+	public boolean isModulePackageFree(IProgressMonitor progressMonitor, Object moduleParentFolder,
+			String packageName) {
 		packageName = cleanString(packageName);
 		assertTrue(ValidatorUtils.isValidPackageName(packageName));
 		assertNotNullOrEmpty(moduleParentFolder);
@@ -361,7 +326,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 			assertNotNullOrEmptyFatal(packageName);
 
 			assertTrue(getHierarchicalTreeSystemProvider().isFolderExist(moduleParentFolder));
-			assertTrue(ValidatorUtils.isValidPackageName(packageName));
+			assertTrue(ValidatorUtils.isValidPackageName(packageName), WeelgoException.INVALID_PACKAGE_NAME);
 
 			Object moduleFolder = getHierarchicalTreeSystemProvider().getFolder(moduleParentFolder, packageName);
 

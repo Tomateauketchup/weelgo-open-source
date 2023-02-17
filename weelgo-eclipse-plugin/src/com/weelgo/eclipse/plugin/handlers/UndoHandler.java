@@ -3,17 +3,25 @@ package com.weelgo.eclipse.plugin.handlers;
 import org.eclipse.e4.core.di.annotations.CanExecute;
 import org.eclipse.e4.core.di.annotations.Execute;
 
+import com.weelgo.eclipse.plugin.CMService;
+import com.weelgo.eclipse.plugin.CurrentSelectionService;
+import com.weelgo.eclipse.plugin.UndoRedoService;
+
 public class UndoHandler {
 
 	@Execute
-	public void execute() {
-		System.out.println("");
+	public void execute(UndoRedoService undoRedoService, CMService cmService,
+			CurrentSelectionService currentSelectionService) {
+		String str = cmService.findModuleUniqueIdentifierId(currentSelectionService.getCurrentSelection());
+		undoRedoService.undoModel(str);
 	}
 
 	@CanExecute
-	public boolean canExecute() {
-		System.out.println("");
-		return true;
+	public boolean canExecute(UndoRedoService undoRedoService, CMService cmService,
+			CurrentSelectionService currentSelectionService) {
+
+		String str = cmService.findModuleUniqueIdentifierId(currentSelectionService.getCurrentSelection());
+		return undoRedoService.canUndo(str);
 	}
 
 }
