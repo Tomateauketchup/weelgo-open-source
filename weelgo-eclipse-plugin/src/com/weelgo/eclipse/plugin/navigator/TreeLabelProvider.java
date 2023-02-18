@@ -47,7 +47,13 @@ public class TreeLabelProvider extends LabelProvider {
 		if (gp != null) {
 			return gp.getPackageName();
 		} else if (modService != null) {
-			return modService.getName();
+			boolean isDirty = modService.isDirty();
+			String name = modService.getName();
+
+			if (isDirty) {
+				name = "* " + name;
+			}
+			return name;
 		} else if (element instanceof INamedObject) {
 			return ((INamedObject) element).getName();
 		} else if (modManager != null) {

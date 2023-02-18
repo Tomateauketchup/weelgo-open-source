@@ -29,6 +29,7 @@ public class UndoRedoManager {
 		if (firstNode == null) {
 			firstNode = currentNode;
 		}
+		undoRedoModelProvider.modelSaved();
 		return n;
 	}
 
@@ -117,6 +118,15 @@ public class UndoRedoManager {
 
 	public void setUndoRedoModelProvider(IUndoRedoModelProvider undoRedoModelProvider) {
 		this.undoRedoModelProvider = undoRedoModelProvider;
+	}
+
+	public String getCurrentNodeDataFingerprint() {
+
+		if (currentNode != null) {
+			return currentNode.getDataFingerprint();
+		}
+		return "";
+
 	}
 
 }

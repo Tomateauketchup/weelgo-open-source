@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.weelgo.chainmapping.core.HierarchicalTreeSystemProvider;
+import com.weelgo.core.CoreUtils;
 import com.weelgo.core.exceptions.ExceptionsUtils;
 import com.weelgo.core.json.JsonUtils;
 
@@ -195,9 +196,12 @@ public class EclipseHierarchicalTreeSystemProvider implements HierarchicalTreeSy
 	public Object createFolder(Object parentFolder, String folderName) {
 
 		try {
-			Object p = getFolder(parentFolder, folderName);
-			if (p != null && p instanceof IFolder) {
-				IFolder f = (IFolder) p;
+			if(CoreUtils.isNotNullOrEmpty(folderName))
+			{
+				parentFolder = getFolder(parentFolder, folderName);
+			}
+			if (parentFolder != null && parentFolder instanceof IFolder) {
+				IFolder f = (IFolder) parentFolder;
 				if (f.exists() == false) {
 					f.create(true, true, null);
 				}
@@ -207,6 +211,19 @@ public class EclipseHierarchicalTreeSystemProvider implements HierarchicalTreeSy
 			ExceptionsUtils.ManageException(e, logger);
 		}
 		return null;
+	}
+
+	@Override
+	public void deleteFolder(Object folderToTest) {
+		try {
+			if (folderToTest != null && folderToTest instanceof IContainer) {
+				IContainer c = (IContainer) folderToTest;
+				c.delete(true, null);
+			}
+		} catch (Exception e) {
+			ExceptionsUtils.ManageException(e, logger);
+		}
+
 	}
 
 }

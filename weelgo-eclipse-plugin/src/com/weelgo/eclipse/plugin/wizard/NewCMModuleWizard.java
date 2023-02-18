@@ -52,7 +52,7 @@ public class NewCMModuleWizard extends GenericWizard implements INewWizard {
 	 */
 	@Override
 	public void addPages() {
-		page = new NewCMModuleWizardPage(selection, getCurrentSelection());
+		page = new NewCMModuleWizardPage(selection, getCurrentSelection());		
 		addPage(page);
 	}
 
@@ -74,10 +74,7 @@ public class NewCMModuleWizard extends GenericWizard implements INewWizard {
 		job.setModuleName(moduleName);
 		job.setModulePackage(packageName);
 		job.setFolderContainer(container);
-		jobList.add(job);
-
-		CMLoadAllModulesJob loadJob = CMLoadAllModulesJob.CREATE();
-		jobList.add(loadJob);
+		jobList.add(job);	
 
 		CMOpenChainMappingEditorJob openJob = CMOpenChainMappingEditorJob.CREATE();
 		jobList.add(openJob);

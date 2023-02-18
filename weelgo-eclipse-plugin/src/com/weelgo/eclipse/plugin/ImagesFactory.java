@@ -16,6 +16,7 @@ public class ImagesFactory {
 	public static String FOLDER_ICON = "folder.gif";
 	public static String GROUP_ICON = "package.gif";
 	public static String GROUP_PROJECT = "project.gif";
+	public static String SAVE_ICON = "save.png";
 	private static Map<String, Image> imagesMap = new HashMap<String, Image>();
 
 	public static Image getIconImage(String iconName) {

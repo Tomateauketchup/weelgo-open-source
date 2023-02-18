@@ -9,19 +9,20 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+import com.weelgo.core.Constants;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.IProgressMonitor;
 import com.weelgo.core.IUuidObject;
+import com.weelgo.core.exceptions.WeelgoException;
 
 public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 
 	public List<CMGenericDataSource> sources = new ArrayList<>();
-
 	public List<CMModuleService> services = new ArrayList<>();
 	public Map<String, CMModuleService> servicesMap = new HashMap<>();
 
-	public void load(IProgressMonitor progressMonitor) {
-		Map<String, CMModuleService> servicesMapTmp = CoreUtils.putIntoMap(services);
+	public void loadAllModules(IProgressMonitor progressMonitor) {
+		Map<String, CMModuleService> servicesMapTmp = CoreUtils.putListIntoMap(services);
 
 		if (sources != null) {
 			for (CMGenericDataSource src : sources) {
@@ -33,7 +34,25 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		services.clear();
 		services.addAll(servicesMapTmp.values());
 		servicesMapTmp.clear();
-		CoreUtils.putIntoMap(services, servicesMap);
+		CoreUtils.putListIntoMap(services, servicesMap);
+	}
+
+	public void loadModule(String moduleUniqueIdentifier, IProgressMonitor progressMonitor) {
+		CMModuleService ser = getServiceByModuleUniqueIdentifierId(moduleUniqueIdentifier);
+		CMGenericDataSource src = getDataSourceOfModuleService(ser);
+		if (src != null) {
+			src.load(progressMonitor, ser);
+		}
+
+	}
+
+	public CMGenericDataSource getDataSourceOfModuleService(CMModuleService ser) {
+		if (ser != null) {
+			return (CMGenericDataSource) loopOnSourcesAndGetMine(ser, t -> {
+				return t;
+			});
+		}
+		return null;
 	}
 
 	public CMReturnObj getObjectByUuid(IUuidObject obj) {
@@ -139,8 +158,48 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		this.services = services;
 	}
 
-	public String createModule(IProgressMonitor progressMonitor, CMGenericDataSource ds, Object moduleParentFolder,
-			String moduleName, String modulePackageName) {
+	public String getFolderFullPathOfObject(Object o) {
+		if (o != null) {
+			if (o instanceof CMGroup) {
+				CMGroup gp = (CMGroup) o;
+				CMModuleService serv = findModuleService(gp);
+				if (serv != null) {
+					CMGenericDataSource ds = getDataSourceOfModuleService(serv);
+					if (ds != null) {
+						Object modRootFolder = serv.getParentContainer();
+
+						modRootFolder = ds.getHierarchicalTreeSystemProvider().getParentFolder(modRootFolder);
+						Object folder = ds.getFolderOfGroup(modRootFolder, gp);
+						if (folder != null) {
+							return ds.getHierarchicalTreeSystemProvider().getUniqueIdForFolderOrFile(folder);
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	public String createModule(IProgressMonitor progressMonitor, CMGenericDataSource ds,
+			Object moduleParentFolderOrCMGroup, String moduleName, String modulePackageName) {
+
+		Object moduleParentFolder = moduleParentFolderOrCMGroup;
+
+		if (moduleParentFolderOrCMGroup != null && moduleParentFolderOrCMGroup instanceof CMGroup) {
+			CMGroup gp = (CMGroup) moduleParentFolderOrCMGroup;
+			CMModuleService serv = findModuleService(gp);
+			if (serv != null) {
+				// We check if there is a groupwith same name in model but not yet saved
+				CoreUtils.assertFalse(serv.isPackageAlreadyExists(modulePackageName, gp.getUuid()),
+						WeelgoException.GROUP_ALREADY_EXIST);
+				Object modRootFolder = serv.getParentContainer();
+				modRootFolder = ds.getHierarchicalTreeSystemProvider().getParentFolder(modRootFolder);
+				moduleParentFolder = ds.getFolderOfGroup(modRootFolder, gp);
+			}
+		}
+
+		CoreUtils.assertNotNullOrEmpty(moduleParentFolder);
+
 		CMModuleService service = new CMModuleService();
 		CMGroup gp = new CMGroup();
 		service.setRootGroup(gp);
@@ -151,14 +210,73 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		gp.setType(CMGroup.TYPE_MODULE);
 		service.check();
 
-		ds.createModule(progressMonitor, moduleParentFolder, service);		
-		return gp.getModuleUniqueIdentifier();
+		Object moduleFolder = ds.createModule(progressMonitor, moduleParentFolder, service);
+		service.setParentContainer(moduleFolder);
+		services.add(service);
+		CoreUtils.putObjectIntoMap(service, servicesMap);
+		loadModule(service.getModuleUniqueIdentifier(), progressMonitor);
+
+		return service.getModuleUniqueIdentifier();
 	}
 
 	public boolean isModulePackageFree(IProgressMonitor progressMonitor, CMGenericDataSource ds,
-			Object moduleParentFolder, String packageName) {
+			Object moduleParentFolderOrCMGroup, String packageName) {
 		if (ds != null) {
-			return ds.isModulePackageFree(progressMonitor, moduleParentFolder, packageName);
+
+			Object moduleParentFolder = moduleParentFolderOrCMGroup;
+
+			if (moduleParentFolderOrCMGroup instanceof CMGroup) {
+				CMGroup gp = (CMGroup) moduleParentFolderOrCMGroup;
+				CMModuleService serOfGroup = findModuleService(moduleParentFolder);
+				if (serOfGroup != null) {
+					// We must find the folder corresponding to this group
+					Object parent = ds.getHierarchicalTreeSystemProvider()
+							.getParentFolder(serOfGroup.getParentContainer());
+					Object groupFolder = ds.getFolderOfGroup(parent, gp);
+					if (groupFolder != null) {
+						moduleParentFolder = groupFolder;
+					}
+				}
+
+			}
+
+			// We check on file system
+			boolean isFree = ds.isModulePackageFree(progressMonitor, moduleParentFolder, packageName);
+			if (isFree) {
+				// We check if there is some packages on CM group that are not yet saved
+				// We go throug parent tu discover the first module
+				CMModuleService ser = findModuleService(moduleParentFolder);
+				if (ser != null) {
+					Object serviceRootFolder = ser.getParentContainer();
+					Object newModuleRootFolder = ds.getHierarchicalTreeSystemProvider().getFolder(moduleParentFolder,
+							packageName);
+
+					Object folderTmp = newModuleRootFolder;
+
+					// To have the package we need t get the delta path
+					String possibleGroupPackage = packageName;
+					boolean stop = false;
+					do {
+
+						folderTmp = ds.getHierarchicalTreeSystemProvider().getParentFolder(folderTmp);
+						if (folderTmp == null) {
+							stop = true;
+						} else {
+							String name = ds.getHierarchicalTreeSystemProvider().getName(folderTmp);
+							possibleGroupPackage = name + Constants.UUID_PACKAGE_SEPARATOR + possibleGroupPackage;
+
+							if (ds.getHierarchicalTreeSystemProvider().isSameFolder(folderTmp, serviceRootFolder)) {
+								stop = true;
+							}
+						}
+
+					} while (stop == false);
+					if (ser.getGroupByPackageFullPath(possibleGroupPackage) != null) {
+						return false;
+					}
+				}
+				return true;
+			}
 		}
 		return false;
 	}
@@ -213,7 +331,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		if (sources != null) {
 			for (CMGenericDataSource src : sources) {
 				if (src != null) {
-					CoreUtils.putIntoList(src.getContainers(), arl);
+					CoreUtils.putListIntoList(src.getContainers(), arl);
 				}
 			}
 		}
@@ -224,7 +342,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 	@Override
 	public Object getParentFolder(Object child) {
 
-		return loopOnSources(child, null, (t) -> {
+		return loopOnSourcesAndGetMine(child, (t) -> {
 			return t.getHierarchicalTreeSystemProvider().getParentFolder(child);
 		});
 
@@ -233,7 +351,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 	@Override
 	public List<Object> getChildFolders(Object folder) {
 
-		return (List<Object>) loopOnSources(folder, null, (t) -> {
+		return (List<Object>) loopOnSourcesAndGetMine(folder, (t) -> {
 
 			List<Object> lst = t.getHierarchicalTreeSystemProvider().getChildFolders(folder);
 			swapFolderToServices(lst);
@@ -254,7 +372,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 	}
 
 	public boolean isHiddenElement(Object o) {
-		Boolean b = (Boolean) loopOnSources(o, null, (t) -> {
+		Boolean b = (Boolean) loopOnSourcesAndGetMine(o, (t) -> {
 			return t.isHiddenElement(o);
 		});
 
@@ -267,7 +385,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 	@Override
 	public String getName(Object o) {
 
-		return (String) loopOnSources(o, null, (t) -> {
+		return (String) loopOnSourcesAndGetMine(o, (t) -> {
 			return t.getHierarchicalTreeSystemProvider().getName(o);
 		});
 	}
@@ -275,7 +393,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 	@Override
 	public boolean isSameFolder(Object folder1, Object folder2) {
 
-		Boolean b = (Boolean) loopOnSources(folder1, folder2, (t) -> {
+		Boolean b = (Boolean) loopOnSourcesAndGetMine(folder1, folder2, (t) -> {
 			return t.getHierarchicalTreeSystemProvider().isSameFolder(folder1, folder2);
 		});
 		if (b != null) {
@@ -286,7 +404,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 
 	@Override
 	public boolean isFile(Object o) {
-		Boolean b = (Boolean) loopOnSources(o, null, (t) -> {
+		Boolean b = (Boolean) loopOnSourcesAndGetMine(o, (t) -> {
 			return t.getHierarchicalTreeSystemProvider().isFile(o);
 		});
 
@@ -298,7 +416,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 
 	@Override
 	public boolean isFolder(Object o) {
-		Boolean b = (Boolean) loopOnSources(o, null, (t) -> {
+		Boolean b = (Boolean) loopOnSourcesAndGetMine(o, (t) -> {
 			return t.getHierarchicalTreeSystemProvider().isFolder(o);
 		});
 		if (b != null) {
@@ -307,7 +425,11 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		return false;
 	}
 
-	public Object loopOnSources(Object o, Object o2, Function<CMGenericDataSource, Object> func) {
+	public Object loopOnSourcesAndGetMine(Object o, Function<CMGenericDataSource, Object> func) {
+		return loopOnSourcesAndGetMine(o, null, func);
+	}
+
+	public Object loopOnSourcesAndGetMine(Object o, Object o2, Function<CMGenericDataSource, Object> func) {
 		if (sources != null) {
 			for (CMGenericDataSource src : sources) {
 				if (src != null && src.isMine(o)) {
@@ -343,6 +465,31 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		return null;
 	}
 
+	public void markAllModelAsNotDirty() {
+		if (services != null) {
+			services.forEach(t -> markModelAsNotDirty(t.getModuleUniqueIdentifier()));
+		}
+	}
+
+	public void markModelAsNotDirty(String modelId) {
+		CMModuleService ser = getServiceByModuleUniqueIdentifierId(modelId);
+		if (ser != null) {
+			ser.markServiceSaved();
+		}
+	}
+
+	public void saveAllModelsForUndoRedo() {
+		if (services != null) {
+			services.forEach(t -> saveModelForUndoRedo(t.getModuleUniqueIdentifier()));
+		}
+	}
+
+	public void restoreAllModelsForUndoRedo() {
+		if (services != null) {
+			services.forEach(t -> restoreModelForUndoRedo(t.getModuleUniqueIdentifier()));
+		}
+	}
+
 	public void saveModelForUndoRedo(String moduleUniqueidentifier) {
 		CMModuleService serv = getServiceByModuleUniqueIdentifierId(moduleUniqueidentifier);
 		if (serv != null && serv.getUndoRedoManager() != null) {
@@ -370,5 +517,9 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 			serv.getUndoRedoManager().redo();
 		}
 	}
+
+	// TODO quand on fait un save et qu'il y a des dossier fils qui ne sont plus
+	// utilisé, il faut les supprimer
+	// TODO mettre en place l'implémentation des modules dans des modules
 
 }

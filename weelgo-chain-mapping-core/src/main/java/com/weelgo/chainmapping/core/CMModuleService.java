@@ -29,6 +29,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 	private UndoRedoManager undoRedoManager = CMFactory.create(UndoRedoManager.class);
 	private Object parentContainer;
+	private String lastSaveDataFingerprint;
 	private CMGroup rootGroup;
 	private List<CMGroup> groups = new ArrayList<>();
 	private List<CMTask> tasks = new ArrayList<>();
@@ -56,6 +57,13 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			@Override
 			public CMModuleService getClonedModel() {
 				return CoreUtils.cloneObject(getThisModuleService());
+			}
+
+			@Override
+			public void modelSaved() {
+				if (CoreUtils.isNotNullOrEmpty(lastSaveDataFingerprint) == false) {
+					markServiceSaved();
+				}
 			}
 		};
 		undoRedoManager.setUndoRedoModelProvider(undoRedoProvider);
@@ -171,7 +179,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		return true;
 	}
 
-	public CMGroup createGroup(String name, String packageName, String parentGroupUuid) {
+	public CMGroup createGroup(CMModulesManager mm, String name, String packageName, String parentGroupUuid) {
 		name = cleanString(name);
 		packageName = cleanString(packageName);
 		parentGroupUuid = cleanString(parentGroupUuid);
@@ -196,6 +204,22 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		gp.setGroupUuid(parentGroupUuid);
 		gp.setType(CMGroup.TYPE_GROUP);
 		checkGroup(gp);
+
+		// We check if there is a folder of an other module
+		// It's possible there is already a folder corresponding to an old load not yet
+		// saved
+
+		CMGenericDataSource ds = mm.getDataSourceOfModuleService(this);
+		Object parentFolder = ds.getHierarchicalTreeSystemProvider().getParentFolder(getParentContainer());
+		Object groupFolder = ds.getFolderOfGroup(parentFolder, gp);
+		CMModuleService ser = mm.findModuleService(groupFolder);
+		if (ser != null
+				&& CoreUtils.isStrictlyEqualsString(ser.getModuleUniqueIdentifier(), getModuleUniqueIdentifier())==false) {
+			throwDynamicException(WeelgoException.MODULE_ALREADY_EXIST);
+		}
+
+//				ds.isModulePackageFree(null, parentGroupUuid, packageName)
+
 		getGroups().add(gp);
 
 		needReloadObjects();
@@ -382,7 +406,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			toPopulate.setTasks(CoreUtils.cloneList(tasks));
 			toPopulate.setDeliverables(CoreUtils.cloneList(deliverables));
 
-			Map map = CoreUtils.putIntoMap(groups);
+			Map map = CoreUtils.putListIntoMap(groups);
 			if (rootGroup != null) {
 				CMGroup root = (CMGroup) map.get(rootGroup.getUuid());
 				toPopulate.setRootGroup(root);
@@ -394,12 +418,40 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 	public void updateObject(CMModuleService objectToUpdate) {
 		if (objectToUpdate != null) {
 			objectToUpdate.needReloadObjects();
-			objectToUpdate.setParentContainer(getParentContainer());
+
+			// On update uniquement les données, pas le parent container ni le last save
 
 			CoreUtils.updateList(objectToUpdate.groups, groups);
 			CoreUtils.updateList(objectToUpdate.tasks, tasks);
 			CoreUtils.updateList(objectToUpdate.deliverables, deliverables);
 		}
+	}
+
+	public boolean isDirty() {
+		if (getUndoRedoManager() != null) {
+			String currentDataFingerprint = getUndoRedoManager().getCurrentNodeDataFingerprint();
+
+			if (CoreUtils.isNotNullOrEmpty(currentDataFingerprint)) {
+				return !CoreUtils.isStrictlyEqualsString(currentDataFingerprint, lastSaveDataFingerprint);
+			}
+		}
+
+		return true;
+	}
+
+	public void markServiceSaved() {
+		if (getUndoRedoManager() != null) {
+			String currentDataFingerprint = getUndoRedoManager().getCurrentNodeDataFingerprint();
+			lastSaveDataFingerprint = currentDataFingerprint;
+		}
+	}
+
+	public String getLastSaveDataFingerprint() {
+		return lastSaveDataFingerprint;
+	}
+
+	public void setLastSaveDataFingerprint(String lastSaveDataFingerprint) {
+		this.lastSaveDataFingerprint = lastSaveDataFingerprint;
 	}
 
 	@Override

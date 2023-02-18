@@ -41,22 +41,22 @@ public class TreeContentProvider implements ITreeContentProvider {
 		ArrayList<Object> arl = new ArrayList<>();
 
 		if (modManager != null) {
-			CoreUtils.putIntoList(modManager.getChildFolders(), arl);
+			CoreUtils.putListIntoList(modManager.getChildFolders(), arl);
 		} else if (dataSource != null) {
-			CoreUtils.putIntoList(dataSource.getContainers(), arl);
+			CoreUtils.putListIntoList(dataSource.getContainers(), arl);
 		} else if (gp != null) {
 			CMReturnObj ret = getObjectByUuid(gp);
 			CMModuleService serv = CMReturnObj.getServices(ret);
 			if (serv != null) {
 				List<Object> childs = serv.getChilds(gp);
-				CoreUtils.putIntoList(childs, arl);
+				CoreUtils.putListIntoList(childs, arl);
 			}
 		} else if (modService != null) {
 			if (modService.getRootGroup() != null) {
 				arl.add(modService.getRootGroup());
 			}
 		} else {
-			CoreUtils.putIntoList(getModulesManager().getChildFolders(element), arl);
+			CoreUtils.putListIntoList(getModulesManager().getChildFolders(element), arl);
 		}
 
 		arl.removeIf(t -> getModulesManager().isHiddenElement(t));

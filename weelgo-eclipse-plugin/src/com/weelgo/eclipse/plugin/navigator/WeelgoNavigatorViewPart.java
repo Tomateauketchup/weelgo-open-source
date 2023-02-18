@@ -6,7 +6,6 @@ import javax.inject.Inject;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.UIEventTopic;
-import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -73,15 +72,37 @@ public class WeelgoNavigatorViewPart {
 
 	@Inject
 	@Optional
+	public void getModuleCreatedEvent(@UIEventTopic(CMEvents.MODULE_CREATED) String modulId) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getModuleLoadedEvent(@UIEventTopic(CMEvents.MODULE_LOADED) String modulId) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getModuleSavedEvent(@UIEventTopic(CMEvents.MODULE_SAVED) String modulId) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getModuleUndoRedoDoneOperationEvent(@UIEventTopic(CMEvents.MODULE_UNDO_REDO_OPERATION_DONE) String modulId) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
 	public void getGroupCreatedEvent(@UIEventTopic(CMEvents.GROUP_CREATED) CMGroup gp) {
 		refreshView();
 
-		//TODO faire undo redo
-		//TODO afficher la liste des jobs réalisés pour undo/redo dans une vue
-		//TODO Faire save menu sur chaque module
-		//TODO faire modification nom des groupes et du module
-		//TODO faire le isDirty sur les modules
-		//TODO Le load all module doit vérifier qu'il n'y a pas des modules non
+		// TODO afficher la liste des jobs réalisés pour undo/redo dans une vue
+		// TODO Faire save menu sur chaque module
+		// TODO faire modification nom des groupes et du module		
+		// TODO Le load all module doit vérifier qu'il n'y a pas des modules non
 		// sauvés.Si c'est le cas un message doit s'afficher
 	}
 

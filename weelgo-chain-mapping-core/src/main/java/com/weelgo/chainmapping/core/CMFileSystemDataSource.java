@@ -43,6 +43,12 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 	}
 
 	@Override
+	public void load(IProgressMonitor progressMonitor, CMModuleService service) {
+		Map<String, CMModuleService> servicesMap = CoreUtils.putObjectIntoMap(service);
+		load(progressMonitor, servicesMap);
+	}
+
+	@Override
 	public void load(IProgressMonitor progressMonitor, Map<String, CMModuleService> servicesMap) {
 		assertNotNullOrEmptyFatal(servicesMap);
 		elementToShow.clear();
@@ -75,8 +81,8 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 				servicesUpdator.compileList();
 				List<CMModuleService> toRemove = servicesUpdator.getToRemoveElements();
 				List<CMModuleService> toAdd = servicesUpdator.getNewElements();
-				removeFromMap(toRemove, servicesMap);
-				putIntoMap(toAdd, servicesMap);
+				removeListFromMap(toRemove, servicesMap);
+				putListIntoMap(toAdd, servicesMap);
 
 				for (Map.Entry<String, CMModuleService> entry : servicesMap.entrySet()) {
 
@@ -114,9 +120,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 
 	@Override
 	public boolean isMine(Object o) {
-		// TODO problème du isMine : Indique su la ressource est bien de ce file system.
-		// Pour l'instant il n'y a que la workspace donc on retourne oui.
-		return true;
+		return super.isMine(o);
 	}
 
 	@Override
@@ -250,41 +254,98 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 			Object jsnFile = getHierarchicalTreeSystemProvider().getFile(moduleRootFolder, MODULE_DATA_FILE_NAME);
 			getHierarchicalTreeSystemProvider().serialiseInJsonFile(jsnFile, id);
 
-			moduleRootFolder = getHierarchicalTreeSystemProvider().getParentFolder(moduleRootFolder);
-			if (!getHierarchicalTreeSystemProvider().isFolderExist(moduleRootFolder)) {
+			Object moduleRootFolderParent = getHierarchicalTreeSystemProvider().getParentFolder(moduleRootFolder);
+			if (!getHierarchicalTreeSystemProvider().isFolderExist(moduleRootFolderParent)) {
 				ExceptionsUtils.throwException("Root folder doesn't exist.");
 			}
 			List<CMGroup> groups = service.getGroups();
+			Map<String, CMGroup> map = new HashMap<>();
 			if (groups != null) {
 				for (CMGroup gp : groups) {
 					if (gp != null) {
-						saveGroup(progressMonitor, moduleRootFolder, gp);
+						String folderId = saveGroup(progressMonitor, moduleRootFolderParent, gp);
+						if (CoreUtils.isNotNullOrEmpty(folderId)) {
+							map.put(folderId, gp);
+						}
 					}
 				}
+
 			}
+			removeNotUserFolders(moduleRootFolder, map);
+			service.markServiceSaved();
 
 		} catch (Exception e) {
 			ExceptionsUtils.ManageException(e, logger);
 		}
 	}
 
-	public void saveGroup(IProgressMonitor progressMonitor, Object moduleRootFolder, CMGroup group) {
+	public void removeNotUserFolders(Object folderToTest, Map<String, CMGroup> usedPath) {
+		if (folderToTest != null) {
+			String id = getHierarchicalTreeSystemProvider().getUniqueIdForFolderOrFile(folderToTest);
+			boolean keep = false;
+			if (usedPath != null) {
+				keep = usedPath.containsKey(id);
+			}
+			if (keep == false) {
+				// We check if there is module in subfolder
+				keep = hasModuleInFolder(folderToTest);
+			}
+			if (keep == false) {
+				getHierarchicalTreeSystemProvider().deleteFolder(folderToTest);
+			} else {
+				List<Object> childs = getHierarchicalTreeSystemProvider().getChildFolders(folderToTest);
+				if (childs != null) {
+					for (Object c : childs) {
+						removeNotUserFolders(c, usedPath);
+					}
+				}
+			}
+		}
+	}
+
+	public boolean hasModuleInFolder(Object folder) {
+		if (getHierarchicalTreeSystemProvider().isFolder(folder)) {
+			Object moduleFile = getHierarchicalTreeSystemProvider().getFile(folder, MODULE_DATA_FILE_NAME);
+			if (getHierarchicalTreeSystemProvider().isFile(moduleFile)
+					&& getHierarchicalTreeSystemProvider().isFileExist(moduleFile)) {
+				return true;
+			}
+
+			List<Object> childs = getHierarchicalTreeSystemProvider().getChildFolders(folder);
+			if (childs != null) {
+				for (Object c : childs) {
+					boolean has = hasModuleInFolder(c);
+					if (has) {
+						return true;
+					}
+				}
+			}
+		}
+
+		return false;
+	}
+
+	public String saveGroup(IProgressMonitor progressMonitor, Object moduleRootFolder, CMGroup group) {
 		try {
 
 			assertNotNullOrEmptyFatal(moduleRootFolder);
 			assertNotNullOrEmptyFatal(group);
-			String packageParentPath = group.getPackageFullPath();
+//			String packageParentPath = group.getPackageFullPath();
 			// On décompose
-			String[] parents = getPackages(packageParentPath);
 
-			Object groupFolder = moduleRootFolder;
-			if (parents != null) {
-				for (String str : parents) {
-					if (isNotNullOrEmpty(str)) {
-						groupFolder = getHierarchicalTreeSystemProvider().createFolder(groupFolder, str);
-					}
-				}
-			}
+//			String[] parents = getPackages(packageParentPath);
+//			Object groupFolder = moduleRootFolder;
+//			if (parents != null) {
+//				for (String str : parents) {
+//					if (isNotNullOrEmpty(str)) {
+//						groupFolder = getHierarchicalTreeSystemProvider().createFolder(groupFolder, str);
+//					}
+//				}
+//			}
+
+			Object groupFolder = getFolderOfGroup(moduleRootFolder, group);
+			getHierarchicalTreeSystemProvider().createFolder(groupFolder);
+
 //			if (isFolderExist(groupFolder) == false) {
 //				createFolder(groupFolder);
 //			}
@@ -296,10 +357,12 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 			Populator.modelToJsonPopulator(group, jsn);
 			Object jsnFile = getHierarchicalTreeSystemProvider().getFile(groupFolder, GROUP_DATA_FILE_NAME);
 			getHierarchicalTreeSystemProvider().serialiseInJsonFile(jsnFile, jsn);
+			return getHierarchicalTreeSystemProvider().getUniqueIdForFolderOrFile(groupFolder);
 
 		} catch (Exception e) {
 			ExceptionsUtils.ManageException(e, logger);
 		}
+		return null;
 	}
 
 	@Override
@@ -308,7 +371,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 		packageName = cleanString(packageName);
 		assertTrue(ValidatorUtils.isValidPackageName(packageName));
 		assertNotNullOrEmpty(moduleParentFolder);
-		assertTrue(getHierarchicalTreeSystemProvider().isFolderExist(moduleParentFolder));
+
 		Object moduleFolder = getHierarchicalTreeSystemProvider().getFolder(moduleParentFolder, packageName);
 		if (getHierarchicalTreeSystemProvider().isFolderExist(moduleFolder)) {
 			return false;
@@ -317,7 +380,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 	}
 
 	@Override
-	public void createModule(IProgressMonitor progressMonitor, Object moduleParentFolder, CMModuleService service) {
+	public Object createModule(IProgressMonitor progressMonitor, Object moduleParentFolder, CMModuleService service) {
 		try {
 
 			assertNotNullOrEmptyFatal(service.getRootGroup());
@@ -330,6 +393,14 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 
 			Object moduleFolder = getHierarchicalTreeSystemProvider().getFolder(moduleParentFolder, packageName);
 
+			// Is a folder already exist, we check if it's a module folder. If not we delete
+			// it because it's a group that has been deleted but not saved
+			if (getHierarchicalTreeSystemProvider().isFolderExist(moduleFolder)) {
+				Object file = getHierarchicalTreeSystemProvider().getFile(moduleFolder, MODULE_DATA_FILE_NAME);
+				assertFalse(getHierarchicalTreeSystemProvider().isFileExist(file),
+						WeelgoException.MODULE_ALREADY_EXIST);
+				getHierarchicalTreeSystemProvider().deleteFolder(moduleFolder);
+			}
 			assertFalse(getHierarchicalTreeSystemProvider().isFolderExist(moduleFolder),
 					WeelgoException.MODULE_ALREADY_EXIST);
 
@@ -341,8 +412,12 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 			// On peut sauvegarder
 			save(progressMonitor, moduleFolder, service);
 
+			return moduleFolder;
+
 		} catch (Exception e) {
 			ExceptionsUtils.ManageException(e, logger);
 		}
+
+		return null;
 	}
 }

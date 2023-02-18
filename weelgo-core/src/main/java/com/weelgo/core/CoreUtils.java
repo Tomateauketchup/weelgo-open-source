@@ -66,7 +66,7 @@ public class CoreUtils {
 			}
 		}
 
-		Map<String, T> map = putIntoMap(newList);
+		Map<String, T> map = putListIntoMap(newList);
 
 		if (toUpdate != null && changedElementRunnable != null) {
 			toUpdate.forEach(oldObj -> {
@@ -242,13 +242,25 @@ public class CoreUtils {
 //		}
 //	}
 
-	public static List putIntoList(Object[] sourceList) {
+	public static List putObjectIntoList(Object sourceObject) {
 		ArrayList rl = new ArrayList<>();
-		putIntoList(sourceList, rl);
+		putObjectIntoList(sourceObject, rl);
 		return rl;
 	}
 
-	public static void putIntoList(Object[] sourceList, List recieverList) {
+	public static List putArrayIntoList(Object[] sourceList) {
+		ArrayList rl = new ArrayList<>();
+		putArrayIntoList(sourceList, rl);
+		return rl;
+	}
+
+	public static void putObjectIntoList(Object sourceObject, List recieverList) {
+		if (recieverList != null && sourceObject != null) {
+			recieverList.add(sourceObject);
+		}
+	}
+
+	public static void putArrayIntoList(Object[] sourceList, List recieverList) {
 		if (recieverList != null && sourceList != null) {
 			for (Object object : sourceList) {
 				recieverList.add(object);
@@ -256,7 +268,7 @@ public class CoreUtils {
 		}
 	}
 
-	public static void putIntoList(List sourceList, List recieverList) {
+	public static void putListIntoList(List sourceList, List recieverList) {
 		if (recieverList != null && sourceList != null) {
 			for (Object object : sourceList) {
 				recieverList.add(object);
@@ -264,7 +276,7 @@ public class CoreUtils {
 		}
 	}
 
-	public static void putIntoList(Map<Object, Object> map, List a) {
+	public static void putMapIntoList(Map<Object, Object> map, List a) {
 		if (a != null && map != null) {
 			for (Map.Entry<Object, Object> entry : map.entrySet()) {
 				Object val = entry.getValue();
@@ -273,7 +285,7 @@ public class CoreUtils {
 		}
 	}
 
-	public static void putIntoMap(List a, Map map) {
+	public static void putListIntoMap(List a, Map map) {
 		if (a != null && map != null) {
 			for (Object o : a) {
 				if (o != null)
@@ -282,18 +294,40 @@ public class CoreUtils {
 		}
 	}
 
-	public static Map putIntoMap(List a) {
-		HashMap map = new HashMap<>();
+	public static void putArrayIntoMap(Object[] a, Map map) {
 		if (a != null && map != null) {
 			for (Object o : a) {
 				if (o != null)
 					map.put(((IUuidObject) o).getUuid(), o);
 			}
 		}
+	}
+
+	public static void putObjectIntoMap(Object a, Map map) {
+		if (a != null && map != null) {
+			map.put(((IUuidObject) a).getUuid(), a);
+		}
+	}
+
+	public static Map putObjectIntoMap(Object object) {
+		HashMap map = new HashMap<>();
+		putObjectIntoMap(object, map);
 		return map;
 	}
 
-	public static void removeFromMap(List a, Map map) {
+	public static Map putArrayIntoMap(Object[] a) {
+		HashMap map = new HashMap<>();
+		putArrayIntoMap(a, map);
+		return map;
+	}
+
+	public static Map putListIntoMap(List a) {
+		HashMap map = new HashMap<>();
+		putListIntoMap(a, map);
+		return map;
+	}
+
+	public static void removeListFromMap(List a, Map map) {
 		if (a != null && map != null) {
 			for (Object o : a) {
 				if (o != null)

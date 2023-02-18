@@ -19,7 +19,7 @@ public class ValidatorUtils {
 
 	static {
 		ArrayList<String> arl = new ArrayList<>();
-		CoreUtils.putIntoList(invalidFileNameStrings, arl);
+		CoreUtils.putArrayIntoList(invalidFileNameStrings, arl);
 		arl.add(" ");
 		invalidPackageNameStrings = (String[]) arl.toArray(new String[arl.size()]);
 	}

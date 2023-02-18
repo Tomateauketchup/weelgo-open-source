@@ -41,12 +41,13 @@ public class Factory {
 	public static final String PLUGIN_ID = "com.weelgo.eclipse.plugin";
 
 	public static final String COMMAND_CREATE_CM_GROUP_ID = "com.weelgo.eclipse.plugin.commands.CreateCMGroupCommand";
+	public static final String COMMAND_SAVE_ID = "org.eclipse.ui.file.save";
 
 	private static Factory factory = null;
 	@Inject
 	private CMService cmServices;
 	@Inject
-	private IEventBroker eventBroker;
+	private EventBroker eventBroker;
 	@Inject
 	private UISynchronize uiSynchronize;
 	@Inject
@@ -109,7 +110,7 @@ public class Factory {
 		return factory.undoRedoService;
 	}
 
-	public static IEventBroker getEventBroker() {
+	public static EventBroker getEventBroker() {
 		loadFactory();
 		return factory.eventBroker;
 	}

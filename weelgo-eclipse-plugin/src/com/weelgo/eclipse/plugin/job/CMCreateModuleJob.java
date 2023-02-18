@@ -1,6 +1,7 @@
 package com.weelgo.eclipse.plugin.job;
 
 import com.weelgo.core.IProgressMonitor;
+import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.Factory;
 
 public class CMCreateModuleJob extends CMDatabaseModifierJob {
@@ -19,7 +20,9 @@ public class CMCreateModuleJob extends CMDatabaseModifierJob {
 
 	@Override
 	public void doRun(IProgressMonitor monitor) {
-		getServices().createModule(monitor, folderContainer, moduleName, modulePackage);
+		String moduleId = getServices().createModule(monitor, folderContainer, moduleName, modulePackage);
+
+		sentEvent(CMEvents.MODULE_CREATED, moduleId);
 	}
 
 	public Object getFolderContainer() {

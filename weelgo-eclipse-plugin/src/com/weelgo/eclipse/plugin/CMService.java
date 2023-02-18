@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.weelgo.chainmapping.core.CMFileSystemDataSource;
+import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMModulesManager;
 import com.weelgo.core.IProgressMonitor;
@@ -22,10 +23,10 @@ public class CMService {
 	private CMFileSystemDataSource workspaceDataSource;
 	private CMModulesManager modulesManager;
 
-	public void createModule(IProgressMonitor progressMonitor, Object moduleParentFolderPath, String moduleName,
+	public String createModule(IProgressMonitor progressMonitor, Object moduleParentFolderPath, String moduleName,
 			String modulePackageName) {
 
-		modulesManager.createModule(progressMonitor, workspaceDataSource, moduleParentFolderPath, moduleName,
+		return modulesManager.createModule(progressMonitor, workspaceDataSource, moduleParentFolderPath, moduleName,
 				modulePackageName);
 	}
 
@@ -34,7 +35,7 @@ public class CMService {
 	}
 
 	public void loadModules(IProgressMonitor monitor) {
-		modulesManager.load(monitor);
+		modulesManager.loadAllModules(monitor);
 	}
 
 	public CMModulesManager getModulesManager() {
@@ -75,6 +76,7 @@ public class CMService {
 	public String findModuleUniqueIdentifierId(Object o) {
 		return getModulesManager().findModuleUniqueIdentifierId(o);
 	}
+
 	public CMModuleService findModuleService(Object o) {
 		return getModulesManager().findModuleService(o);
 	}
@@ -83,5 +85,9 @@ public class CMService {
 			String packageName) {
 		return getModulesManager().isModulePackageFree(progressMonitor, workspaceDataSource, moduleParentFolder,
 				packageName);
-	}	
+	}
+
+	public String getFolderFullPathOfGroup(CMGroup gp) {
+		return getModulesManager().getFolderFullPathOfObject(gp);
+	}
 }

@@ -19,6 +19,7 @@ import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.exceptions.ExceptionsUtils;
 import com.weelgo.eclipse.plugin.CMService;
+import com.weelgo.eclipse.plugin.EventBroker;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.ProgressMonitorAdapter;
 import com.weelgo.eclipse.plugin.UndoRedoService;
@@ -29,7 +30,7 @@ public abstract class CMJob extends Job {
 	@Inject
 	private CMService services;
 	@Inject
-	private IEventBroker eventBroker;
+	private EventBroker eventBroker;
 	@Inject
 	private UndoRedoService undoRedoService;
 	private String moduleUniqueIdentifier;
@@ -62,11 +63,21 @@ public abstract class CMJob extends Job {
 
 			if (isUndoRedoJob()) {
 				undoRedoService.saveModel(getModuleUniqueIdentifier());
+				if (isMarkAsNotDirty()) {
+					getServices().getModulesManager().markModelAsNotDirty(getModuleUniqueIdentifier());
+				}
+			} else if (isUndoRedoAllModulesJob()) {
+				undoRedoService.saveAllModel();
+				if (isMarkAsNotDirty()) {
+					getServices().getModulesManager().markAllModelAsNotDirty();
+				}
 			}
 		} catch (Exception e) {
 
 			if (isUndoRedoJob()) {
 				undoRedoService.restoreModel(getModuleUniqueIdentifier());
+			} else if (isUndoRedoAllModulesJob()) {
+				undoRedoService.restoreAllModel();
 			}
 			ExceptionsUtils.ManageException(e, logger);
 		}
@@ -83,13 +94,21 @@ public abstract class CMJob extends Job {
 		return false;
 	}
 
+	public boolean isUndoRedoAllModulesJob() {
+		return false;
+	}
+
+	public boolean isMarkAsNotDirty() {
+		return false;
+	}
+
 	public void addRule(ISchedulingRule... rules) {
 		ArrayList<ISchedulingRule> arl = new ArrayList<>();
 		ISchedulingRule currentRule = getRule();
 		if (currentRule != null) {
 			arl.add(currentRule);
 		}
-		CoreUtils.putIntoList(rules, arl);
+		CoreUtils.putArrayIntoList(rules, arl);
 
 		ISchedulingRule combinedRule = null;
 		for (ISchedulingRule rule : arl) {
@@ -111,11 +130,11 @@ public abstract class CMJob extends Job {
 	}
 
 	public boolean sentEvent(String topic) {
-		return getEventBroker().post(topic, null);
+		return getEventBroker().sentEvent(topic, null);
 	}
 
 	public boolean sentEvent(String topic, Object data) {
-		return getEventBroker().post(topic, data);
+		return getEventBroker().sentEvent(topic, data);
 	}
 
 	public String getBeginTaskMessage() {
@@ -128,11 +147,11 @@ public abstract class CMJob extends Job {
 
 	public abstract void doRun(com.weelgo.core.IProgressMonitor monitor);
 
-	public IEventBroker getEventBroker() {
+	public EventBroker getEventBroker() {
 		return eventBroker;
 	}
 
-	public void setEventBroker(IEventBroker eventBroker) {
+	public void setEventBroker(EventBroker eventBroker) {
 		this.eventBroker = eventBroker;
 	}
 

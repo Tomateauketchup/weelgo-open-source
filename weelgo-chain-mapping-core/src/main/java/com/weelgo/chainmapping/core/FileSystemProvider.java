@@ -160,6 +160,18 @@ public class FileSystemProvider implements HierarchicalTreeSystemProvider {
 	}
 
 	@Override
+	public void deleteFolder(Object folderToTest) {
+		try {
+			if (folderToTest != null && folderToTest instanceof File) {
+				FileUtils.forceDelete((File) folderToTest);
+			}
+		} catch (Exception e) {
+			ExceptionsUtils.ManageException(e, logger);
+		}
+
+	}
+
+	@Override
 	public Object createFolder(Object parentFolder) {
 		return createFolder(parentFolder, null);
 	}

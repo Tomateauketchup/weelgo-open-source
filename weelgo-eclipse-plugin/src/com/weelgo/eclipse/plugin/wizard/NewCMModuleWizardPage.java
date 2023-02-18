@@ -18,7 +18,10 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
+import com.weelgo.chainmapping.core.CMGroup;
+import com.weelgo.core.CoreUtils;
 import com.weelgo.core.ValidatorUtils;
+import com.weelgo.eclipse.plugin.CMService;
 import com.weelgo.eclipse.plugin.Factory;
 
 /**
@@ -35,7 +38,6 @@ public class NewCMModuleWizardPage extends WizardPage {
 
 	private ISelection selection;
 	private Object selection2;
-	
 
 	/**
 	 * Constructor for SampleNewWizardPage.
@@ -121,6 +123,11 @@ public class NewCMModuleWizardPage extends WizardPage {
 					container = ((IResource) obj).getParent();
 				containerText.setText(container.getFullPath().toString());
 			}
+			if (obj instanceof CMGroup) {
+				CMGroup gp = (CMGroup) obj;
+				String path = getServices().getFolderFullPathOfGroup(gp);
+				containerText.setText(CoreUtils.cleanString(path));
+			}
 		}
 		moduleNameText.setText("New module name");
 		modulePackageNameText.setText("new_module_name");
@@ -179,8 +186,7 @@ public class NewCMModuleWizardPage extends WizardPage {
 			updateStatus("Package name must be valid");
 			return;
 		}
-		if(Factory.getCMServices().isModulePackageFreeForEclipseWorkspace(null, container, packageName)==false)
-		{
+		if (Factory.getCMServices().isModulePackageFreeForEclipseWorkspace(null, container, packageName) == false) {
 			updateStatus("Package name already used");
 			return;
 		}
@@ -204,4 +210,9 @@ public class NewCMModuleWizardPage extends WizardPage {
 	public String getPackageName() {
 		return modulePackageNameText.getText();
 	}
+
+	public CMService getServices() {
+		return Factory.getCMServices();
+	}
+
 }

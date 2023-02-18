@@ -14,6 +14,7 @@
       <tags>categoryTag:Weelgo</tags>
       <handlers xmi:id="_81ACAK41Ee2LUdqnK6Q47w" elementId="com.weelgo.eclipse.plugin.handlers.UndoHandler" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.handlers.UndoHandler" command="_Z8hnQK41Ee2LUdqnK6Q47w"/>
       <handlers xmi:id="_ytiF8K45Ee2LUdqnK6Q47w" elementId="com.weelgo.eclipse.plugin.handlers.RedoHandler" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.handlers.RedoHandler" command="_hjRgwK42Ee2LUdqnK6Q47w"/>
+      <handlers xmi:id="_YpEzIK95Ee2xMeZqUsbXRQ" elementId="com.weelgo.eclipse.plugin.handlers.SaveHandler" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.handlers.SaveHandler" command="_b-VcEK43Ee2LUdqnK6Q47w"/>
       <menus xsi:type="menu:PopupMenu" xmi:id="_5TOE0KyqEe2Yx_P2nyaC7A" elementId="com.weelgo.eclipse.plugin.navigator.ContextMenu" accessibilityPhrase="" label="Context menu">
         <children xsi:type="menu:DynamicMenuContribution" xmi:id="_GvkDQKytEe2Yx_P2nyaC7A" elementId="com.weelgo.eclipse.plugin.navigator.DynamicContextMenu" label="Dynamic menu" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.navigator.DynamicContextMenu"/>
       </menus>

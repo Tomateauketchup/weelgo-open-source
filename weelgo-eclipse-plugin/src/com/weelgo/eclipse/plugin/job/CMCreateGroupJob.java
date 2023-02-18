@@ -43,7 +43,7 @@ public class CMCreateGroupJob extends CMJob {
 			CMGroup gp = (CMGroup) selectedParent;
 			String[] ret = ser.findNameForNewGroup(gp.getUuid());
 			if (ret != null && ret.length > 1) {
-				CMGroup newGp = ser.createGroup(ret[0], ret[1], gp.getUuid());
+				CMGroup newGp = ser.createGroup(getServices().getModulesManager(), ret[0], ret[1], gp.getUuid());
 				sentEvent(CMEvents.GROUP_CREATED, newGp);
 			}
 

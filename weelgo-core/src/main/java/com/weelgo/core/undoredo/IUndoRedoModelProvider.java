@@ -4,5 +4,6 @@ public interface IUndoRedoModelProvider<T> {
 	
 	public T getClonedModel();
 	public void pushToModel(T o);
+	public void modelSaved();
 
 }

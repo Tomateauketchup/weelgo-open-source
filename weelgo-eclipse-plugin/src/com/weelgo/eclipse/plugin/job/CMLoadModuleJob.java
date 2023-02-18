@@ -7,31 +7,33 @@ import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.Factory;
 
 @Creatable
-public class CMLoadAllModulesJob extends CMJob {
+public class CMLoadModuleJob extends CMJob {
 
-	public CMLoadAllModulesJob() {
-		super("Load all modules", "Loading all modules ...");
+	public CMLoadModuleJob() {
+		super("Load module", "Loading module ...");
 	}
 
-	public static CMLoadAllModulesJob CREATE() {
-		return Factory.create(CMLoadAllModulesJob.class);
+	public static CMLoadModuleJob CREATE() {
+		return Factory.create(CMLoadModuleJob.class);
 	}
 
 	@Override
-	public boolean isUndoRedoAllModulesJob() {
+	public boolean isUndoRedoJob() {
 		return true;
 	}
-	
+
 	@Override
 	public boolean isMarkAsNotDirty() {
 		return true;
 	}
+
 	@Override
 	public void doRun(com.weelgo.core.IProgressMonitor monitor) {
 
-		getServices().loadModules(monitor);
+		String id = getModuleUniqueIdentifier();
+		getServices().getModulesManager().loadModule(id, monitor);
 
-		sentEvent(CMEvents.ALL_MODULE_LOADED);
+		sentEvent(CMEvents.MODULE_LOADED, id);
 
 	}
 
