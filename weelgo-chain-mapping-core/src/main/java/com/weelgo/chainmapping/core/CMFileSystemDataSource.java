@@ -198,7 +198,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 						currentService = new CMModuleService();
 						currentService.setRootGroup(newGp);
 						currentService.getGroups().add(newGp);
-						currentService.setParentContainer(parentFolder);
+						currentService.setContainer(parentFolder);
 						servicesMap.put(modUniqueIdentifier, currentService);
 
 						markToShow(parentFolder);
@@ -235,7 +235,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 	public void save(IProgressMonitor progressMonitor, CMModuleService moduleService) {
 
 		if (moduleService != null) {
-			save(progressMonitor, moduleService.getParentContainer(), moduleService);
+			save(progressMonitor, moduleService.getContainer(), moduleService);
 		}
 	}
 
@@ -387,8 +387,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 			String packageName = service.getRootGroup().getPackageName();
 			assertNotNullOrEmptyFatal(service.getRootGroup().getModuleUniqueIdentifier());
 			assertNotNullOrEmptyFatal(packageName);
-
-			assertTrue(getHierarchicalTreeSystemProvider().isFolderExist(moduleParentFolder));
+			
 			assertTrue(ValidatorUtils.isValidPackageName(packageName), WeelgoException.INVALID_PACKAGE_NAME);
 
 			Object moduleFolder = getHierarchicalTreeSystemProvider().getFolder(moduleParentFolder, packageName);

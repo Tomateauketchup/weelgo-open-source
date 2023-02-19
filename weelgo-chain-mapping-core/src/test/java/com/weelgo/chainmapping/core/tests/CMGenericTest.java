@@ -36,7 +36,7 @@ public class CMGenericTest extends GenericTest {
 			throws Exception {
 		CMFileSystemDataSource ds = getFileSystemDataSource(mm);
 		String id = mm.createModule(null, ds, containerFolderOfCMGroup, name, packageName);
-		mm.getServiceByModuleUniqueIdentifierId(id).getUndoRedoManager().saveModel();
+		mm.getServiceByModuleUniqueIdentifierId(id).getUndoRedoManager().saveModel(null);
 		return id;
 	}
 
@@ -54,7 +54,7 @@ public class CMGenericTest extends GenericTest {
 
 	public void loadAllModules(CMModulesManager mm) {
 		mm.loadAllModules(null);
-		mm.saveAllModelsForUndoRedo();
+		mm.saveAllModelsForUndoRedo(null);
 		mm.markAllModelAsNotDirty();
 	}
 
@@ -64,7 +64,7 @@ public class CMGenericTest extends GenericTest {
 
 	public void saveInUndoRedoManager(CMModuleService modServ) {
 		if (modServ != null && modServ.getUndoRedoManager() != null) {
-			modServ.getUndoRedoManager().saveModel();
+			modServ.getUndoRedoManager().saveModel(null);
 		}
 	}
 

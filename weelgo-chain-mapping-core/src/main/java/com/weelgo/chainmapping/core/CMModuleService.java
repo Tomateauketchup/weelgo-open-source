@@ -28,7 +28,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		ICloneableObject<CMModuleService>, IUpdatablebject<CMModuleService> {
 
 	private UndoRedoManager undoRedoManager = CMFactory.create(UndoRedoManager.class);
-	private Object parentContainer;
+	private Object container;
 	private String lastSaveDataFingerprint;
 	private CMGroup rootGroup;
 	private List<CMGroup> groups = new ArrayList<>();
@@ -129,35 +129,13 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		this.rootGroup = rootGroup;
 	}
 
-	public Object getParentContainer() {
-		return parentContainer;
+	public Object getContainer() {
+		return container;
 	}
 
-	public void setParentContainer(Object parentContainer) {
-		this.parentContainer = parentContainer;
-	}
-
-	public String[] findNameForNewGroup(String parentGroupUuid) {
-		parentGroupUuid = cleanString(parentGroupUuid);
-		assertNotNullOrEmpty(parentGroupUuid);
-		int index = 1;
-		String baseName = "New Group";
-		String baseNamePackage = "new_group";
-
-		String bn = "";
-		String pk = "";
-		do {
-
-			bn = baseName + " " + index;
-			pk = baseNamePackage + "_" + index;
-
-			index++;
-
-		} while (isPackageAlreadyExists(pk, parentGroupUuid));
-
-		return new String[] { bn, pk };
-
-	}
+	public void setContainer(Object parentContainer) {
+		this.container = parentContainer;
+	}	
 
 	public boolean isPackageAlreadyExists(String packageName, String parentGroupUuid) {
 
@@ -210,11 +188,11 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		// saved
 
 		CMGenericDataSource ds = mm.getDataSourceOfModuleService(this);
-		Object parentFolder = ds.getHierarchicalTreeSystemProvider().getParentFolder(getParentContainer());
+		Object parentFolder = ds.getHierarchicalTreeSystemProvider().getParentFolder(getContainer());
 		Object groupFolder = ds.getFolderOfGroup(parentFolder, gp);
 		CMModuleService ser = mm.findModuleService(groupFolder);
-		if (ser != null
-				&& CoreUtils.isStrictlyEqualsString(ser.getModuleUniqueIdentifier(), getModuleUniqueIdentifier())==false) {
+		if (ser != null && CoreUtils.isStrictlyEqualsString(ser.getModuleUniqueIdentifier(),
+				getModuleUniqueIdentifier()) == false) {
 			throwDynamicException(WeelgoException.MODULE_ALREADY_EXIST);
 		}
 
@@ -378,6 +356,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 	public List<Object> getChilds(String parentUuid) {
 
 		if (isNotNullOrEmpty(parentUuid)) {
+			loadObjectsIntoMap(false);
 			ArrayList<Object> arl = new ArrayList<>();
 
 			Consumer<Map> addInList = map -> {
@@ -527,4 +506,8 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		this.undoRedoManager = undoRedoManager;
 	}
 
+	@Override
+	public String toString() {
+		return getName();
+	}
 }

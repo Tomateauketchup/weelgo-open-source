@@ -32,13 +32,22 @@ public abstract class CMGenericDataSource {
 
 		if (o instanceof CMModuleService) {
 			CMModuleService ser = (CMModuleService) o;
-			return isMine(ser.getParentContainer());
+			return isMine(ser.getContainer());
 		}
 		// TODO problème du isMine : Indique su la ressource est bien de ce file system.
 		// Pour l'instant il n'y a que la workspace donc on retourne oui.
 		return true;
 	}
-	
+
+	public Object getFolderOfGroup(CMModuleService ser, CMGroup group) {
+		if (ser != null && group != null) {
+			Object moduleFolder = ser.getContainer();
+			Object parentOfModule = getHierarchicalTreeSystemProvider().getParentFolder(moduleFolder);
+			return getFolderOfGroup(parentOfModule, group);
+		}
+		return null;
+	}
+
 	public Object getFolderOfGroup(Object parentFolderOfTheModuleFolder, CMGroup group) {
 		if (parentFolderOfTheModuleFolder != null && group != null) {
 			String packageParentPath = group.getPackageFullPath();

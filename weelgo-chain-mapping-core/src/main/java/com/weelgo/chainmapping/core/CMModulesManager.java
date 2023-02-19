@@ -1,5 +1,8 @@
 package com.weelgo.chainmapping.core;
 
+import static com.weelgo.core.CoreUtils.assertNotNullOrEmpty;
+import static com.weelgo.core.CoreUtils.cleanString;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -142,6 +145,65 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		}
 	}
 
+	public Object getFolderOfGroup(CMModuleService ser, CMGroup group) {
+		if (ser != null && group != null) {
+			CMGenericDataSource ds = getDataSourceOfModuleService(ser);
+			if (ds != null) {
+				return ds.getFolderOfGroup(ser, group);
+			}
+		}
+		return null;
+	}
+
+	public String[] findNameForNewGroup(CMModuleService ser, String parentGroupUuid) {
+		if (ser != null) {
+			parentGroupUuid = cleanString(parentGroupUuid);
+			assertNotNullOrEmpty(parentGroupUuid);
+
+			CMGenericDataSource ds = getDataSourceOfModuleService(ser);
+			if (ds != null) {
+				CMGroup p = ser.getGroupByUuid(parentGroupUuid);
+				if (p != null) {
+					Object gpFolder = getFolderOfGroup(ser, p);
+					if (gpFolder != null) {
+
+						int index = 1;
+						String baseName = "New Group";
+						String baseNamePackage = "new_group";
+
+						String bn = "";
+						String pk = "";
+						boolean continueLoop = true;
+						do {
+
+							bn = baseName + " " + index;
+							pk = baseNamePackage + "_" + index;
+
+							index++;
+
+							continueLoop = ser.isPackageAlreadyExists(pk, parentGroupUuid);
+							if (continueLoop == false) {
+								// On doit regarder si il existe pas également un module dans le groupe
+								Object newGroupFolder = ds.getHierarchicalTreeSystemProvider().getFolder(gpFolder, pk);
+								CMModuleService serTmp = findModuleService(newGroupFolder);
+								if (serTmp != null
+										&& CoreUtils.isStrictlyEqualsString(serTmp.getModuleUniqueIdentifier(),
+												ser.getModuleUniqueIdentifier()) == false) {
+									continueLoop = true;
+								}
+							}
+
+						} while (continueLoop);
+
+						return new String[] { bn, pk };
+					}
+				}
+			}
+		}
+		return null;
+
+	}
+
 	public List<CMGenericDataSource> getSources() {
 		return sources;
 	}
@@ -166,7 +228,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 				if (serv != null) {
 					CMGenericDataSource ds = getDataSourceOfModuleService(serv);
 					if (ds != null) {
-						Object modRootFolder = serv.getParentContainer();
+						Object modRootFolder = serv.getContainer();
 
 						modRootFolder = ds.getHierarchicalTreeSystemProvider().getParentFolder(modRootFolder);
 						Object folder = ds.getFolderOfGroup(modRootFolder, gp);
@@ -192,7 +254,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 				// We check if there is a groupwith same name in model but not yet saved
 				CoreUtils.assertFalse(serv.isPackageAlreadyExists(modulePackageName, gp.getUuid()),
 						WeelgoException.GROUP_ALREADY_EXIST);
-				Object modRootFolder = serv.getParentContainer();
+				Object modRootFolder = serv.getContainer();
 				modRootFolder = ds.getHierarchicalTreeSystemProvider().getParentFolder(modRootFolder);
 				moduleParentFolder = ds.getFolderOfGroup(modRootFolder, gp);
 			}
@@ -211,7 +273,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		service.check();
 
 		Object moduleFolder = ds.createModule(progressMonitor, moduleParentFolder, service);
-		service.setParentContainer(moduleFolder);
+		service.setContainer(moduleFolder);
 		services.add(service);
 		CoreUtils.putObjectIntoMap(service, servicesMap);
 		loadModule(service.getModuleUniqueIdentifier(), progressMonitor);
@@ -230,8 +292,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 				CMModuleService serOfGroup = findModuleService(moduleParentFolder);
 				if (serOfGroup != null) {
 					// We must find the folder corresponding to this group
-					Object parent = ds.getHierarchicalTreeSystemProvider()
-							.getParentFolder(serOfGroup.getParentContainer());
+					Object parent = ds.getHierarchicalTreeSystemProvider().getParentFolder(serOfGroup.getContainer());
 					Object groupFolder = ds.getFolderOfGroup(parent, gp);
 					if (groupFolder != null) {
 						moduleParentFolder = groupFolder;
@@ -245,40 +306,54 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 			if (isFree) {
 				// We check if there is some packages on CM group that are not yet saved
 				// We go throug parent tu discover the first module
-				CMModuleService ser = findModuleService(moduleParentFolder);
-				if (ser != null) {
-					Object serviceRootFolder = ser.getParentContainer();
-					Object newModuleRootFolder = ds.getHierarchicalTreeSystemProvider().getFolder(moduleParentFolder,
-							packageName);
 
-					Object folderTmp = newModuleRootFolder;
+				Object newModuleRootFolder = ds.getHierarchicalTreeSystemProvider().getFolder(moduleParentFolder,
+						packageName);
 
-					// To have the package we need t get the delta path
-					String possibleGroupPackage = packageName;
-					boolean stop = false;
-					do {
-
-						folderTmp = ds.getHierarchicalTreeSystemProvider().getParentFolder(folderTmp);
-						if (folderTmp == null) {
-							stop = true;
-						} else {
-							String name = ds.getHierarchicalTreeSystemProvider().getName(folderTmp);
-							possibleGroupPackage = name + Constants.UUID_PACKAGE_SEPARATOR + possibleGroupPackage;
-
-							if (ds.getHierarchicalTreeSystemProvider().isSameFolder(folderTmp, serviceRootFolder)) {
-								stop = true;
-							}
-						}
-
-					} while (stop == false);
-					if (ser.getGroupByPackageFullPath(possibleGroupPackage) != null) {
-						return false;
-					}
+				CMGroup possibleGp = findGroup(newModuleRootFolder);
+				if (possibleGp != null) {
+					return false;
 				}
 				return true;
 			}
 		}
 		return false;
+	}
+
+	public CMGroup findGroup(Object folder) {
+		CMModuleService ser = findModuleService(folder);
+		if (ser != null) {
+			CMGenericDataSource ds = findDataSource(ser);
+			if (ds != null) {
+				Object serviceRootFolder = ser.getContainer();
+				Object newModuleRootFolder = folder;
+
+				Object folderTmp = newModuleRootFolder;
+
+				// To have the package we need t get the delta path
+				String possibleGroupPackage = ds.getHierarchicalTreeSystemProvider().getName(folderTmp);
+				boolean stop = false;
+				do {
+
+					folderTmp = ds.getHierarchicalTreeSystemProvider().getParentFolder(folderTmp);
+					if (folderTmp == null) {
+						stop = true;
+					} else {
+						String name = ds.getHierarchicalTreeSystemProvider().getName(folderTmp);
+						possibleGroupPackage = name + Constants.UUID_PACKAGE_SEPARATOR + possibleGroupPackage;
+
+						if (ds.getHierarchicalTreeSystemProvider().isSameFolder(folderTmp, serviceRootFolder)) {
+							stop = true;
+						}
+					}
+
+				} while (stop == false);
+
+				CMGroup gp = ser.getGroupByPackageFullPath(possibleGroupPackage);
+				return gp;
+			}
+		}
+		return null;
 	}
 
 	public CMFileSystemDataSource createCMFileSystemDataSource() {
@@ -304,7 +379,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 	public CMModuleService getCorrespondingModuleServiceOfFolder(Object o) {
 		if (o != null && services != null) {
 			for (CMModuleService ser : services) {
-				if (ser != null && ser.getParentContainer() != null && isSameFolder(o, ser.getParentContainer())) {
+				if (ser != null && ser.getContainer() != null && isSameFolder(o, ser.getContainer())) {
 					return ser;
 				}
 			}
@@ -322,6 +397,63 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 				}
 			}
 		}
+		return null;
+	}
+
+	public List<Object> getChildsForTreeNavigator(CMGroup gp) {
+		if (gp != null) {
+			ArrayList<Object> arl = new ArrayList<>();
+			// We gen normal groupd chiilds
+			CMModuleService ser = findModuleService(gp);
+			if (ser != null) {
+				List<Object> lst = ser.getChilds(gp);
+				CoreUtils.putListIntoList(lst, arl);
+			}
+
+			// We go check if there is any module to load
+			CMGenericDataSource ds = getDataSourceOfModuleService(ser);
+			Object folderOfGroup = ds.getFolderOfGroup(ser, gp);
+			List<Object> childs = ds.getHierarchicalTreeSystemProvider().getChildFolders(folderOfGroup);
+			if (childs != null) {
+				for (Object c : childs) {
+					CMModuleService serTm = findModuleService(c);
+					if (serTm != null && CoreUtils.isStrictlyEqualsString(serTm.getModuleUniqueIdentifier(),
+							ser.getModuleUniqueIdentifier()) == false) {
+						// Module detected
+						arl.add(serTm);
+					}
+				}
+			}
+			return arl;
+		}
+		return null;
+	}
+
+	public Object getParentForTreeNavigator(CMModuleService serv) {
+		// Here the service can be into a Resource File or a group. We must find first
+		// if he is in a group
+
+		if (serv != null && serv.getContainer() != null) {
+			Object moduleFolder = serv.getContainer();
+			CMGenericDataSource ds = findDataSource(serv);
+			if (ds != null) {
+				Object parent = ds.getHierarchicalTreeSystemProvider().getParentFolder(moduleFolder);
+				CMGroup possibleGP = findGroup(parent);
+				if (possibleGP != null) {
+					return possibleGP;
+				}
+				// We check if it can be a service
+				CMModuleService ser = findModuleService(parent);
+				if (ser != null) {
+					if (ds.getHierarchicalTreeSystemProvider().isSameFolder(ser.getContainer(), parent)) {
+						return ser.getRootGroup();
+					}
+				}
+				return parent;
+			}
+
+		}
+
 		return null;
 	}
 
@@ -478,9 +610,9 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		}
 	}
 
-	public void saveAllModelsForUndoRedo() {
+	public void saveAllModelsForUndoRedo(Object infoData) {
 		if (services != null) {
-			services.forEach(t -> saveModelForUndoRedo(t.getModuleUniqueIdentifier()));
+			services.forEach(t -> saveModelForUndoRedo(t.getModuleUniqueIdentifier(), infoData));
 		}
 	}
 
@@ -490,10 +622,10 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		}
 	}
 
-	public void saveModelForUndoRedo(String moduleUniqueidentifier) {
+	public void saveModelForUndoRedo(String moduleUniqueidentifier, Object infoData) {
 		CMModuleService serv = getServiceByModuleUniqueIdentifierId(moduleUniqueidentifier);
 		if (serv != null && serv.getUndoRedoManager() != null) {
-			serv.getUndoRedoManager().saveModel();
+			serv.getUndoRedoManager().saveModel(infoData);
 		}
 	}
 

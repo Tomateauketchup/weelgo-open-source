@@ -100,6 +100,10 @@ public class WeelgoNavigatorViewPart {
 		refreshView();
 
 		// TODO afficher la liste des jobs réalisés pour undo/redo dans une vue
+		//TODO dans la liste des jobs, mettre l'heure de la réalisation
+		//TODO mettre le nom de l'objet concerné dans la liste des jobs
+		//TODO quand on sélectionn un module, mettre à jour l'affichage de la liste des jobs
+		// TOTO mettre des flags sur des undiredoNode qui ne peuvent pas être undo comme la création d'un module par exmple
 		// TODO Faire save menu sur chaque module
 		// TODO faire modification nom des groupes et du module		
 		// TODO Le load all module doit vérifier qu'il n'y a pas des modules non

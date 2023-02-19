@@ -31,6 +31,7 @@ import com.weelgo.core.CoreUtils;
 import com.weelgo.core.StringUpdateListProcessor;
 import com.weelgo.core.exceptions.ExceptionsUtils;
 import com.weelgo.eclipse.plugin.job.CMLoadAllModulesJob;
+import com.weelgo.eclipse.plugin.undoredo.UndoRedoService;
 
 @Creatable
 @Singleton
@@ -173,6 +174,7 @@ public class Factory {
 	public boolean isWorkspaceModified() {
 
 		// TODO améliorer la détection de ressource : quand un nouveau projet arrive ou
+		//TODO passer le undoRedo view en e4
 		// est supprimé, il faut uniquement loader pour ce projet et pas loader les
 		// autres car il est possible que le modèle soit modifié
 		List<String> oldList = openedProjects;

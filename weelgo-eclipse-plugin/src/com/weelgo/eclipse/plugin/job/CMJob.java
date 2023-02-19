@@ -21,8 +21,9 @@ import com.weelgo.core.exceptions.ExceptionsUtils;
 import com.weelgo.eclipse.plugin.CMService;
 import com.weelgo.eclipse.plugin.EventBroker;
 import com.weelgo.eclipse.plugin.Factory;
+import com.weelgo.eclipse.plugin.ImagesFactory;
 import com.weelgo.eclipse.plugin.ProgressMonitorAdapter;
-import com.weelgo.eclipse.plugin.UndoRedoService;
+import com.weelgo.eclipse.plugin.undoredo.UndoRedoService;
 
 public abstract class CMJob extends Job {
 
@@ -62,12 +63,12 @@ public abstract class CMJob extends Job {
 			doRun(ProgressMonitorAdapter.beginTask(getBeginTaskMessage(), 100, monitor));
 
 			if (isUndoRedoJob()) {
-				undoRedoService.saveModel(getModuleUniqueIdentifier());
+				undoRedoService.saveModel(getModuleUniqueIdentifier(), getUndoRedoLabel(), getUndoRedoIcon());
 				if (isMarkAsNotDirty()) {
 					getServices().getModulesManager().markModelAsNotDirty(getModuleUniqueIdentifier());
 				}
 			} else if (isUndoRedoAllModulesJob()) {
-				undoRedoService.saveAllModel();
+				undoRedoService.saveAllModel(getUndoRedoLabel(), getUndoRedoIcon());
 				if (isMarkAsNotDirty()) {
 					getServices().getModulesManager().markAllModelAsNotDirty();
 				}
@@ -100,6 +101,14 @@ public abstract class CMJob extends Job {
 
 	public boolean isMarkAsNotDirty() {
 		return false;
+	}
+
+	public String getUndoRedoLabel() {
+		return "Job";
+	}
+
+	public String getUndoRedoIcon() {
+		return ImagesFactory.MODIFY_ICON;
 	}
 
 	public void addRule(ISchedulingRule... rules) {

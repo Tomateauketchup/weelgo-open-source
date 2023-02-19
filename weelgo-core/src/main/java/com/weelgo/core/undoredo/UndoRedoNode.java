@@ -12,6 +12,7 @@ public class UndoRedoNode implements INamedObject {
 	private List<UndoRedoNode> childNodes = new ArrayList<>();
 	private Object data;
 	private String dataFingerprint;
+	private Object infoData;
 
 	public String getDataFingerprint() {
 		return dataFingerprint;
@@ -51,6 +52,21 @@ public class UndoRedoNode implements INamedObject {
 
 	public void setChildNodes(List<UndoRedoNode> childNodes) {
 		this.childNodes = childNodes;
+	}
+
+	public Object getInfoData() {
+		return infoData;
+	}
+
+	public void setInfoData(Object infoData) {
+		this.infoData = infoData;
+	}
+
+	public UndoRedoNode getLastChildNode() {
+		if (childNodes != null && childNodes.size() > 0) {
+			return childNodes.get(childNodes.size() - 1);
+		}
+		return null;
 	}
 
 }

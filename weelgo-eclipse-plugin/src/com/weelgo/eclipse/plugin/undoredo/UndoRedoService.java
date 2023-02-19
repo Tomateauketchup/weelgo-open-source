@@ -1,16 +1,17 @@
-package com.weelgo.eclipse.plugin;
+package com.weelgo.eclipse.plugin.undoredo;
 
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 import org.eclipse.e4.core.di.annotations.Creatable;
-import org.eclipse.e4.core.services.events.IEventBroker;
-import org.osgi.service.event.Event;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.weelgo.core.CoreUtils;
+import com.weelgo.eclipse.plugin.CMEvents;
+import com.weelgo.eclipse.plugin.CMService;
+import com.weelgo.eclipse.plugin.EventBroker;
 
 @Creatable
 @Singleton
@@ -29,14 +30,14 @@ public class UndoRedoService {
 
 	}
 
-	public void saveModel(String moduleUniqueidentifier) {
+	public void saveModel(String moduleUniqueidentifier,String label,String icon) {
 		logger.debug("Save on UndoRedoService for " + moduleUniqueidentifier);
-		cmService.getModulesManager().saveModelForUndoRedo(moduleUniqueidentifier);
+		cmService.getModulesManager().saveModelForUndoRedo(moduleUniqueidentifier,UndoRedoInfoData.create(label, icon));
 	}
 
-	public void saveAllModel() {
+	public void saveAllModel(String label,String icon) {
 		logger.debug("Save all models on UndoRedoService.");
-		cmService.getModulesManager().saveAllModelsForUndoRedo();
+		cmService.getModulesManager().saveAllModelsForUndoRedo(UndoRedoInfoData.create(label, icon));
 	}
 
 	public void restoreModel(String moduleUniqueidentifier) {

@@ -5,6 +5,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 
 import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.Factory;
+import com.weelgo.eclipse.plugin.ImagesFactory;
 
 @Creatable
 public class CMLoadModuleJob extends CMJob {
@@ -17,6 +18,16 @@ public class CMLoadModuleJob extends CMJob {
 		return Factory.create(CMLoadModuleJob.class);
 	}
 
+	@Override
+	public String getUndoRedoLabel() {
+		return "Load module";
+	}
+
+	@Override
+	public String getUndoRedoIcon() {
+		return ImagesFactory.MODIFY_ICON;
+	}
+	
 	@Override
 	public boolean isUndoRedoJob() {
 		return true;

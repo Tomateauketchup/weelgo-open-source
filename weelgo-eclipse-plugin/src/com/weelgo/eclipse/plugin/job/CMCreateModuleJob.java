@@ -3,6 +3,7 @@ package com.weelgo.eclipse.plugin.job;
 import com.weelgo.core.IProgressMonitor;
 import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.Factory;
+import com.weelgo.eclipse.plugin.ImagesFactory;
 
 public class CMCreateModuleJob extends CMDatabaseModifierJob {
 
@@ -19,10 +20,25 @@ public class CMCreateModuleJob extends CMDatabaseModifierJob {
 	}
 
 	@Override
+	public boolean isUndoRedoAllModulesJob() {
+		return true;
+	}
+
+	@Override
 	public void doRun(IProgressMonitor monitor) {
 		String moduleId = getServices().createModule(monitor, folderContainer, moduleName, modulePackage);
 
 		sentEvent(CMEvents.MODULE_CREATED, moduleId);
+	}
+	
+	@Override
+	public String getUndoRedoLabel() {
+		return "Create module";
+	}
+
+	@Override
+	public String getUndoRedoIcon() {
+		return ImagesFactory.CHAIN_MAPPING_ICON;
 	}
 
 	public Object getFolderContainer() {

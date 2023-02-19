@@ -1,12 +1,14 @@
 package com.weelgo.core.json.tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
@@ -53,5 +55,28 @@ public class GenericTest {
 
 	public static String generateUTF8String(String str) {
 		return str + "티아라漢字 ط ظ ع";
+	}
+
+	public void assertDirectoryAndExist(File f) {
+		assertTrue(f.exists() && f.isDirectory());
+	}
+
+	public void assertNotExist(File f) {
+		assertFalse(f.exists());
+	}
+	
+	public void assertListEquals(List l1,List l2)
+	{
+		if(l1==null && l2==null)
+		{
+			return;
+		}
+		assertTrue(l1!=null && l2!=null);
+		assertTrue(l1.size()==l2.size());
+		for (int i = 0; i < l1.size(); i++) {
+			Object o1=l1.get(i);
+			Object o2=l2.get(i);			
+			assertTrue(o1.equals(o2));			
+		}		
 	}
 }

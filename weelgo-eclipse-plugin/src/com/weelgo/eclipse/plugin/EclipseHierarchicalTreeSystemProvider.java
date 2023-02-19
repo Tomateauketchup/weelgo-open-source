@@ -50,18 +50,20 @@ public class EclipseHierarchicalTreeSystemProvider implements HierarchicalTreeSy
 	@Override
 	public List<Object> getChildFolders(Object folder) {
 		try {
-			if (folder instanceof IContainer) {
-				IContainer p = (IContainer) folder;
-				IResource[] childs = p.members();
-				ArrayList<Object> arl = new ArrayList<>();
-				if (childs != null) {
-					for (IResource iResource : childs) {
-						if (iResource instanceof IContainer && iResource.exists() && isFolder(iResource)) {
-							arl.add(iResource);
+			if (isFolderExist(folder)) {
+				if (folder instanceof IContainer) {
+					IContainer p = (IContainer) folder;
+					IResource[] childs = p.members();
+					ArrayList<Object> arl = new ArrayList<>();
+					if (childs != null) {
+						for (IResource iResource : childs) {
+							if (iResource instanceof IContainer && iResource.exists() && isFolder(iResource)) {
+								arl.add(iResource);
+							}
 						}
 					}
+					return arl;
 				}
-				return arl;
 			}
 
 		} catch (Exception e) {
@@ -196,8 +198,7 @@ public class EclipseHierarchicalTreeSystemProvider implements HierarchicalTreeSy
 	public Object createFolder(Object parentFolder, String folderName) {
 
 		try {
-			if(CoreUtils.isNotNullOrEmpty(folderName))
-			{
+			if (CoreUtils.isNotNullOrEmpty(folderName)) {
 				parentFolder = getFolder(parentFolder, folderName);
 			}
 			if (parentFolder != null && parentFolder instanceof IFolder) {

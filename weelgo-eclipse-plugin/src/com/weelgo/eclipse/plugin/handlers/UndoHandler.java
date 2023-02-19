@@ -5,7 +5,7 @@ import org.eclipse.e4.core.di.annotations.Execute;
 
 import com.weelgo.eclipse.plugin.CMService;
 import com.weelgo.eclipse.plugin.CurrentSelectionService;
-import com.weelgo.eclipse.plugin.UndoRedoService;
+import com.weelgo.eclipse.plugin.undoredo.UndoRedoService;
 
 public class UndoHandler {
 

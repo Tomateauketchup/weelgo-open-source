@@ -8,6 +8,7 @@ import com.weelgo.core.IProgressMonitor;
 import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.CurrentSelectionService;
 import com.weelgo.eclipse.plugin.Factory;
+import com.weelgo.eclipse.plugin.ImagesFactory;
 
 public class CMCreateGroupJob extends CMJob {
 
@@ -35,13 +36,23 @@ public class CMCreateGroupJob extends CMJob {
 	}
 
 	@Override
+	public String getUndoRedoLabel() {
+		return "Create group";
+	}
+
+	@Override
+	public String getUndoRedoIcon() {
+		return ImagesFactory.GROUP_ICON;
+	}
+
+	@Override
 	public void doRun(IProgressMonitor monitor) {
 
 		CMModuleService ser = getModuleService(selectedParent);
 		if (ser != null && selectedParent instanceof CMGroup) {
 			setModuleUniqueIdentifier(ser.getModuleUniqueIdentifier());
 			CMGroup gp = (CMGroup) selectedParent;
-			String[] ret = ser.findNameForNewGroup(gp.getUuid());
+			String[] ret = getServices().getModulesManager().findNameForNewGroup(ser, gp.getUuid());
 			if (ret != null && ret.length > 1) {
 				CMGroup newGp = ser.createGroup(getServices().getModulesManager(), ret[0], ret[1], gp.getUuid());
 				sentEvent(CMEvents.GROUP_CREATED, newGp);

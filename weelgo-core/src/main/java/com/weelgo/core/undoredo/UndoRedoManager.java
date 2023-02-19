@@ -13,12 +13,13 @@ public class UndoRedoManager {
 	private UndoRedoNode currentNode = null;
 	private UndoRedoNode firstNode = null;
 
-	public UndoRedoNode saveModel() {
+	public UndoRedoNode saveModel(Object infoData) {
 		Object newObject = undoRedoModelProvider.getClonedModel();
 		Object oldObject = getReconstitutedData(currentNode);
 		Object incrementedData = incrementalDataWorker.createIncrementalData(oldObject, newObject);
 
 		UndoRedoNode n = new UndoRedoNode();
+		n.setInfoData(infoData);
 		n.setData(incrementedData);
 		n.setDataFingerprint(CoreUtils.generateUUIDString());
 		if (currentNode != null) {
@@ -127,6 +128,18 @@ public class UndoRedoManager {
 		}
 		return "";
 
+	}
+
+	public UndoRedoNode getFirstNode() {
+		return firstNode;
+	}
+
+	public void setFirstNode(UndoRedoNode firstNode) {
+		this.firstNode = firstNode;
+	}
+
+	public UndoRedoNode getCurrentNode() {
+		return currentNode;
 	}
 
 }

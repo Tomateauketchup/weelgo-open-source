@@ -248,7 +248,7 @@ public class CoreUtils {
 		return rl;
 	}
 
-	public static List putArrayIntoList(Object[] sourceList) {
+	public static List putArrayIntoList(Object... sourceList) {
 		ArrayList rl = new ArrayList<>();
 		putArrayIntoList(sourceList, rl);
 		return rl;
@@ -315,7 +315,7 @@ public class CoreUtils {
 		return map;
 	}
 
-	public static Map putArrayIntoMap(Object[] a) {
+	public static Map putArrayIntoMap(Object... a) {
 		HashMap map = new HashMap<>();
 		putArrayIntoMap(a, map);
 		return map;

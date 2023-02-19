@@ -45,12 +45,7 @@ public class TreeContentProvider implements ITreeContentProvider {
 		} else if (dataSource != null) {
 			CoreUtils.putListIntoList(dataSource.getContainers(), arl);
 		} else if (gp != null) {
-			CMReturnObj ret = getObjectByUuid(gp);
-			CMModuleService serv = CMReturnObj.getServices(ret);
-			if (serv != null) {
-				List<Object> childs = serv.getChilds(gp);
-				CoreUtils.putListIntoList(childs, arl);
-			}
+			CoreUtils.putListIntoList(getModulesManager().getChildsForTreeNavigator(gp), arl);
 		} else if (modService != null) {
 			if (modService.getRootGroup() != null) {
 				arl.add(modService.getRootGroup());
@@ -60,7 +55,7 @@ public class TreeContentProvider implements ITreeContentProvider {
 		}
 
 		arl.removeIf(t -> getModulesManager().isHiddenElement(t));
-		
+
 		return arl.toArray(new Object[arl.size()]);
 
 	}
@@ -94,7 +89,7 @@ public class TreeContentProvider implements ITreeContentProvider {
 			return getModulesManager();
 		}
 		if (modService != null) {
-			return modService.getParentContainer();
+			return getModulesManager().getParentForTreeNavigator(modService);			
 		}
 
 		String gpUuid = "";

@@ -143,7 +143,7 @@ public class FileSystemProvider implements HierarchicalTreeSystemProvider {
 		if (folder == null) {
 			return null;
 		}
-		if (folder instanceof File) {
+		if (folder instanceof File && isFolderExist(folder)) {
 			File f = (File) folder;
 			File[] ar = f.listFiles(new FileFilter() {
 

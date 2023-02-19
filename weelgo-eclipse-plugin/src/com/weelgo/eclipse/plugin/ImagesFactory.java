@@ -17,6 +17,8 @@ public class ImagesFactory {
 	public static String GROUP_ICON = "package.gif";
 	public static String GROUP_PROJECT = "project.gif";
 	public static String SAVE_ICON = "save.png";
+	public static String MODIFY_ICON = "modify.gif";
+	
 	private static Map<String, Image> imagesMap = new HashMap<String, Image>();
 
 	public static Image getIconImage(String iconName) {
