@@ -8,13 +8,17 @@ import org.eclipse.e4.core.services.events.IEventBroker;
 
 @Creatable
 @Singleton
-public class EventBroker{
-	
+public class EventBroker {
+
 	@Inject
 	private IEventBroker eventBroker;
-	
+
 	public boolean sentEvent(String topic, Object data) {
 		return eventBroker.post(topic, data);
+	}
+
+	public boolean sentEvent(String topic) {
+		return eventBroker.post(topic, null);
 	}
 
 }

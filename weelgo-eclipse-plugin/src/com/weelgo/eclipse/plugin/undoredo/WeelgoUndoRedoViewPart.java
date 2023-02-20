@@ -4,174 +4,101 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import javax.annotation.PostConstruct;
 import javax.inject.Inject;
+import javax.inject.Named;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Optional;
+import org.eclipse.e4.ui.di.Focus;
 import org.eclipse.e4.ui.di.UIEventTopic;
+import org.eclipse.e4.ui.services.EMenuService;
+import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.gef.ContextMenuProvider;
+import org.eclipse.gef.DefaultEditDomain;
+import org.eclipse.gef.GraphicalViewer;
+import org.eclipse.gef.ui.parts.GraphicalEditor;
+import org.eclipse.gef.ui.parts.GraphicalViewerImpl;
+import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
+import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.layout.GridDataFactory;
 import org.eclipse.jface.viewers.ComboViewer;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IEditorPart;
 
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
+import com.weelgo.core.CoreUtils;
+import com.weelgo.core.IUuidObject;
 import com.weelgo.core.undoredo.UndoRedoManager;
 import com.weelgo.core.undoredo.UndoRedoNode;
 import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.CMService;
+import com.weelgo.eclipse.plugin.ColorFactory;
+import com.weelgo.eclipse.plugin.CurrentSelectionService;
+import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.ImagesFactory;
+import com.weelgo.eclipse.plugin.SelectionAdapter;
 import com.weelgo.eclipse.plugin.job.CMJob;
 
 @Creatable
 public class WeelgoUndoRedoViewPart {
 
 	@Inject
-	IWorkbench workbench;
-
-	@Inject
 	CMService cmServices;
-
-	private TableViewer viewer;
 
 	private Composite container;
 
 	private ComboViewer comboModules;
 
-	class ViewLabelProvider extends LabelProvider implements ITableLabelProvider {
-		@Override
-		public String getColumnText(Object obj, int index) {
-			String label = "Operation";
-			if (obj != null && obj instanceof Node) {
-				Node nd = (Node) obj;
+	private GraphicalViewer grapView;
 
-				UndoRedoNode n = nd.n;
-				Object data = n.getInfoData();
-				if (data instanceof UndoRedoInfoData) {
-					UndoRedoInfoData info = (UndoRedoInfoData) data;
-					label = info.getLabel();
-				}
-				if (nd.isCurrent) {
-					label = "-> " + label;
-				}
-			}
-			return label;
-		}
+	@Inject
+	ESelectionService selectionService;
 
-		@Override
-		public Image getColumnImage(Object obj, int index) {
+	@Inject
+	SelectionAdapter selectionAdapter;
 
-			String image = ImagesFactory.MODIFY_ICON;
-			if (obj != null && obj instanceof Node) {
-				Node nd = (Node) obj;
+	@Inject
+	private UndoRedoModel undoRedoModel;
 
-				UndoRedoNode n = nd.n;
-				Object data = n.getInfoData();
-				if (data instanceof UndoRedoInfoData) {
-					UndoRedoInfoData info = (UndoRedoInfoData) data;
-					image = info.getIcon();
-				}
-			}
+	private Label savedLabel;
 
-			return ImagesFactory.getIconImage(image);
-		}
+	@PostConstruct
+	public void postConstruct(Composite parent, EMenuService menuService, UndoRedoEditDomain domain) {
 
-		@Override
-		public Image getImage(Object obj) {
-			return workbench.getSharedImages().getImage(ISharedImages.IMG_OBJ_ELEMENT);
-		}
-	}
-
-	class Node {
-		private UndoRedoNode n;
-		private boolean isCurrent = false;
-	}
-
-	class TableViewerContentProvider implements IStructuredContentProvider {
-
-		@Override
-		public Object[] getElements(Object inputElement) {
-			List<Node> arl = new ArrayList();
-			if (inputElement != null && inputElement instanceof CMService) {
-				CMService ser = (CMService) inputElement;
-				ISelection select = comboModules.getSelection();
-				if (select != null && select instanceof IStructuredSelection) {
-					IStructuredSelection structSelec = (IStructuredSelection) select;
-					if (structSelec != null) {
-						Object o = structSelec.getFirstElement();
-						if (o != null && o instanceof CMModuleService) {
-							CMModuleService module = (CMModuleService) o;
-							UndoRedoManager undoRedoManager = module.getUndoRedoManager();
-							if (undoRedoManager != null) {
-								UndoRedoNode firstElem = undoRedoManager.getFirstNode();
-								if (firstElem != null) {
-									UndoRedoNode elemTmp = firstElem;
-
-									do {
-
-										Node n = new Node();
-										n.n = elemTmp;
-										n.isCurrent = elemTmp.equals(undoRedoManager.getCurrentNode());
-										arl.add(n);
-
-										elemTmp = elemTmp.getLastChildNode();
-
-									} while (elemTmp != null);
-								}
-
-							}
-						}
-					}
-				}
-			}
-			Collections.reverse(arl);
-			return arl.toArray(new Node[arl.size()]);
-		}
-	}
-
-	class ComboContentProvider implements IStructuredContentProvider {
-
-		@Override
-		public Object[] getElements(Object inputElement) {
-			if (inputElement != null && inputElement instanceof CMService) {
-				CMService ser = (CMService) inputElement;
-				List<CMModuleService> modules = ser.getModulesManager().getServices();
-				if (modules != null && modules.size() > 0) {
-					return modules.toArray(new CMModuleService[modules.size()]);
-				}
-			}
-			return new Object[0];
-		}
-	}
-
-	public void postConstruct(Composite parent) {
-
-		parent.setBackground(Display.getCurrent().getSystemColor(SWT.COLOR_WHITE));
-
+		parent.setBackground(ColorFactory.WHITE_COLOR);
 		container = new Composite(parent, SWT.NONE);
 
 		GridLayout layout = new GridLayout();
+		layout.marginWidth = 0;
+		layout.marginHeight = 0;
+		layout.horizontalSpacing = 0;
+		layout.verticalSpacing = 0;
 		container.setLayout(layout);
-		layout.numColumns = 2;
+
+		Composite compTmp = new Composite(container, SWT.NONE);
+//		compTmp.setBackground(ColorFactory.BLUE_COLOR);
+		compTmp.setLayout(new GridLayout(3, false));
 
 		Image image = ImagesFactory.getIconImage(ImagesFactory.CHAIN_MAPPING_ICON);
-		Label imgLabel = new Label(container, SWT.NONE);
+		Label imgLabel = new Label(compTmp, SWT.NONE);
 		imgLabel.setImage(image);
 		GridDataFactory.fillDefaults().applyTo(imgLabel);
 
-		comboModules = new ComboViewer(container, SWT.READ_ONLY);
+		comboModules = new ComboViewer(compTmp, SWT.READ_ONLY);
 		comboModules.setContentProvider(new ComboContentProvider());
 		comboModules.setLabelProvider(new LabelProvider() {
 			@Override
@@ -183,33 +110,75 @@ public class WeelgoUndoRedoViewPart {
 				return super.getText(element);
 			}
 		});
-//		GridDataFactory.fillDefaults().applyTo(comboModules.getControl());
+		GridDataFactory.fillDefaults().applyTo(comboModules.getControl());
 		comboModules.addPostSelectionChangedListener(event -> {
+			selectionService.setSelection(getSelectedModule());
 			refreshView();
 		});
 
 		comboModules.setInput(cmServices);
 
-		viewer = new TableViewer(container, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		GridDataFactory.fillDefaults().span(2, 1).grab(true, true).applyTo(viewer.getControl());
-		viewer.setContentProvider(new TableViewerContentProvider());
+		savedLabel = new Label(compTmp, SWT.NONE);
+		GridDataFactory.fillDefaults().applyTo(savedLabel);
 
-		viewer.setInput(cmServices);
-		viewer.setLabelProvider(new ViewLabelProvider());
+		grapView = new ScrollingGraphicalViewer();
+		grapView.createControl(container);
+		GridDataFactory.fillDefaults().grab(true, true).applyTo(grapView.getControl());
+		grapView.getControl().setBackground(ColorFactory.WHITE_COLOR);
+
+		undoRedoModel.setServiceRetriever(t -> {
+			return getSelectedModule();
+		});
+		grapView.setEditPartFactory(new UndoRedoEditPartFactory());
+		grapView.setContents(undoRedoModel);
+		grapView.setEditDomain(domain);
+		menuService.registerContextMenu(grapView.getControl(), "com.weelgo.eclipse.plugin.navigator.ContextMenu");
+
+		Factory.askFirstModulesLoad();
+
 	}
 
-	public void moduleSelected(String moduleUniqueIdentifier) {
+	public CMModuleService getSelectedModule() {
 
+		return selectionAdapter.find(comboModules.getSelection(), CMModuleService.class);
 	}
 
 	public void refreshView() {
 
-		CMJob.updateUI("Weelgo Navigator", (IProgressMonitor) -> {
+		CMJob.updateUI("Weelgo Undo/Redo", (IProgressMonitor) -> {
 
 			comboModules.refresh();
-			viewer.refresh();
+			grapView.getContents().refresh();
+
+			CMModuleService s = getSelectedModule();
+			boolean isDirty = s != null && s.isDirty();
+
+			savedLabel.setText(isDirty ? "*" : "");
+			container.pack();
 
 		});
+	}
+
+	@Focus
+	public void focus() {
+		selectionService.setSelection(getSelectedModule());
+	}
+
+	@Inject
+	@Optional
+	public void setSelectionCHanged(@UIEventTopic(CMEvents.SELECTION_CHANGED) Object selection) {
+		CMModuleService serv = cmServices.findModuleService(selection);
+		if (serv != null) {
+			boolean changeSelection = true;
+			CMModuleService currentSelection = getSelectedModule();
+			if (currentSelection != null && CoreUtils.isStrictlyEqualsString(
+					currentSelection.getModuleUniqueIdentifier(), serv.getModuleUniqueIdentifier())) {
+				changeSelection = false;
+			}
+			if (changeSelection) {
+				comboModules.setSelection(new StructuredSelection(serv));
+			}
+		}
 	}
 
 	@Inject
@@ -253,5 +222,20 @@ public class WeelgoUndoRedoViewPart {
 	public void getModuleUndoRedoDoneOperationEvent(
 			@UIEventTopic(CMEvents.MODULE_UNDO_REDO_OPERATION_DONE) String modulId) {
 		refreshView();
+	}
+
+	class ComboContentProvider implements IStructuredContentProvider {
+
+		@Override
+		public Object[] getElements(Object inputElement) {
+			if (inputElement != null && inputElement instanceof CMService) {
+				CMService ser = (CMService) inputElement;
+				List<CMModuleService> modules = ser.getModulesManager().getServices();
+				if (modules != null && modules.size() > 0) {
+					return modules.toArray(new CMModuleService[modules.size()]);
+				}
+			}
+			return new Object[0];
+		}
 	}
 }

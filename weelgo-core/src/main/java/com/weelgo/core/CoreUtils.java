@@ -17,6 +17,23 @@ import com.weelgo.core.exceptions.ExceptionsUtils;
 
 public class CoreUtils {
 
+	public static boolean isInstanceOf(Object o, Class... possibleClasses) {
+		if(possibleClasses!=null)
+		{
+			for (Class cTmp : possibleClasses) {
+				if(cTmp!=null && cTmp.isInstance(o))
+				{
+					return true;
+				}
+			}
+		}		
+		return false;
+	}
+
+	public static String getLinkUUID(String source, String target) {
+		return source + "_" + target;
+	}
+
 	public static <T extends IUpdatableUuidObject> void updateList(List<T> listToUpdate, List<T> newList) {
 		updateList(listToUpdate, newList, true);
 	}
@@ -40,7 +57,7 @@ public class CoreUtils {
 
 	}
 
-	public static <T extends IUpdatableUuidObject> void updateList(List<T> listToUpdate, List<T> newList,
+	public static <T extends IUuidObject> void updateList(List<T> listToUpdate, List<T> newList,
 			BiFunction<T, T, Void> changedElementRunnable, BiFunction<T, T, Void> notChangedElementRunnable) {
 		IUuidUpdateListProcessor<T> servicesUpdator = new IUuidUpdateListProcessor<T>(listToUpdate, newList) {
 

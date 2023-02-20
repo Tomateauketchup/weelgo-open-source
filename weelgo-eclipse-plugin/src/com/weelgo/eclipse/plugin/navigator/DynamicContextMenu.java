@@ -19,40 +19,31 @@ import com.weelgo.eclipse.plugin.handlers.OpenCreateModuleWizardHandler;
 public class DynamicContextMenu {
 
 	@AboutToShow
-	public void aboutToShow(List<MMenuElement> items,CurrentSelectionService currentSelectionService) {
+	public void aboutToShow(List<MMenuElement> items, CurrentSelectionService currentSelectionService) {
 
 		boolean showCreateModule = false;
 		boolean showCreateGroup = false;
-		boolean showSaveModule=false;
-		Object currentSelection = currentSelectionService.getCurrentSelection();
-		if (currentSelection != null) {
-			if (currentSelection instanceof IContainer) {
-				showCreateModule = true;
-			}
-			if (currentSelection instanceof CMGroup) {
-				showCreateGroup = true;
-				showCreateModule = true;
-			}
-		} else {
+		boolean showSaveModule = false;
+
+		if (currentSelectionService.find(IContainer.class) != null) {
 			showCreateModule = true;
 		}
-		if(currentSelection instanceof CMModuleService)
-		{
-			showSaveModule=true;
+		if (currentSelectionService.find(CMGroup.class) != null) {
+			showCreateGroup = true;
+			showCreateModule = true;
+			showSaveModule = true;
+		}
+		if (currentSelectionService.find(CMModuleService.class) != null) {
+			showSaveModule = true;
 		}
 
-		if(showSaveModule==false)
-		{
-			showSaveModule=showCreateGroup;
-		}
-		
 		if (showSaveModule) {
 			MHandledMenuItem it = Factory.createMHandledMenuItem("Save Module", ImagesFactory.SAVE_ICON,
 					Factory.COMMAND_SAVE_ID);
 			items.add(it);
 
 		}
-		
+
 		if (showCreateModule) {
 			MDirectMenuItem it = Factory.createMDirectMenuItem("Create module", ImagesFactory.CHAIN_MAPPING_ICON,
 					OpenCreateModuleWizardHandler.class);
@@ -65,8 +56,6 @@ public class DynamicContextMenu {
 			items.add(it);
 
 		}
-		
-		
 
 //		MHandledMenuItem menuItem = MMenuFactory.INSTANCE.createHandledMenuItem();
 //		menuItem.setLabel("Create module");

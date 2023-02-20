@@ -78,7 +78,9 @@ public class UndoRedoManager {
 	}
 
 	public UndoRedoNode goToNode(UndoRedoNode node) {
-		return null;
+		currentNode = node;
+		push(currentNode);
+		return currentNode;
 	}
 
 	public UndoRedoNode restore() {

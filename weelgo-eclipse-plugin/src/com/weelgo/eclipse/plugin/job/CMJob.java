@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.weelgo.chainmapping.core.CMModuleService;
+import com.weelgo.chainmapping.core.CMModulesManager;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.exceptions.ExceptionsUtils;
 import com.weelgo.eclipse.plugin.CMService;
@@ -170,6 +171,10 @@ public abstract class CMJob extends Job {
 
 	public void setServices(CMService services) {
 		this.services = services;
+	}
+
+	public CMModulesManager getModulesManager() {
+		return getServices().getModulesManager();
 	}
 
 	public String getModuleUniqueIdentifier() {

@@ -17,6 +17,7 @@ import com.weelgo.core.CoreUtils;
 import com.weelgo.core.IProgressMonitor;
 import com.weelgo.core.IUuidObject;
 import com.weelgo.core.exceptions.WeelgoException;
+import com.weelgo.core.undoredo.UndoRedoNode;
 
 public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 
@@ -649,6 +650,15 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 			serv.getUndoRedoManager().redo();
 		}
 	}
+	
+	public void goToSpecificUndoRedoSave(String moduleUniqueidentifier,UndoRedoNode node)
+	{
+		CMModuleService serv = getServiceByModuleUniqueIdentifierId(moduleUniqueidentifier);
+		if (serv != null && serv.getUndoRedoManager() != null) {
+			serv.getUndoRedoManager().goToNode(node);
+		}
+	}
+	
 
 	// TODO quand on fait un save et qu'il y a des dossier fils qui ne sont plus
 	// utilisé, il faut les supprimer

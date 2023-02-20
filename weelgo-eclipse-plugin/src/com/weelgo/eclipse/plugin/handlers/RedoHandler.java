@@ -12,15 +12,13 @@ public class RedoHandler {
 	@Execute
 	public void execute(UndoRedoService undoRedoService, CMService cmService,
 			CurrentSelectionService currentSelectionService) {
-		String str = cmService.findModuleUniqueIdentifierId(currentSelectionService.getCurrentSelection());
-		undoRedoService.redoModel(str);
+		undoRedoService.redoModel(currentSelectionService.findModuleUniqueIdentifierObjectId());
 	}
 
 	@CanExecute
 	public boolean canExecute(UndoRedoService undoRedoService, CMService cmService,
 			CurrentSelectionService currentSelectionService) {
-		String str = cmService.findModuleUniqueIdentifierId(currentSelectionService.getCurrentSelection());
-		return undoRedoService.canRedo(str);
+		return undoRedoService.canRedo(currentSelectionService.findModuleUniqueIdentifierObjectId());
 	}
 
 }

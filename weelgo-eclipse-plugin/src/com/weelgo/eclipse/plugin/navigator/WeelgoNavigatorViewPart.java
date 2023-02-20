@@ -40,13 +40,9 @@ public class WeelgoNavigatorViewPart {
 			selectionService.setSelection(selection.getFirstElement());
 		});
 		menuService.registerContextMenu(viewer.getControl(), "com.weelgo.eclipse.plugin.navigator.ContextMenu");
-		askLoadModules();
-	}
 
-	public void askLoadModules() {
-		CMLoadAllModulesJob job = CMLoadAllModulesJob.CREATE();
-		job.doSchedule();
 		// TODO faire rafraichierune partie de l'arbre
+		Factory.askFirstModulesLoad();
 	}
 
 	public void refreshView() {
@@ -90,7 +86,8 @@ public class WeelgoNavigatorViewPart {
 
 	@Inject
 	@Optional
-	public void getModuleUndoRedoDoneOperationEvent(@UIEventTopic(CMEvents.MODULE_UNDO_REDO_OPERATION_DONE) String modulId) {
+	public void getModuleUndoRedoDoneOperationEvent(
+			@UIEventTopic(CMEvents.MODULE_UNDO_REDO_OPERATION_DONE) String modulId) {
 		refreshView();
 	}
 
@@ -99,13 +96,17 @@ public class WeelgoNavigatorViewPart {
 	public void getGroupCreatedEvent(@UIEventTopic(CMEvents.GROUP_CREATED) CMGroup gp) {
 		refreshView();
 
+		// TODO Bug quand on fait un save d'un module ça créé un oad sur tous
+		// TODO Bug quand on créé un module dans un module ça ajoute un undo dans l'arbre du module parent
 		// TODO afficher la liste des jobs réalisés pour undo/redo dans une vue
-		//TODO dans la liste des jobs, mettre l'heure de la réalisation
-		//TODO mettre le nom de l'objet concerné dans la liste des jobs
-		//TODO quand on sélectionn un module, mettre à jour l'affichage de la liste des jobs
-		// TOTO mettre des flags sur des undiredoNode qui ne peuvent pas être undo comme la création d'un module par exmple
+		// TODO dans la liste des jobs, mettre l'heure de la réalisation
+		// TODO mettre le nom de l'objet concerné dans la liste des jobs
+		// TODO quand on sélectionn un module, mettre à jour l'affichage de la liste des
+		// jobs
+		// TOTO mettre des flags sur des undiredoNode qui ne peuvent pas être undo comme
+		// la création d'un module par exmple
 		// TODO Faire save menu sur chaque module
-		// TODO faire modification nom des groupes et du module		
+		// TODO faire modification nom des groupes et du module
 		// TODO Le load all module doit vérifier qu'il n'y a pas des modules non
 		// sauvés.Si c'est le cas un message doit s'afficher
 	}

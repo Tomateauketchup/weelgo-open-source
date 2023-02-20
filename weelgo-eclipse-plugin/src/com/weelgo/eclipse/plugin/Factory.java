@@ -57,6 +57,7 @@ public class Factory {
 	private UndoRedoService undoRedoService;
 
 	private List<String> openedProjects = new ArrayList<>();
+	private boolean isFirstLoadDone = false;
 
 	public static IEclipseContext getActiveContext() {
 		IEclipseContext context = getWorkbenchContext();
@@ -174,7 +175,7 @@ public class Factory {
 	public boolean isWorkspaceModified() {
 
 		// TODO améliorer la détection de ressource : quand un nouveau projet arrive ou
-		//TODO passer le undoRedo view en e4
+		// TODO passer le undoRedo view en e4
 		// est supprimé, il faut uniquement loader pour ce projet et pas loader les
 		// autres car il est possible que le modèle soit modifié
 		List<String> oldList = openedProjects;
@@ -190,6 +191,19 @@ public class Factory {
 		updator.compileList();
 
 		return updator.hasChanged();
+	}
+
+	public static void askFirstModulesLoad() {
+		loadFactory();
+		factory.doFirstModulesLoad();
+	}
+
+	public void doFirstModulesLoad() {
+		if (isFirstLoadDone == false) {
+			CMLoadAllModulesJob job = CMLoadAllModulesJob.CREATE();
+			job.doSchedule();
+		}
+		isFirstLoadDone = true;
 	}
 
 }

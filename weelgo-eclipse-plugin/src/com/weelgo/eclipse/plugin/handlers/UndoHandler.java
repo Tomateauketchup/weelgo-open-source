@@ -11,17 +11,14 @@ public class UndoHandler {
 
 	@Execute
 	public void execute(UndoRedoService undoRedoService, CMService cmService,
-			CurrentSelectionService currentSelectionService) {
-		String str = cmService.findModuleUniqueIdentifierId(currentSelectionService.getCurrentSelection());
-		undoRedoService.undoModel(str);
+			CurrentSelectionService currentSelectionService) {		
+		undoRedoService.undoModel(currentSelectionService.findModuleUniqueIdentifierObjectId());
 	}
 
 	@CanExecute
 	public boolean canExecute(UndoRedoService undoRedoService, CMService cmService,
-			CurrentSelectionService currentSelectionService) {
-
-		String str = cmService.findModuleUniqueIdentifierId(currentSelectionService.getCurrentSelection());
-		return undoRedoService.canUndo(str);
+			CurrentSelectionService currentSelectionService) {		
+		return undoRedoService.canUndo(currentSelectionService.findModuleUniqueIdentifierObjectId());
 	}
 
 }

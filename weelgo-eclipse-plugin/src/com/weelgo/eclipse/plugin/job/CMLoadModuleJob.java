@@ -25,7 +25,7 @@ public class CMLoadModuleJob extends CMJob {
 
 	@Override
 	public String getUndoRedoIcon() {
-		return ImagesFactory.MODIFY_ICON;
+		return ImagesFactory.LOAD_ICON;
 	}
 	
 	@Override

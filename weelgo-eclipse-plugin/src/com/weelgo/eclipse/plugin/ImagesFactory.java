@@ -9,17 +9,21 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class ImagesFactory {
 
-	public static String TASK_ICON = "task.png";
-	public static String CHAIN_MAPPING_ICON = "chain_mapping.png";
-	public static String DELIVERABLE_ICON = "deliverable.gif";
-	public static String FILE_ICON = "file.png";
-	public static String FOLDER_ICON = "folder.gif";
-	public static String GROUP_ICON = "package.gif";
-	public static String GROUP_PROJECT = "project.gif";
-	public static String SAVE_ICON = "save.png";
-	public static String MODIFY_ICON = "modify.gif";
+	public static final int ICON_SIZE_IN_PX=16;
+	public static final String TASK_ICON = "task.png";
+	public static final String CHAIN_MAPPING_ICON = "chain_mapping.png";
+	public static final String DELIVERABLE_ICON = "deliverable.gif";
+	public static final String FILE_ICON = "file.png";
+	public static final String FOLDER_ICON = "folder.gif";
+	public static final String GROUP_ICON = "package.gif";
+	public static final String GROUP_PROJECT = "project.gif";
+	public static final String SAVE_ICON = "save.png";
+	public static final String LOAD_ICON = "load.png";
+	public static final String MODIFY_ICON = "modify.gif";
+	public static final String ARROW_LEFT = "arrow_left.gif";
+	public static final String UNDO = "undo_redo_view.gif";
 	
-	private static Map<String, Image> imagesMap = new HashMap<String, Image>();
+	private static final Map<String, Image> imagesMap = new HashMap<String, Image>();
 
 	public static Image getIconImage(String iconName) {
 		Image image = imagesMap.get(iconName);

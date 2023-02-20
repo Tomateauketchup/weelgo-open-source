@@ -12,7 +12,7 @@ public class SaveHandler {
 
 	@Execute
 	public void execute(CMService cmService, CurrentSelectionService currentSelectionService) {
-		String str = cmService.findModuleUniqueIdentifierId(currentSelectionService.getCurrentSelection());
+		String str = currentSelectionService.findModuleUniqueIdentifierObjectId();
 		if (CoreUtils.isNotNullOrEmpty(str)) {
 			CMSaveModuleJob j = CMSaveModuleJob.CREATE();
 			j.setModuleUniqueIdentifier(str);

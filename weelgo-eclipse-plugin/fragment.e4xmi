@@ -20,8 +20,18 @@
       </menus>
       <toolbar xmi:id="_mIS6QK1pEe2CHMmgcvMd4w" elementId="com.weelgo.eclipse.plugin.navigator.toolbar">
         <children xsi:type="menu:HandledToolItem" xmi:id="_zNJDoK34Ee2LUdqnK6Q47w" elementId="com.weelgo.eclipse.plugin.navigator.toolbar.saveAllModules" label="Save all modules" iconURI="platform:/plugin/com.weelgo.eclipse.plugin/icons/save_all.png" command="_2kFxUK34Ee2LUdqnK6Q47w"/>
-        <children xsi:type="menu:HandledToolItem" xmi:id="_BamYYK1rEe2CHMmgcvMd4w" elementId="com.weelgo.eclipse.plugin.navigator.toolbar.loadAllModules" label="Load all modules" iconURI="platform:/plugin/com.weelgo.eclipse.plugin/icons/refresh.png" command="_06EQAK1qEe2CHMmgcvMd4w"/>
+        <children xsi:type="menu:HandledToolItem" xmi:id="_BamYYK1rEe2CHMmgcvMd4w" elementId="com.weelgo.eclipse.plugin.navigator.toolbar.loadAllModules" label="Load all modules" iconURI="platform:/plugin/com.weelgo.eclipse.plugin/icons/load.png" command="_06EQAK1qEe2CHMmgcvMd4w"/>
       </toolbar>
+    </elements>
+    <elements xsi:type="basic:PartDescriptor" xmi:id="_PD53QLD7Ee2hdfvvueyPSw" elementId="com.weelgo.eclipse.plugin.undoredo.WeelgoUndoRedoViewPart" label="Weelgo Undo/Redo" iconURI="platform:/plugin/com.weelgo.eclipse.plugin/icons/undo_redo_view.gif" category="Weelgo" closeable="true" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.undoredo.WeelgoUndoRedoViewPart">
+      <tags>View</tags>
+      <tags>categoryTag:Weelgo</tags>
+      <handlers xmi:id="_ntc0gLEqEe23C6yEpc-l4w" elementId="com.weelgo.eclipse.plugin.handlers.UndoHandler" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.handlers.UndoHandler" command="_Z8hnQK41Ee2LUdqnK6Q47w"/>
+      <handlers xmi:id="_p36g8LEqEe23C6yEpc-l4w" elementId="com.weelgo.eclipse.plugin.handlers.RedoHandler" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.handlers.RedoHandler" command="_hjRgwK42Ee2LUdqnK6Q47w"/>
+      <handlers xmi:id="_q4PVgLEqEe23C6yEpc-l4w" elementId="com.weelgo.eclipse.plugin.handlers.SaveHandler" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.handlers.SaveHandler" command="_b-VcEK43Ee2LUdqnK6Q47w"/>
+      <menus xsi:type="menu:PopupMenu" xmi:id="_8J7SMLFKEe2HmcjuzUyPMg" elementId="com.weelgo.eclipse.plugin.navigator.ContextMenu" accessibilityPhrase="" label="Context menu">
+        <children xsi:type="menu:DynamicMenuContribution" xmi:id="_8J7SMbFKEe2HmcjuzUyPMg" elementId="com.weelgo.eclipse.plugin.undoredo.DynamicContextMenu" label="Dynamic menu" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.undoredo.DynamicContextMenu"/>
+      </menus>
     </elements>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_MlCRcKuzEe29xcc-jYjrcA" featurename="menuContributions" parentElementId="xpath:/">

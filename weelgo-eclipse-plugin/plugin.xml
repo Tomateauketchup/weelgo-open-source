@@ -23,20 +23,5 @@
             apply="always">
       </fragment>
    </extension>
-   <extension
-         point="org.eclipse.ui.views">
-      <category
-            id="Weelgo"
-            name="Weelgo">
-      </category>
-      <view
-            category="Weelgo"
-            class="com.weelgo.eclipse.plugin.undoredo.WeelgoUndoRedoView"
-            icon="icons/undo_redo_view.gif"
-            id="com.weelgo.eclipse.plugin.undoredo.WeelgoUndoRedoView"
-            inject="true"
-            name="Weelgo Undo/Redo">
-      </view>
-   </extension>
 
 </plugin>
