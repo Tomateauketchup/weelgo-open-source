@@ -76,6 +76,8 @@ public class WeelgoUndoRedoViewPart {
 
 	private Label savedLabel;
 
+	private Composite selectorComposite;
+
 	@PostConstruct
 	public void postConstruct(Composite parent, EMenuService menuService, UndoRedoEditDomain domain) {
 
@@ -89,16 +91,16 @@ public class WeelgoUndoRedoViewPart {
 		layout.verticalSpacing = 0;
 		container.setLayout(layout);
 
-		Composite compTmp = new Composite(container, SWT.NONE);
+		selectorComposite = new Composite(container, SWT.NONE);
 //		compTmp.setBackground(ColorFactory.BLUE_COLOR);
-		compTmp.setLayout(new GridLayout(3, false));
+		selectorComposite.setLayout(new GridLayout(3, false));
 
 		Image image = ImagesFactory.getIconImage(ImagesFactory.CHAIN_MAPPING_ICON);
-		Label imgLabel = new Label(compTmp, SWT.NONE);
+		Label imgLabel = new Label(selectorComposite, SWT.NONE);
 		imgLabel.setImage(image);
 		GridDataFactory.fillDefaults().applyTo(imgLabel);
 
-		comboModules = new ComboViewer(compTmp, SWT.READ_ONLY);
+		comboModules = new ComboViewer(selectorComposite, SWT.READ_ONLY);
 		comboModules.setContentProvider(new ComboContentProvider());
 		comboModules.setLabelProvider(new LabelProvider() {
 			@Override
@@ -110,7 +112,7 @@ public class WeelgoUndoRedoViewPart {
 				return super.getText(element);
 			}
 		});
-		GridDataFactory.fillDefaults().applyTo(comboModules.getControl());
+		GridDataFactory.fillDefaults().grab(true, false).applyTo(comboModules.getControl());
 		comboModules.addPostSelectionChangedListener(event -> {
 			selectionService.setSelection(getSelectedModule());
 			refreshView();
@@ -118,7 +120,7 @@ public class WeelgoUndoRedoViewPart {
 
 		comboModules.setInput(cmServices);
 
-		savedLabel = new Label(compTmp, SWT.NONE);
+		savedLabel = new Label(selectorComposite, SWT.NONE);
 		GridDataFactory.fillDefaults().applyTo(savedLabel);
 
 		grapView = new ScrollingGraphicalViewer();
@@ -154,7 +156,8 @@ public class WeelgoUndoRedoViewPart {
 			boolean isDirty = s != null && s.isDirty();
 
 			savedLabel.setText(isDirty ? "*" : "");
-			container.pack();
+			selectorComposite.pack();
+//			grapView.getControl().pack();
 
 		});
 	}

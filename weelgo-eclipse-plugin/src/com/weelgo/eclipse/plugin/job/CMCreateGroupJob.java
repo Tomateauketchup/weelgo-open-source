@@ -55,6 +55,9 @@ public class CMCreateGroupJob extends CMJob {
 			String[] ret = getServices().getModulesManager().findNameForNewGroup(ser, gp.getUuid());
 			if (ret != null && ret.length > 1) {
 				CMGroup newGp = ser.createGroup(getServices().getModulesManager(), ret[0], ret[1], gp.getUuid());
+				if (newGp != null) {
+					setUndoRedoTargetName(newGp.getName());
+				}
 				sentEvent(CMEvents.GROUP_CREATED, newGp);
 			}
 

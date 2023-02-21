@@ -24,6 +24,8 @@ import com.weelgo.eclipse.plugin.handlers.SaveHandler;
 @Creatable
 public class UndoRedoEditDomain extends EditDomain {
 
+	private NodeEditPart mouseMoveEditPart;
+
 	@Inject
 	ESelectionService selectionService;
 
@@ -32,7 +34,7 @@ public class UndoRedoEditDomain extends EditDomain {
 
 	@Inject
 	UndoRedoService undoRedoService;
-	
+
 	@Inject
 	CMService cmService;
 
@@ -65,10 +67,34 @@ public class UndoRedoEditDomain extends EditDomain {
 			undoRedoService.redoModel(currentSelectionService.findModuleUniqueIdentifierObjectId());
 		}
 		if (KeyHelper.isCTRL_S(keyEvent)) {
-			SaveHandler sh=new SaveHandler();
-			sh.execute(cmService, currentSelectionService);			
+			SaveHandler sh = new SaveHandler();
+			sh.execute(cmService, currentSelectionService);
 		}
 		super.keyUp(keyEvent, viewer);
+	}
+
+	@Override
+	public void mouseMove(MouseEvent mouseEvent, EditPartViewer viewer) {
+		EditPart e = findEditPart(mouseEvent, viewer);
+		if (e instanceof NodeEditPart node) {
+			if (node.equals(mouseMoveEditPart) == false) {
+				if (mouseMoveEditPart != null) {
+					mouseMoveEditPart.setMouseOver(false);
+					mouseMoveEditPart.refreshVisuals();
+				}
+				node.setMouseOver(true);
+				mouseMoveEditPart = node;
+				mouseMoveEditPart.refreshVisuals();
+			}
+
+		} else {
+			if (mouseMoveEditPart != null) {
+				mouseMoveEditPart.setMouseOver(false);
+				mouseMoveEditPart.refreshVisuals();
+			}
+			mouseMoveEditPart = null;
+		}
+		super.mouseMove(mouseEvent, viewer);
 	}
 
 	@Override

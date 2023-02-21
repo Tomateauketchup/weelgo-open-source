@@ -11,6 +11,8 @@ import org.eclipse.e4.ui.services.IServiceConstants;
 import org.eclipse.e4.ui.workbench.modeling.EModelService;
 import org.eclipse.e4.ui.workbench.modeling.EPartService;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.DefaultToolTip;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,8 +34,12 @@ public class TestButtonHandler {
 			CMService myService, UISynchronize sync, @Named(IServiceConstants.ACTIVE_SHELL) Shell shell,
 			IEventBroker eventBroker) {
 
-		CMLoadAllModulesJob job = CMLoadAllModulesJob.CREATE();
-		job.doSchedule();
+		
+		DefaultToolTip tp=new DefaultToolTip(null);
+		tp.setText("toto");
+		tp.show(Display.getDefault().getCursorLocation());
+//		CMLoadAllModulesJob job = CMLoadAllModulesJob.CREATE();
+//		job.doSchedule();
 
 //		CMJob j = new CMJob("Mon truc à faire") {
 //			@Override

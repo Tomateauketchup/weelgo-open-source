@@ -5,8 +5,10 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -18,15 +20,13 @@ import com.weelgo.core.exceptions.ExceptionsUtils;
 public class CoreUtils {
 
 	public static boolean isInstanceOf(Object o, Class... possibleClasses) {
-		if(possibleClasses!=null)
-		{
+		if (possibleClasses != null) {
 			for (Class cTmp : possibleClasses) {
-				if(cTmp!=null && cTmp.isInstance(o))
-				{
+				if (cTmp != null && cTmp.isInstance(o)) {
 					return true;
 				}
 			}
-		}		
+		}
 		return false;
 	}
 
@@ -293,9 +293,16 @@ public class CoreUtils {
 		}
 	}
 
-	public static void putMapIntoList(Map<Object, Object> map, List a) {
+	public static List putMapIntoList(Map map) {
+		List l = new ArrayList<>();
+		putMapIntoList(map, l);
+		return l;
+	}
+
+	public static void putMapIntoList(Map<String, Object> map, List a) {
 		if (a != null && map != null) {
-			for (Map.Entry<Object, Object> entry : map.entrySet()) {
+
+			for (Map.Entry<String, Object> entry : map.entrySet()) {
 				Object val = entry.getValue();
 				a.add(val);
 			}

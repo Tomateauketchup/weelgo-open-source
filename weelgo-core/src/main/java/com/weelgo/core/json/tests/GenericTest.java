@@ -13,14 +13,19 @@ import java.util.List;
 import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 
+import com.weelgo.core.CoreFactory;
 import com.weelgo.core.CoreUtils;
+import com.weelgo.core.clock.ClockServices;
+import com.weelgo.core.clock.IClockServices;
 import com.weelgo.core.exceptions.WeelgoDynamicException;
 import com.weelgo.core.exceptions.WeelgoException;
 
-public class GenericTest {
+public class GenericTest implements IClockServices {
 
 	@Rule
 	public TemporaryFolder tmpFolder = new TemporaryFolder();
+
+	public IClockServices clockServices = CoreFactory.create(ClockServices.class);
 
 	public File createFolder() throws IOException {
 		return tmpFolder.newFolder();
@@ -64,19 +69,22 @@ public class GenericTest {
 	public void assertNotExist(File f) {
 		assertFalse(f.exists());
 	}
-	
-	public void assertListEquals(List l1,List l2)
-	{
-		if(l1==null && l2==null)
-		{
+
+	public void assertListEquals(List l1, List l2) {
+		if (l1 == null && l2 == null) {
 			return;
 		}
-		assertTrue(l1!=null && l2!=null);
-		assertTrue(l1.size()==l2.size());
+		assertTrue(l1 != null && l2 != null);
+		assertTrue(l1.size() == l2.size());
 		for (int i = 0; i < l1.size(); i++) {
-			Object o1=l1.get(i);
-			Object o2=l2.get(i);			
-			assertTrue(o1.equals(o2));			
-		}		
+			Object o1 = l1.get(i);
+			Object o2 = l2.get(i);
+			assertTrue(o1.equals(o2));
+		}
+	}
+
+	@Override
+	public long getUTC_O() {
+		return clockServices.getUTC_O();
 	}
 }

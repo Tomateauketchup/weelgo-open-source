@@ -15,6 +15,7 @@ import com.weelgo.chainmapping.core.CMFileSystemDataSource;
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMModulesManager;
+import com.weelgo.chainmapping.core.navigator.NavigatorModel;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.exceptions.WeelgoException;
 
@@ -556,5 +557,25 @@ public class TestChainMappingCore extends CMGenericTest {
 		assertFalse(gp3Folder.exists());
 		assertFalse(gp4Folder.exists());
 
+	}
+	
+	
+	@Test
+	public void testNavigator() throws Exception {
+
+		CMModulesManager modManager = createModulesManager();
+		String modId1 = createModule(modManager, "Module 1", "module_1");
+		CMModuleService modServ1 = modManager.getServiceByModuleUniqueIdentifierId(modId1);
+		CMGroup rootGp = modServ1.getRootGroup();
+		File rootFolder = (File) modServ1.getContainer();
+
+		CMGroup gp1 = createGroup(modManager, modServ1, "gp1", rootGp);
+		CMGroup gp2 = createGroup(modManager, modServ1, "gp2", gp1);
+		CMGroup gp3 = createGroup(modManager, modServ1, "gp3", gp2);
+		
+		NavigatorModel model=new NavigatorModel();
+		model.update(modManager);
+		
+		
 	}
 }

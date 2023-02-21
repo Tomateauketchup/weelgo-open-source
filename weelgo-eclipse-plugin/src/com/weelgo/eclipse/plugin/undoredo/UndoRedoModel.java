@@ -1,14 +1,10 @@
 package com.weelgo.eclipse.plugin.undoredo;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import javax.inject.Inject;
 
 import org.eclipse.e4.core.di.annotations.Creatable;
 
@@ -17,20 +13,16 @@ import com.weelgo.chainmapping.core.IModuleUniqueIdentifierObject;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.undoredo.UndoRedoManager;
 import com.weelgo.core.undoredo.UndoRedoNode;
-import com.weelgo.eclipse.plugin.CMService;
 
 @Creatable
 public class UndoRedoModel implements IModuleUniqueIdentifierObject {
 
 	public static final int ROW_SPACE = 30;
-	public static final int COL_SPACE = 30;
+	public static final int COL_SPACE = 45;
 	public static final int LEFT_MARGIN = 10;
 	public static final int TOP_MARGIN = 5;
 
-	@Inject
-	CMService cmServices;
-
-	private List<NodeModel> nodes = new ArrayList<NodeModel>();
+	private List<NodeModel> nodes = new ArrayList<>();
 	private Map<String, NodeLinkModel> linksMap = new HashMap<>();
 	private Map<String, NodeModel> nodesMap = new HashMap<>();
 	private Function<Void, CMModuleService> serviceRetriever;
@@ -40,8 +32,8 @@ public class UndoRedoModel implements IModuleUniqueIdentifierObject {
 	}
 
 	public void updateNodes() {
-		List<NodeModel> newNodes = new ArrayList<NodeModel>();
-		List<NodeLinkModel> newLinks = new ArrayList<NodeLinkModel>();
+		List<NodeModel> newNodes = new ArrayList<>();
+		List<NodeLinkModel> newLinks = new ArrayList<>();
 
 		CMModuleService serv = getModuleService();
 		if (serv != null) {
@@ -51,7 +43,8 @@ public class UndoRedoModel implements IModuleUniqueIdentifierObject {
 				if (firstElem != null) {
 					UndoRedoNode elemTmp = firstElem;
 					NodeModel previousNode = null;
-					int nbRow = createNode(newNodes, newLinks, undoRedoManager, elemTmp, previousNode, 0, null);
+					int nbRow = createNode(newNodes, newLinks, undoRedoManager, elemTmp, previousNode, 0, null,
+							serv.getLastSaveDataFingerprint());
 					int maxY = nbRow * ROW_SPACE + TOP_MARGIN;
 					// On va inverser la pile
 					for (NodeModel nd : newNodes) {
@@ -65,12 +58,12 @@ public class UndoRedoModel implements IModuleUniqueIdentifierObject {
 			}
 		}
 
-		List<NodeModel> toRemove = new ArrayList<NodeModel>();
+		List<NodeModel> toRemove = new ArrayList<>();
 		for (Map.Entry<String, NodeModel> entry : nodesMap.entrySet()) {
 			String key = entry.getKey();
 			NodeModel val = entry.getValue();
 
-			if (newNodes.contains(val) == false) {
+			if (!newNodes.contains(val)) {
 				toRemove.add(val);
 			}
 		}
@@ -78,12 +71,12 @@ public class UndoRedoModel implements IModuleUniqueIdentifierObject {
 			nodesMap.remove(n.getUuid());
 		}
 
-		List<NodeLinkModel> toRemoveLnk = new ArrayList<NodeLinkModel>();
+		List<NodeLinkModel> toRemoveLnk = new ArrayList<>();
 		for (Map.Entry<String, NodeLinkModel> entry : linksMap.entrySet()) {
 			String key = entry.getKey();
 			NodeLinkModel val = entry.getValue();
 
-			if (newLinks.contains(val) == false) {
+			if (!newLinks.contains(val)) {
 				toRemoveLnk.add(val);
 			}
 		}
@@ -96,7 +89,7 @@ public class UndoRedoModel implements IModuleUniqueIdentifierObject {
 			nodes.addAll(nodesMap.values());
 		}
 //		BiFunction<NodeModel, NodeModel, Void> updateFunc=(oldObj, newObj) -> {
-//			
+//
 //			oldObj.setCurrentNode(newObj.isCurrentNode());
 //			oldObj.setPosX(newObj.getPosX());
 //			oldObj.setUndoRedoNode(newObj.getUndoRedoNode());
@@ -108,7 +101,8 @@ public class UndoRedoModel implements IModuleUniqueIdentifierObject {
 	}
 
 	public int createNode(List<NodeModel> nodes, List<NodeLinkModel> links, UndoRedoManager undoRedoManager,
-			UndoRedoNode elem, NodeModel previousNode, int row, List<List<NodeModel>> rows) {
+			UndoRedoNode elem, NodeModel previousNode, int row, List<List<NodeModel>> rows,
+			String currentSaveFingerprint) {
 
 		int maxRow = row;
 		if (elem != null && undoRedoManager != null) {
@@ -121,6 +115,7 @@ public class UndoRedoModel implements IModuleUniqueIdentifierObject {
 			n.setParent(null);
 			n.getChilds().clear();
 			n.setUuid(elem.getDataFingerprint());
+			n.setSavedNode(CoreUtils.isStrictlyEqualsString(currentSaveFingerprint, elem.getDataFingerprint()));
 			n.setUndoRedoNode(elem);
 			n.setCurrentNode(elem.equals(undoRedoManager.getCurrentNode()));
 
@@ -170,7 +165,7 @@ public class UndoRedoModel implements IModuleUniqueIdentifierObject {
 			if (childs != null) {
 				for (UndoRedoNode c : childs) {
 					if (c != null) {
-						int r = createNode(nodes, links, undoRedoManager, c, n, row + 1, rows);
+						int r = createNode(nodes, links, undoRedoManager, c, n, row + 1, rows, currentSaveFingerprint);
 						if (r > maxRow) {
 							maxRow = r;
 						}

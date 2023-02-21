@@ -2,10 +2,13 @@ package com.weelgo.core.tests;
 
 import static org.junit.Assert.*;
 
+import java.time.ZoneId;
+
 import org.junit.Test;
 
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.ValidatorUtils;
+import com.weelgo.core.clock.DateUtils;
 import com.weelgo.core.json.tests.GenericTest;
 
 public class TestCore extends GenericTest {
@@ -29,4 +32,22 @@ public class TestCore extends GenericTest {
 
 	}
 
+	@Test
+	public void testClockUtils() {
+
+		long now = getUTC_O();
+		ZoneId zone = ZoneId.of("UTC+00:00");
+		int hours = Integer.valueOf(DateUtils.formatHours(now, zone));
+		int minutes = Integer.valueOf(DateUtils.formatMinutes(now, zone));
+
+		assertEquals(hours + ":" + minutes, DateUtils.formatTime(now, zone));
+
+		zone = ZoneId.of("UTC+01:00");
+		int hours2 = Integer.valueOf(DateUtils.formatHours(now, zone));
+		int minutes2 = Integer.valueOf(DateUtils.formatMinutes(now, zone));
+
+		assertEquals(hours == 23 ? 0 : hours + 1, hours2);
+		assertEquals(minutes, minutes2);
+
+	}
 }

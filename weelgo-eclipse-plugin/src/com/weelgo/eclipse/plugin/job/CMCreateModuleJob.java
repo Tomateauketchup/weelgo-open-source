@@ -21,13 +21,18 @@ public class CMCreateModuleJob extends CMDatabaseModifierJob {
 
 	@Override
 	public boolean isUndoRedoAllModulesJob() {
+		return false;
+	}
+	
+	@Override
+	public boolean isUndoRedoJob() {		
 		return true;
 	}
 
 	@Override
 	public void doRun(IProgressMonitor monitor) {
 		String moduleId = getServices().createModule(monitor, folderContainer, moduleName, modulePackage);
-
+		setModuleUniqueIdentifier(moduleId);
 		sentEvent(CMEvents.MODULE_CREATED, moduleId);
 	}
 	

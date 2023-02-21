@@ -13,6 +13,7 @@ public class NodeModel implements IUuidObject {
 	private boolean currentNode = false;
 	private int posX = 0;
 	private int posY = 0;
+	private boolean savedNode = false;
 	private NodeLinkModel parent;
 	private List<NodeLinkModel> childs = new ArrayList<NodeLinkModel>();
 
@@ -41,6 +42,9 @@ public class NodeModel implements IUuidObject {
 	}
 
 	public long getTime() {
+		if (undoRedoNode != null) {
+			return undoRedoNode.getCreationDate();
+		}
 		return Constants.DATE_TIME_NOT_DEF;
 	}
 
@@ -74,6 +78,22 @@ public class NodeModel implements IUuidObject {
 
 	public void setChilds(List<NodeLinkModel> childs) {
 		this.childs = childs;
+	}
+
+	public boolean isSavedNode() {
+		return savedNode;
+	}
+
+	public void setSavedNode(boolean savedNode) {
+		this.savedNode = savedNode;
+	}
+
+	public String getTargetName() {
+		UndoRedoInfoData d = getInfoData();
+		if (d != null) {
+			return d.getTargetName();
+		}
+		return "";
 	}
 
 	public String getLabel() {

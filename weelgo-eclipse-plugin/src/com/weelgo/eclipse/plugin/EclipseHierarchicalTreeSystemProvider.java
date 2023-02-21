@@ -204,6 +204,9 @@ public class EclipseHierarchicalTreeSystemProvider implements HierarchicalTreeSy
 			if (parentFolder != null && parentFolder instanceof IFolder) {
 				IFolder f = (IFolder) parentFolder;
 				if (f.exists() == false) {
+
+					IContainer parent = f.getParent();
+					createFolder(parent);
 					f.create(true, true, null);
 				}
 				return f;
@@ -212,7 +215,7 @@ public class EclipseHierarchicalTreeSystemProvider implements HierarchicalTreeSy
 			ExceptionsUtils.ManageException(e, logger);
 		}
 		return null;
-	}
+	}	
 
 	@Override
 	public void deleteFolder(Object folderToTest) {

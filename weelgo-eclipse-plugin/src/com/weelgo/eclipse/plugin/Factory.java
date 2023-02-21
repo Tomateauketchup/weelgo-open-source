@@ -1,7 +1,9 @@
 package com.weelgo.eclipse.plugin;
 
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -88,6 +90,8 @@ public class Factory {
 			};
 			workspace.addResourceChangeListener(listener);
 			factory = ContextInjectionFactory.make(Factory.class, localCtx);
+			// First test to load current projets
+			factory.isWorkspaceModified();
 
 		}
 	}
@@ -174,8 +178,7 @@ public class Factory {
 
 	public boolean isWorkspaceModified() {
 
-		// TODO améliorer la détection de ressource : quand un nouveau projet arrive ou
-		// TODO passer le undoRedo view en e4
+		// TODO améliorer la détection de ressource : quand un nouveau projet arrive ou		
 		// est supprimé, il faut uniquement loader pour ce projet et pas loader les
 		// autres car il est possible que le modèle soit modifié
 		List<String> oldList = openedProjects;
@@ -204,6 +207,10 @@ public class Factory {
 			job.doSchedule();
 		}
 		isFirstLoadDone = true;
+	}
+
+	public static ZoneId getTimeZone() {
+		return ZoneId.systemDefault();
 	}
 
 }

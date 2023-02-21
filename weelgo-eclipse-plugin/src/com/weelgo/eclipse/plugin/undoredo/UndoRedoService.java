@@ -34,15 +34,15 @@ public class UndoRedoService {
 
 	}
 
-	public void saveModel(String moduleUniqueidentifier, String label, String icon) {
+	public void saveModel(String moduleUniqueidentifier, String label, String icon, String targetName) {
 		logger.debug("Save on UndoRedoService for " + moduleUniqueidentifier);
 		cmService.getModulesManager().saveModelForUndoRedo(moduleUniqueidentifier,
-				UndoRedoInfoData.create(label, icon));
+				UndoRedoInfoData.create(label, icon, targetName));
 	}
 
 	public void saveAllModel(String label, String icon) {
 		logger.debug("Save all models on UndoRedoService.");
-		cmService.getModulesManager().saveAllModelsForUndoRedo(UndoRedoInfoData.create(label, icon));
+		cmService.getModulesManager().saveAllModelsForUndoRedo(UndoRedoInfoData.create(label, icon, ""));
 	}
 
 	public void restoreModel(String moduleUniqueidentifier) {

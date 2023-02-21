@@ -37,6 +37,7 @@ public abstract class CMJob extends Job {
 	private UndoRedoService undoRedoService;
 	private String moduleUniqueIdentifier;
 	private String beginTaskMessage = "Starting Weelgo job ...";
+	private String undoRedoTargetName;
 
 	public CMJob() {
 		super("Weelgo Job");
@@ -64,7 +65,8 @@ public abstract class CMJob extends Job {
 			doRun(ProgressMonitorAdapter.beginTask(getBeginTaskMessage(), 100, monitor));
 
 			if (isUndoRedoJob()) {
-				undoRedoService.saveModel(getModuleUniqueIdentifier(), getUndoRedoLabel(), getUndoRedoIcon());
+				undoRedoService.saveModel(getModuleUniqueIdentifier(), getUndoRedoLabel(), getUndoRedoIcon(),
+						getUndoRedoTargetName());
 				if (isMarkAsNotDirty()) {
 					getServices().getModulesManager().markModelAsNotDirty(getModuleUniqueIdentifier());
 				}
@@ -128,6 +130,14 @@ public abstract class CMJob extends Job {
 		}
 		setRule(combinedRule);
 
+	}
+
+	public String getUndoRedoTargetName() {
+		return undoRedoTargetName;
+	}
+
+	public void setUndoRedoTargetName(String undoRedoTargetName) {
+		this.undoRedoTargetName = undoRedoTargetName;
 	}
 
 	public void doSchedule() {

@@ -3,6 +3,7 @@ package com.weelgo.core.undoredo;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.weelgo.core.Constants;
 import com.weelgo.core.INamedObject;
 
 public class UndoRedoNode implements INamedObject {
@@ -13,6 +14,7 @@ public class UndoRedoNode implements INamedObject {
 	private Object data;
 	private String dataFingerprint;
 	private Object infoData;
+	private long creationDate = Constants.DATE_TIME_NOT_DEF;
 
 	public String getDataFingerprint() {
 		return dataFingerprint;
@@ -60,6 +62,14 @@ public class UndoRedoNode implements INamedObject {
 
 	public void setInfoData(Object infoData) {
 		this.infoData = infoData;
+	}
+
+	public long getCreationDate() {
+		return creationDate;
+	}
+
+	public void setCreationDate(long creationDate) {
+		this.creationDate = creationDate;
 	}
 
 	public UndoRedoNode getLastChildNode() {

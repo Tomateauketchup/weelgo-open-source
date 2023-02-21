@@ -62,13 +62,8 @@ public class NewCMModuleWizard extends GenericWizard implements INewWizard {
 		final String moduleName = page.geModuleName();
 		final String packageName = page.getPackageName();
 
-		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();//
-		IResource resource = root.findMember(new Path(containerName));
-
-		if (!resource.exists() || !(resource instanceof IContainer)) {
-			ExceptionsUtils.throwException("Container \"" + containerName + "\" does not exist.");
-		}
-		IContainer container = (IContainer) resource;
+		
+		IResource container=ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(containerName));	
 
 		CMCreateModuleJob job = CMCreateModuleJob.CREATE();
 		job.setModuleName(moduleName);

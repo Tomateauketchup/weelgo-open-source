@@ -42,6 +42,9 @@ public class WeelgoNavigatorViewPart {
 		menuService.registerContextMenu(viewer.getControl(), "com.weelgo.eclipse.plugin.navigator.ContextMenu");
 
 		// TODO faire rafraichierune partie de l'arbre
+		// TODO tester créer un module avec plsuieurs sous groupes sauvés. Puis on créé
+		// un module dans un de ses groupes. Ensuite on supprime les groupes et on
+		// sauvegarder. Les fichiers de groupes doivent avoir disparu
 		Factory.askFirstModulesLoad();
 	}
 
@@ -96,16 +99,11 @@ public class WeelgoNavigatorViewPart {
 	public void getGroupCreatedEvent(@UIEventTopic(CMEvents.GROUP_CREATED) CMGroup gp) {
 		refreshView();
 
-		// TODO Bug quand on fait un save d'un module ça créé un oad sur tous
-		// TODO Bug quand on créé un module dans un module ça ajoute un undo dans l'arbre du module parent
-		// TODO afficher la liste des jobs réalisés pour undo/redo dans une vue
-		// TODO dans la liste des jobs, mettre l'heure de la réalisation
+		// TODO Bug quand on créé un module dans un module ça ajoute un undo dans
+		// l'arbre du module parent
 		// TODO mettre le nom de l'objet concerné dans la liste des jobs
-		// TODO quand on sélectionn un module, mettre à jour l'affichage de la liste des
-		// jobs
 		// TOTO mettre des flags sur des undiredoNode qui ne peuvent pas être undo comme
 		// la création d'un module par exmple
-		// TODO Faire save menu sur chaque module
 		// TODO faire modification nom des groupes et du module
 		// TODO Le load all module doit vérifier qu'il n'y a pas des modules non
 		// sauvés.Si c'est le cas un message doit s'afficher

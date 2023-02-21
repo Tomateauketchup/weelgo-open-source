@@ -4,14 +4,18 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import com.weelgo.core.CoreFactory;
 import com.weelgo.core.CoreUtils;
+import com.weelgo.core.clock.ClockServices;
+import com.weelgo.core.clock.IClockServices;
 
 public class UndoRedoManager {
 
 	private IUndoRedoModelProvider undoRedoModelProvider;
-	private IIncrementalDataWorker incrementalDataWorker = new BasicIncrementalDataWorker();
+	private IIncrementalDataWorker incrementalDataWorker = CoreFactory.create(BasicIncrementalDataWorker.class);
 	private UndoRedoNode currentNode = null;
 	private UndoRedoNode firstNode = null;
+	private IClockServices clockServices = CoreFactory.create(ClockServices.class);
 
 	public UndoRedoNode saveModel(Object infoData) {
 		Object newObject = undoRedoModelProvider.getClonedModel();
@@ -19,6 +23,7 @@ public class UndoRedoManager {
 		Object incrementedData = incrementalDataWorker.createIncrementalData(oldObject, newObject);
 
 		UndoRedoNode n = new UndoRedoNode();
+		n.setCreationDate(clockServices.getUTC_O());
 		n.setInfoData(infoData);
 		n.setData(incrementedData);
 		n.setDataFingerprint(CoreUtils.generateUUIDString());

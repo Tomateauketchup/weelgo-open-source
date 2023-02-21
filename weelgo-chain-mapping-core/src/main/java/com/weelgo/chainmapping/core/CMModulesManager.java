@@ -492,6 +492,18 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		});
 	}
 
+	public List<CMModuleService> getModuleServicesOfDataSource(CMGenericDataSource ds) {
+		List<CMModuleService> lst = new ArrayList<>();
+
+		for (CMModuleService ser : services) {
+			if (ser != null && ds.isMine(ser.getContainer())) {
+				lst.add(ser);
+			}
+		}
+
+		return lst;
+	}
+
 	public void swapFolderToServices(List<Object> lst) {
 		if (lst != null) {
 			for (int i = 0; i < lst.size(); i++) {
@@ -650,18 +662,14 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 			serv.getUndoRedoManager().redo();
 		}
 	}
-	
-	public void goToSpecificUndoRedoSave(String moduleUniqueidentifier,UndoRedoNode node)
-	{
+
+	public void goToSpecificUndoRedoSave(String moduleUniqueidentifier, UndoRedoNode node) {
 		CMModuleService serv = getServiceByModuleUniqueIdentifierId(moduleUniqueidentifier);
 		if (serv != null && serv.getUndoRedoManager() != null) {
 			serv.getUndoRedoManager().goToNode(node);
 		}
 	}
-	
 
-	// TODO quand on fait un save et qu'il y a des dossier fils qui ne sont plus
-	// utilisé, il faut les supprimer
 	// TODO mettre en place l'implémentation des modules dans des modules
 
 }

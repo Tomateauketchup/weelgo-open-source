@@ -154,22 +154,26 @@ public class NewCMModuleWizardPage extends WizardPage {
 	 */
 
 	private void dialogChanged() {
-		IResource container = ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(getContainerName()));
+
+		String containerName = getContainerName();
 		String fileName = geModuleName();
 		String packageName = getPackageName();
 
-		if (getContainerName().length() == 0) {
-			updateStatus("File container must be specified");
+		if (CoreUtils.isNotNullOrEmpty(containerName) == false) {
+			updateStatus("Folder container must be specified");
 			return;
 		}
-		if (container == null || (container.getType() & (IResource.PROJECT | IResource.FOLDER)) == 0) {
-			updateStatus("File container must exist");
+
+		IResource container = null;
+
+		try {
+			container = ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(getContainerName()));
+
+		} catch (Exception e) {
+			updateStatus(e.getMessage());
 			return;
 		}
-		if (!container.isAccessible()) {
-			updateStatus("Project must be writable");
-			return;
-		}
+
 		if (fileName.length() == 0) {
 			updateStatus("Name must be specified");
 			return;

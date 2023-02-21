@@ -135,7 +135,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 	public void setContainer(Object parentContainer) {
 		this.container = parentContainer;
-	}	
+	}
 
 	public boolean isPackageAlreadyExists(String packageName, String parentGroupUuid) {
 
@@ -374,6 +374,14 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			addInList.accept(taskChilds);
 
 			return arl;
+		}
+		return null;
+	}
+
+	public List<CMGroup> getGroupChilds(String parentUuid) {
+		if (isNotNullOrEmpty(parentUuid)) {
+			loadObjectsIntoMap(false);
+			return groupChilds.get(parentUuid);
 		}
 		return null;
 	}

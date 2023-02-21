@@ -1,6 +1,7 @@
 package com.weelgo.eclipse.plugin.handlers;
 
 import org.eclipse.e4.core.di.annotations.CanExecute;
+import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Execute;
 
 import com.weelgo.chainmapping.core.IModuleUniqueIdentifierObject;
@@ -8,6 +9,7 @@ import com.weelgo.core.undoredo.UndoRedoNode;
 import com.weelgo.eclipse.plugin.CurrentSelectionService;
 import com.weelgo.eclipse.plugin.undoredo.UndoRedoService;
 
+@Creatable
 public class GoToUndoRedoSaveHandler {
 
 	@Execute
