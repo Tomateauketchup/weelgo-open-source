@@ -14,27 +14,35 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import com.weelgo.chainmapping.core.CMGroup;
+import com.weelgo.chainmapping.core.navigator.NavigatorModel;
 import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.CMService;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.job.CMJob;
-import com.weelgo.eclipse.plugin.job.CMLoadAllModulesJob;
 
 public class WeelgoNavigatorViewPart {
 
 	private TreeViewer viewer;
 
+	private NavigatorModel model;
+
+	@Inject
+	private CMService services;
+
 	@PostConstruct
-	public void postConstruct(Composite parent, CMService services, EMenuService menuService,
-			IEclipseContext eclipseContext, ESelectionService selectionService) {
+	public void postConstruct(Composite parent, EMenuService menuService, IEclipseContext eclipseContext,
+			ESelectionService selectionService, NewTreeContentProvider contentProvier,
+			NewTreeLabelProvider labelProvider) {
+
+		model = new NavigatorModel();
+		model.update(services.getModulesManager());
+		contentProvier.setModel(model);
+
 		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 
-		TreeContentProvider cp = Factory.create(TreeContentProvider.class, eclipseContext);
-		viewer.setContentProvider(cp);
-
-		TreeLabelProvider pvd = Factory.create(TreeLabelProvider.class, eclipseContext);
-		viewer.setLabelProvider(pvd);
-		viewer.setInput(services.getModulesManager());
+		viewer.setContentProvider(contentProvier);
+		viewer.setLabelProvider(labelProvider);
+		viewer.setInput(model);
 		viewer.addSelectionChangedListener(event -> {
 			IStructuredSelection selection = viewer.getStructuredSelection();
 			selectionService.setSelection(selection.getFirstElement());
@@ -50,11 +58,19 @@ public class WeelgoNavigatorViewPart {
 
 	public void refreshView() {
 
+		model.update(services.getModulesManager());
+
 		CMJob.updateUI("Weelgo Navigator", (IProgressMonitor) -> {
 
 			viewer.refresh();
 
 		});
+	}
+
+	@Inject
+	@Optional
+	public void getWorkspaceModifiedEvent(@UIEventTopic(CMEvents.WORKSPACE_FOLDER_MODIFIED) Object o) {
+		refreshView();
 	}
 
 	@Inject

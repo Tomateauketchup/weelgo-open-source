@@ -25,5 +25,9 @@ public interface HierarchicalTreeSystemProvider extends HierarchicalTreeSystemNa
 	public boolean isFileSystemElement(Object o);
 
 	public void deleteFolder(Object folderToTest);
+	
+	public void deleteFile(Object folderToTest);
+
+	public Object getFolderFromFullPath(String... path);
 
 }

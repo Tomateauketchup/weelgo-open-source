@@ -134,7 +134,7 @@ public class WeelgoUndoRedoViewPart {
 		grapView.setEditPartFactory(new UndoRedoEditPartFactory());
 		grapView.setContents(undoRedoModel);
 		grapView.setEditDomain(domain);
-		menuService.registerContextMenu(grapView.getControl(), "com.weelgo.eclipse.plugin.navigator.ContextMenu");
+		menuService.registerContextMenu(grapView.getControl(), "com.weelgo.eclipse.plugin.undoredo.ContextMenu");
 
 		Factory.askFirstModulesLoad();
 
@@ -170,7 +170,7 @@ public class WeelgoUndoRedoViewPart {
 	@Inject
 	@Optional
 	public void setSelectionCHanged(@UIEventTopic(CMEvents.SELECTION_CHANGED) Object selection) {
-		CMModuleService serv = cmServices.findModuleService(selection);
+		CMModuleService serv = selectionAdapter.findModuleService(selection);
 		if (serv != null) {
 			boolean changeSelection = true;
 			CMModuleService currentSelection = getSelectedModule();

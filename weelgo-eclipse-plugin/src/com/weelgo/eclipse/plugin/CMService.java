@@ -19,15 +19,15 @@ import com.weelgo.core.IProgressMonitor;
 @Singleton
 public class CMService {
 
+	public static final String ECLIPSE_WORKSPACE_DATA_SOURCE_UUID = "eclipse_workspace_data_source";
 	private static Logger logger = LoggerFactory.getLogger(CMService.class);
-	private CMFileSystemDataSource workspaceDataSource;
 	private CMModulesManager modulesManager;
 
 	public String createModule(IProgressMonitor progressMonitor, Object moduleParentFolderPath, String moduleName,
-			String modulePackageName) {
+			String modulePackageName, String dataSourceUuid) {
 
-		return modulesManager.createModule(progressMonitor, workspaceDataSource, moduleParentFolderPath, moduleName,
-				modulePackageName);
+		return modulesManager.createModule(progressMonitor, moduleParentFolderPath, moduleName, modulePackageName,
+				dataSourceUuid);
 	}
 
 	public void saveAllModules(IProgressMonitor monitor) {
@@ -67,10 +67,12 @@ public class CMService {
 		};
 
 		IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-		workspaceDataSource = modulesManager.createCMFileSystemDataSource();
+		CMFileSystemDataSource workspaceDataSource = modulesManager.createCMFileSystemDataSource();
+		workspaceDataSource.setName("Workspace");
+		workspaceDataSource.setUuid(ECLIPSE_WORKSPACE_DATA_SOURCE_UUID);
 		workspaceDataSource.setRootFolder(root);
 
-		modulesManager.getSources().add(workspaceDataSource);
+		modulesManager.addDataSource(workspaceDataSource);
 	}
 
 	public String findModuleUniqueIdentifierId(Object o) {
@@ -81,13 +83,14 @@ public class CMService {
 		return getModulesManager().findModuleService(o);
 	}
 
-	public boolean isModulePackageFreeForEclipseWorkspace(IProgressMonitor progressMonitor, Object moduleParentFolder,
-			String packageName) {
-		return getModulesManager().isModulePackageFree(progressMonitor, workspaceDataSource, moduleParentFolder,
+	public boolean isModulePackageFreeForEclipseWorkspace(IProgressMonitor progressMonitor, String datasourceUUid,
+			Object moduleParentFolder, String packageName) {
+		return getModulesManager().isModulePackageFree(progressMonitor, datasourceUUid, moduleParentFolder,
 				packageName);
 	}
 
 	public String getFolderFullPathOfGroup(CMGroup gp) {
 		return getModulesManager().getFolderFullPathOfObject(gp);
 	}
+
 }

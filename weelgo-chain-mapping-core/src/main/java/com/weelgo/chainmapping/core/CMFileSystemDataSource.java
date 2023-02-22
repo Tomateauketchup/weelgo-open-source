@@ -289,6 +289,24 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 			if (keep == false) {
 				// We check if there is module in subfolder
 				keep = hasModuleInFolder(folderToTest);
+				
+				if(keep)
+				{
+					//If there is a module, we need to check if it's in this folder
+					Object moduleFile = getHierarchicalTreeSystemProvider().getFile(folderToTest, MODULE_DATA_FILE_NAME);
+					if (getHierarchicalTreeSystemProvider().isFile(moduleFile)
+							&& getHierarchicalTreeSystemProvider().isFileExist(moduleFile)) {
+						//We do nothing
+					}else
+					{
+						//We remove the group file
+						Object groupFile = getHierarchicalTreeSystemProvider().getFile(folderToTest, GROUP_DATA_FILE_NAME);
+						if (getHierarchicalTreeSystemProvider().isFile(groupFile)
+								&& getHierarchicalTreeSystemProvider().isFileExist(groupFile)) {
+							getHierarchicalTreeSystemProvider().deleteFile(groupFile);
+						}
+					}
+				}
 			}
 			if (keep == false) {
 				getHierarchicalTreeSystemProvider().deleteFolder(folderToTest);
@@ -330,25 +348,10 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 
 			assertNotNullOrEmptyFatal(moduleRootFolder);
 			assertNotNullOrEmptyFatal(group);
-//			String packageParentPath = group.getPackageFullPath();
-			// On décompose
-
-//			String[] parents = getPackages(packageParentPath);
-//			Object groupFolder = moduleRootFolder;
-//			if (parents != null) {
-//				for (String str : parents) {
-//					if (isNotNullOrEmpty(str)) {
-//						groupFolder = getHierarchicalTreeSystemProvider().createFolder(groupFolder, str);
-//					}
-//				}
-//			}
 
 			Object groupFolder = getFolderOfGroup(moduleRootFolder, group);
 			getHierarchicalTreeSystemProvider().createFolder(groupFolder);
 
-//			if (isFolderExist(groupFolder) == false) {
-//				createFolder(groupFolder);
-//			}
 			if (!getHierarchicalTreeSystemProvider().isFolderExist(groupFolder)) {
 				ExceptionsUtils.throwException("Folder doesn't exists.");
 			}

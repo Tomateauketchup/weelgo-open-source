@@ -20,7 +20,7 @@ public class DynamicContextMenu {
 
 	@AboutToShow
 	public void aboutToShow(List<MMenuElement> items, CurrentSelectionService currentSelectionService) {
-
+		
 		boolean showCreateModule = false;
 		boolean showCreateGroup = false;
 		boolean showSaveModule = false;
@@ -35,6 +35,8 @@ public class DynamicContextMenu {
 		}
 		if (currentSelectionService.find(CMModuleService.class) != null) {
 			showSaveModule = true;
+			showCreateGroup = true;
+			showCreateModule = true;
 		}
 
 		if (showSaveModule) {

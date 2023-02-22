@@ -66,6 +66,10 @@ public class GenericTest implements IClockServices {
 		assertTrue(f.exists() && f.isDirectory());
 	}
 
+	public void assertFileAndExist(File f) {
+		assertTrue(f.exists() && f.isFile());
+	}
+
 	public void assertNotExist(File f) {
 		assertFalse(f.exists());
 	}

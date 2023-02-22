@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ContainerSelectionDialog;
 
 import com.weelgo.chainmapping.core.CMGroup;
+import com.weelgo.core.Constants;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.ValidatorUtils;
 import com.weelgo.eclipse.plugin.CMService;
@@ -38,6 +39,7 @@ public class NewCMModuleWizardPage extends WizardPage {
 
 	private ISelection selection;
 	private Object selection2;
+	private String dataSourceUuid;
 
 	/**
 	 * Constructor for SampleNewWizardPage.
@@ -62,7 +64,7 @@ public class NewCMModuleWizardPage extends WizardPage {
 		Label label = new Label(container, SWT.NULL);
 		label.setText("&Container:");
 
-		containerText = new Text(container, SWT.BORDER | SWT.SINGLE);
+		containerText = new Text(container, SWT.BORDER | SWT.SINGLE | SWT.READ_ONLY);
 		GridData gd = new GridData(GridData.FILL_HORIZONTAL);
 		containerText.setLayoutData(gd);
 		containerText.addModifyListener(e -> dialogChanged());
@@ -110,21 +112,27 @@ public class NewCMModuleWizardPage extends WizardPage {
 			if (ssel.size() > 1)
 				return;
 			obj = ssel.getFirstElement();
+			dataSourceUuid = CMService.ECLIPSE_WORKSPACE_DATA_SOURCE_UUID;
 		}
 		if (obj == null) {
 			obj = selection2;
+			dataSourceUuid = Factory.getSelectionAdapter().findDataSourceUuid(obj);
 		}
 		if (obj != null) {
-			if (obj instanceof IResource) {
-				IContainer container;
-				if (obj instanceof IContainer)
-					container = (IContainer) obj;
+
+			IResource res = Factory.getSelectionAdapter().find(obj, IResource.class);
+			if (res != null) {
+				IContainer container = null;
+				if (res instanceof IContainer)
+					container = (IContainer) res;
 				else
-					container = ((IResource) obj).getParent();
-				containerText.setText(container.getFullPath().toString());
+					container = res.getParent();
+				if (container != null) {
+					containerText.setText(container.getFullPath().toString());
+				}
 			}
-			if (obj instanceof CMGroup) {
-				CMGroup gp = (CMGroup) obj;
+			CMGroup gp = Factory.getSelectionAdapter().find(obj, CMGroup.class);
+			if (gp != null) {
 				String path = getServices().getFolderFullPathOfGroup(gp);
 				containerText.setText(CoreUtils.cleanString(path));
 			}
@@ -164,16 +172,10 @@ public class NewCMModuleWizardPage extends WizardPage {
 			return;
 		}
 
-		IResource container = null;
-
-		try {
-			container = ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(getContainerName()));
-
-		} catch (Exception e) {
-			updateStatus(e.getMessage());
+		if (CoreUtils.isNotNullOrEmpty(dataSourceUuid) == false) {
+			updateStatus("A data source must be specified");
 			return;
 		}
-
 		if (fileName.length() == 0) {
 			updateStatus("Name must be specified");
 			return;
@@ -190,7 +192,21 @@ public class NewCMModuleWizardPage extends WizardPage {
 			updateStatus("Package name must be valid");
 			return;
 		}
-		if (Factory.getCMServices().isModulePackageFreeForEclipseWorkspace(null, container, packageName) == false) {
+
+		Object container = null;
+
+		try {
+			container = getServices().getModulesManager().getFolderFromFullPath(dataSourceUuid,
+					new String[] { containerName, packageName });
+
+		} catch (Exception e) {
+			updateStatus(e.getMessage());
+			return;
+		}
+
+		Object parentFolder = getServices().getModulesManager().getParentFolder(container);
+		if (parentFolder != null && Factory.getCMServices().isModulePackageFreeForEclipseWorkspace(null, dataSourceUuid,
+				parentFolder, packageName) == false) {
 			updateStatus("Package name already used");
 			return;
 		}
@@ -217,6 +233,14 @@ public class NewCMModuleWizardPage extends WizardPage {
 
 	public CMService getServices() {
 		return Factory.getCMServices();
+	}
+
+	public String getDataSourceUuid() {
+		return dataSourceUuid;
+	}
+
+	public void setDataSourceUuid(String dataSourceUuid) {
+		this.dataSourceUuid = dataSourceUuid;
 	}
 
 }

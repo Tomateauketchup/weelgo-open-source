@@ -8,6 +8,7 @@ import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.services.IServiceConstants;
 
+import com.weelgo.chainmapping.core.IDataSourceObject;
 import com.weelgo.chainmapping.core.IModuleUniqueIdentifierObject;
 
 @Creatable
@@ -43,5 +44,13 @@ public class CurrentSelectionService {
 
 	public String findModuleUniqueIdentifierObjectId() {
 		return selectionAdapter.findModuleUniqueIdentifierObjectId(currentSelection);
+	}
+
+	public IDataSourceObject findDataSourceObject(Object objectToCheck) {
+		return selectionAdapter.findDataSourceObject(objectToCheck);
+	}
+
+	public String findDataSourceUuid(Object objectToCheck) {
+		return selectionAdapter.findDataSourceUuid(objectToCheck);
 	}
 }

@@ -17,7 +17,7 @@ public class CMLoadAllModulesJob extends CMJob {
 	public static CMLoadAllModulesJob CREATE() {
 		return Factory.create(CMLoadAllModulesJob.class);
 	}
-	
+
 	@Override
 	public String getUndoRedoLabel() {
 		return "Load module";
@@ -32,11 +32,7 @@ public class CMLoadAllModulesJob extends CMJob {
 	public boolean isUndoRedoAllModulesJob() {
 		return true;
 	}
-	
-	@Override
-	public boolean isMarkAsNotDirty() {
-		return true;
-	}
+
 	@Override
 	public void doRun(com.weelgo.core.IProgressMonitor monitor) {
 
@@ -50,5 +46,8 @@ public class CMLoadAllModulesJob extends CMJob {
 	public void execute() {
 		doSchedule();
 	}
+	
+	//TODO tester la création d'un module alors qu'il y a déjà un module qui existe dans l'IHM. Ca ne met pas de message d'erreur.
+	//TODO quand on supprime le dossier d'un module et qu'on fais un load all, ça supprime pas le module des services
 
 }

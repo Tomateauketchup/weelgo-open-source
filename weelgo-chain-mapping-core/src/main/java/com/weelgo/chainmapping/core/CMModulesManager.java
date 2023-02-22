@@ -4,6 +4,7 @@ import static com.weelgo.core.CoreUtils.assertNotNullOrEmpty;
 import static com.weelgo.core.CoreUtils.cleanString;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,19 +22,20 @@ import com.weelgo.core.undoredo.UndoRedoNode;
 
 public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 
-	public List<CMGenericDataSource> sources = new ArrayList<>();
+	public Map<String, CMGenericDataSource> sourcesMap = new HashMap<>();
 	public List<CMModuleService> services = new ArrayList<>();
 	public Map<String, CMModuleService> servicesMap = new HashMap<>();
 
 	public void loadAllModules(IProgressMonitor progressMonitor) {
 		Map<String, CMModuleService> servicesMapTmp = CoreUtils.putListIntoMap(services);
 
-		if (sources != null) {
-			for (CMGenericDataSource src : sources) {
+		if (sourcesMap != null) {
+
+			sourcesMap.forEach((t, src) -> {
 				if (src != null) {
 					src.load(progressMonitor, servicesMapTmp);
 				}
-			}
+			});
 		}
 		services.clear();
 		services.addAll(servicesMapTmp.values());
@@ -67,8 +69,9 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 	}
 
 	public CMGenericDataSource findDataSource(Object o) {
-		if (sources != null) {
-			for (CMGenericDataSource src : sources) {
+		if (sourcesMap != null) {
+			for (Map.Entry<String, CMGenericDataSource> entry : sourcesMap.entrySet()) {
+				CMGenericDataSource src = entry.getValue();
 				if (src != null && src.isMine(o)) {
 					return src;
 				}
@@ -125,8 +128,11 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 	public void saveModule(IProgressMonitor progressMonitor, String moduleUniqueIdentifier) {
 		CMModuleService srv = getServiceByModuleUniqueIdentifierId(moduleUniqueIdentifier);
 		if (srv != null) {
-			if (sources != null) {
-				for (CMGenericDataSource src : sources) {
+			if (sourcesMap != null) {
+
+				for (Map.Entry<String, CMGenericDataSource> entry : sourcesMap.entrySet()) {
+					CMGenericDataSource src = entry.getValue();
+
 					if (src != null && src.isMine(srv)) {
 						src.save(progressMonitor, srv);
 						break;
@@ -146,6 +152,15 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		}
 	}
 
+	public Object getFolderFromFullPath(String datasourceUuid,String... path)
+	{
+		CoreUtils.assertNotNullOrEmpty(path);
+		CoreUtils.assertNotNullOrEmpty(datasourceUuid);
+		CMGenericDataSource ds = getDataSourceByUuid(datasourceUuid);
+		CoreUtils.assertNotNullOrEmpty(ds);
+		return ds.getHierarchicalTreeSystemProvider().getFolderFromFullPath(path);
+	}
+	
 	public Object getFolderOfGroup(CMModuleService ser, CMGroup group) {
 		if (ser != null && group != null) {
 			CMGenericDataSource ds = getDataSourceOfModuleService(ser);
@@ -205,12 +220,11 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 
 	}
 
-	public List<CMGenericDataSource> getSources() {
-		return sources;
-	}
-
-	public void setSources(List<CMGenericDataSource> sources) {
-		this.sources = sources;
+	public CMGenericDataSource getDataSourceByUuid(String uuid) {
+		if (sourcesMap != null) {
+			return sourcesMap.get(uuid);
+		}
+		return null;
 	}
 
 	public List<CMModuleService> getServices() {
@@ -243,9 +257,19 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		return null;
 	}
 
-	public String createModule(IProgressMonitor progressMonitor, CMGenericDataSource ds,
-			Object moduleParentFolderOrCMGroup, String moduleName, String modulePackageName) {
+	public String createModule(IProgressMonitor progressMonitor, Object moduleParentFolderOrCMGroup, String moduleName,
+			String modulePackageName, String dataSourceUuid) {
 
+		CMGenericDataSource ds = getDataSourceByUuid(dataSourceUuid);
+		assertNotNullOrEmpty(ds);
+		
+		if(moduleParentFolderOrCMGroup instanceof String)
+		{
+			String path = (String) moduleParentFolderOrCMGroup;
+			moduleParentFolderOrCMGroup=ds.getHierarchicalTreeSystemProvider().getFolderFromFullPath(new String[] {path,modulePackageName});
+			moduleParentFolderOrCMGroup=ds.getHierarchicalTreeSystemProvider().getParentFolder(moduleParentFolderOrCMGroup);
+		}
+		
 		Object moduleParentFolder = moduleParentFolderOrCMGroup;
 
 		if (moduleParentFolderOrCMGroup != null && moduleParentFolderOrCMGroup instanceof CMGroup) {
@@ -282,8 +306,9 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		return service.getModuleUniqueIdentifier();
 	}
 
-	public boolean isModulePackageFree(IProgressMonitor progressMonitor, CMGenericDataSource ds,
+	public boolean isModulePackageFree(IProgressMonitor progressMonitor, String dataSourceUuid,
 			Object moduleParentFolderOrCMGroup, String packageName) {
+		CMGenericDataSource ds = getDataSourceByUuid(dataSourceUuid);
 		if (ds != null) {
 
 			Object moduleParentFolder = moduleParentFolderOrCMGroup;
@@ -389,8 +414,10 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 	}
 
 	public CMGenericDataSource isRootContainerOfDataSource(Object o) {
-		if (sources != null) {
-			for (CMGenericDataSource src : sources) {
+		if (sourcesMap != null) {
+			for (Map.Entry<String, CMGenericDataSource> entry : sourcesMap.entrySet()) {
+				CMGenericDataSource src = entry.getValue();
+
 				if (src != null && src.getContainers() != null) {
 					if (src.getContainers().contains(o)) {
 						return src;
@@ -461,8 +488,10 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 	public List<Object> getChildFolders() {
 		ArrayList<Object> arl = new ArrayList<>();
 
-		if (sources != null) {
-			for (CMGenericDataSource src : sources) {
+		if (sourcesMap != null) {
+			for (Map.Entry<String, CMGenericDataSource> entry : sourcesMap.entrySet()) {
+				CMGenericDataSource src = entry.getValue();
+
 				if (src != null) {
 					CoreUtils.putListIntoList(src.getContainers(), arl);
 				}
@@ -575,8 +604,10 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 	}
 
 	public Object loopOnSourcesAndGetMine(Object o, Object o2, Function<CMGenericDataSource, Object> func) {
-		if (sources != null) {
-			for (CMGenericDataSource src : sources) {
+		if (sourcesMap != null) {
+			for (Map.Entry<String, CMGenericDataSource> entry : sourcesMap.entrySet()) {
+				CMGenericDataSource src = entry.getValue();
+
 				if (src != null && src.isMine(o)) {
 
 					boolean ok = false;
@@ -670,6 +701,24 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		}
 	}
 
+	public void addDataSource(CMGenericDataSource ds) {
+		assertNotNullOrEmpty(sourcesMap);
+		assertNotNullOrEmpty(ds);
+		assertNotNullOrEmpty(ds.getUuid());
+
+		CMGenericDataSource o = getDataSourceByUuid(ds.getUuid());
+		CoreUtils.assertTrue(o == null);
+		CoreUtils.putObjectIntoMap(ds, sourcesMap);
+
+	}
+
+	public Collection<CMGenericDataSource> getDataSources() {
+		if (sourcesMap != null) {
+			return sourcesMap.values();
+		}
+		return null;
+	}
+	
 	// TODO mettre en place l'implémentation des modules dans des modules
 
 }

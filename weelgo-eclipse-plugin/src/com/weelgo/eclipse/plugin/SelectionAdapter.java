@@ -9,7 +9,10 @@ import org.eclipse.gef.RootEditPart;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import com.weelgo.chainmapping.core.CMModuleService;
+import com.weelgo.chainmapping.core.IDataSourceObject;
 import com.weelgo.chainmapping.core.IModuleUniqueIdentifierObject;
+import com.weelgo.chainmapping.core.navigator.NavNode;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.undoredo.UndoRedoNode;
 import com.weelgo.eclipse.plugin.undoredo.NodeModel;
@@ -21,6 +24,17 @@ public class SelectionAdapter {
 	@Inject
 	CMService cmService;
 
+	public CMModuleService findModuleService(Object objectToCheck) {
+		IModuleUniqueIdentifierObject o = findModuleUniqueIdentifierObject(objectToCheck);
+		if (o != null) {
+			if (o instanceof CMModuleService) {
+				return (CMModuleService) o;
+			}
+			return cmService.findModuleService(o);
+		}
+		return null;
+	}
+
 	public IModuleUniqueIdentifierObject findModuleUniqueIdentifierObject(Object objectToCheck) {
 		return find(objectToCheck, IModuleUniqueIdentifierObject.class);
 	}
@@ -29,6 +43,18 @@ public class SelectionAdapter {
 		IModuleUniqueIdentifierObject ser = findModuleUniqueIdentifierObject(objectToCheck);
 		if (ser != null) {
 			return ser.getModuleUniqueIdentifier();
+		}
+		return "";
+	}
+
+	public IDataSourceObject findDataSourceObject(Object objectToCheck) {
+		return find(objectToCheck, IDataSourceObject.class);
+	}
+
+	public String findDataSourceUuid(Object objectToCheck) {
+		IDataSourceObject ser = findDataSourceObject(objectToCheck);
+		if (ser != null) {
+			return ser.getDataSourceUuid();
 		}
 		return "";
 	}
@@ -49,6 +75,28 @@ public class SelectionAdapter {
 					return o;
 				}
 
+			}
+		}
+
+		if (objectToCheck instanceof CMModuleService n) {
+			Object data = n.getRootGroup();
+			T o = find(data, wantedClass);
+			if (o != null) {
+				return o;
+			}
+
+			data = n.getContainer();
+			o = find(data, wantedClass);
+			if (o != null) {
+				return o;
+			}
+		}
+
+		if (objectToCheck instanceof NavNode n) {
+			Object data = n.getData();
+			T o = find(data, wantedClass);
+			if (o != null) {
+				return o;
 			}
 		}
 

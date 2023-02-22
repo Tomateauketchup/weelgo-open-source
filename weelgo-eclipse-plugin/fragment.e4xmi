@@ -29,7 +29,7 @@
       <handlers xmi:id="_ntc0gLEqEe23C6yEpc-l4w" elementId="com.weelgo.eclipse.plugin.handlers.UndoHandler" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.handlers.UndoHandler" command="_Z8hnQK41Ee2LUdqnK6Q47w"/>
       <handlers xmi:id="_p36g8LEqEe23C6yEpc-l4w" elementId="com.weelgo.eclipse.plugin.handlers.RedoHandler" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.handlers.RedoHandler" command="_hjRgwK42Ee2LUdqnK6Q47w"/>
       <handlers xmi:id="_q4PVgLEqEe23C6yEpc-l4w" elementId="com.weelgo.eclipse.plugin.handlers.SaveHandler" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.handlers.SaveHandler" command="_b-VcEK43Ee2LUdqnK6Q47w"/>
-      <menus xsi:type="menu:PopupMenu" xmi:id="_8J7SMLFKEe2HmcjuzUyPMg" elementId="com.weelgo.eclipse.plugin.navigator.ContextMenu" accessibilityPhrase="" label="Context menu">
+      <menus xsi:type="menu:PopupMenu" xmi:id="_8J7SMLFKEe2HmcjuzUyPMg" elementId="com.weelgo.eclipse.plugin.undoredo.ContextMenu" accessibilityPhrase="" label="Context menu">
         <children xsi:type="menu:DynamicMenuContribution" xmi:id="_8J7SMbFKEe2HmcjuzUyPMg" elementId="com.weelgo.eclipse.plugin.undoredo.DynamicContextMenu" label="Dynamic menu" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.undoredo.DynamicContextMenu"/>
       </menus>
     </elements>

@@ -15,6 +15,7 @@ import com.weelgo.chainmapping.core.CMFileSystemDataSource;
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMModulesManager;
+import com.weelgo.chainmapping.core.navigator.NavNode;
 import com.weelgo.chainmapping.core.navigator.NavigatorModel;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.exceptions.WeelgoException;
@@ -27,10 +28,10 @@ public class TestChainMappingCore extends CMGenericTest {
 		CMModulesManager modManager = createModulesManager();
 		String id = createModule(modManager, "Mon module", "mon_module");
 		CMFileSystemDataSource ds = getFileSystemDataSource(modManager);
-		assertFalse(modManager.isModulePackageFree(null, ds, ds.getRootFolder(), "mon_module"));
+		assertFalse(modManager.isModulePackageFree(null, ds.getUuid(), ds.getRootFolder(), "mon_module"));
 
 		try {
-			modManager.createModule(null, ds, ds.getRootFolder(), "Mon module", "mon_module");
+			modManager.createModule(null, ds.getRootFolder(), "Mon module", "mon_module", ds.getUuid());
 			fail();
 		} catch (Exception e) {
 			assertDynamicException(WeelgoException.MODULE_ALREADY_EXIST, e);
@@ -124,7 +125,7 @@ public class TestChainMappingCore extends CMGenericTest {
 		CMModuleService modServ1 = modManager.getServiceByModuleUniqueIdentifierId(modId1);
 		CMGroup root1 = modServ1.getRootGroup();
 
-		String modId2 = createModule(modManager,root1, "new_group_1", "new_group_1");
+		String modId2 = createModule(modManager, root1, "new_group_1", "new_group_1");
 		CMModuleService modServ2 = modManager.getServiceByModuleUniqueIdentifierId(modId2);
 		CMGroup root2 = modServ2.getRootGroup();
 
@@ -132,7 +133,7 @@ public class TestChainMappingCore extends CMGenericTest {
 		assertArrayEquals(new String[] { "New Group 2", "new_group_2" }, ret);
 
 		CMGroup new_group_2 = createGroup(modManager, modServ1, "New_Group_2", "new_group_2", root1);
-		
+
 		ret = modManager.findNameForNewGroup(modServ1, new_group_2.getUuid());
 		assertArrayEquals(new String[] { "New Group 1", "new_group_1" }, ret);
 
@@ -358,7 +359,8 @@ public class TestChainMappingCore extends CMGenericTest {
 		File gp1Folder = new File(rootFolder, "gp1");
 		assertFalse(gp1Folder.exists());// The folder doesn't exist because not saved
 
-		assertFalse(modManager.isModulePackageFree(null, getFileSystemDataSource(modManager), rootGroup, "gp1"));
+		assertFalse(
+				modManager.isModulePackageFree(null, getFileSystemDataSource(modManager).getUuid(), rootGroup, "gp1"));
 
 		// We try to create module with same name
 		try {
@@ -368,7 +370,8 @@ public class TestChainMappingCore extends CMGenericTest {
 			assertDynamicException(WeelgoException.GROUP_ALREADY_EXIST, e);
 		}
 
-		assertTrue(modManager.isModulePackageFree(null, getFileSystemDataSource(modManager), rootGroup, "module_2"));
+		assertTrue(modManager.isModulePackageFree(null, getFileSystemDataSource(modManager).getUuid(), rootGroup,
+				"module_2"));
 
 		String modId2 = createModule(modManager, rootGroup, "Module 2", "module_2");
 		CMModuleService modServ2 = modManager.getServiceByModuleUniqueIdentifierId(modId2);
@@ -558,8 +561,117 @@ public class TestChainMappingCore extends CMGenericTest {
 		assertFalse(gp4Folder.exists());
 
 	}
-	
-	
+
+	@Test
+	public void testSave4() throws Exception {
+		CMModulesManager modManager = createModulesManager();
+		String modId1 = createModule(modManager, "Module 1", "module_1");
+		CMModuleService modServ1 = modManager.getServiceByModuleUniqueIdentifierId(modId1);
+		CMGroup rootGp = modServ1.getRootGroup();
+		File rootFolder = (File) modServ1.getContainer();
+
+		CMGroup gp1 = createGroup(modManager, modServ1, "gp1", rootGp);
+		CMGroup gp2 = createGroup(modManager, modServ1, "gp2", gp1);
+		CMGroup gp3 = createGroup(modManager, modServ1, "gp3", gp2);
+
+		File gp1Folder = new File(rootFolder, "gp1");
+		File gp2Folder = new File(gp1Folder, "gp2");
+		File gp3Folder = new File(gp2Folder, "gp3");
+
+		File gp1DataFile = new File(gp1Folder, CMFileSystemDataSource.GROUP_DATA_FILE_NAME);
+		File gp2DataFile = new File(gp2Folder, CMFileSystemDataSource.GROUP_DATA_FILE_NAME);
+		File gp3DataFile = new File(gp3Folder, CMFileSystemDataSource.GROUP_DATA_FILE_NAME);
+
+		assertDirectoryAndExist(rootFolder);
+		assertNotExist(gp1Folder);
+		assertNotExist(gp2Folder);
+		assertNotExist(gp3Folder);
+		assertNotExist(gp1DataFile);
+		assertNotExist(gp2DataFile);
+		assertNotExist(gp3DataFile);
+
+		saveModule(modManager, modServ1);
+		assertDirectoryAndExist(rootFolder);
+		assertDirectoryAndExist(gp1Folder);
+		assertDirectoryAndExist(gp2Folder);
+		assertDirectoryAndExist(gp3Folder);
+		assertFileAndExist(gp1DataFile);
+		assertFileAndExist(gp2DataFile);
+		assertFileAndExist(gp3DataFile);
+
+		undo(modServ1);
+		undo(modServ1);
+		undo(modServ1);
+		saveModule(modManager, modServ1);
+		assertDirectoryAndExist(rootFolder);
+		assertNotExist(gp1Folder);
+		assertNotExist(gp2Folder);
+		assertNotExist(gp3Folder);
+		assertNotExist(gp1DataFile);
+		assertNotExist(gp2DataFile);
+		assertNotExist(gp3DataFile);
+
+		redo(modServ1);
+		redo(modServ1);
+		redo(modServ1);
+		saveModule(modManager, modServ1);
+		assertDirectoryAndExist(rootFolder);
+		assertDirectoryAndExist(gp1Folder);
+		assertDirectoryAndExist(gp2Folder);
+		assertDirectoryAndExist(gp3Folder);
+		assertFileAndExist(gp1DataFile);
+		assertFileAndExist(gp2DataFile);
+		assertFileAndExist(gp3DataFile);
+
+		// On ajoute un module dans gp3
+		String modId2 = createModule(modManager, gp3, "module2", "module2");
+		CMModuleService modServ2 = modManager.getServiceByModuleUniqueIdentifierId(modId2);
+		CMGroup rootGp2 = modServ2.getRootGroup();
+		File rootFolder2 = (File) modServ2.getContainer();
+
+		assertDirectoryAndExist(rootFolder);
+		assertDirectoryAndExist(gp1Folder);
+		assertDirectoryAndExist(gp2Folder);
+		assertDirectoryAndExist(gp3Folder);
+		assertDirectoryAndExist(rootFolder2);
+		assertFileAndExist(gp1DataFile);
+		assertFileAndExist(gp2DataFile);
+		assertFileAndExist(gp3DataFile);
+
+		// On undo le module 1
+		undo(modServ1);
+		undo(modServ1);
+		undo(modServ1);
+
+		assertDirectoryAndExist(rootFolder);
+		assertDirectoryAndExist(gp1Folder);
+		assertDirectoryAndExist(gp2Folder);
+		assertDirectoryAndExist(gp3Folder);
+		assertDirectoryAndExist(rootFolder2);
+		assertFileAndExist(gp1DataFile);
+		assertFileAndExist(gp2DataFile);
+		assertFileAndExist(gp3DataFile);
+
+		// On save 1
+		saveModule(modManager, modServ1);
+
+		// Les dossiers sont toujours là, mar contre ils doivent êtres vidé des fichier
+		// de data
+		assertDirectoryAndExist(rootFolder);
+		assertDirectoryAndExist(gp1Folder);
+		assertDirectoryAndExist(gp2Folder);
+		assertDirectoryAndExist(gp3Folder);
+		assertDirectoryAndExist(rootFolder2);
+		assertNotExist(gp1DataFile);
+		assertNotExist(gp2DataFile);
+		assertNotExist(gp3DataFile);
+
+		loadAllModules(modManager);
+		assertNullOrEmpty(modServ1.getObject(gp1));
+		assertNullOrEmpty(modServ1.getObject(gp2));
+		assertNullOrEmpty(modServ1.getObject(gp3));
+	}
+
 	@Test
 	public void testNavigator() throws Exception {
 
@@ -572,10 +684,76 @@ public class TestChainMappingCore extends CMGenericTest {
 		CMGroup gp1 = createGroup(modManager, modServ1, "gp1", rootGp);
 		CMGroup gp2 = createGroup(modManager, modServ1, "gp2", gp1);
 		CMGroup gp3 = createGroup(modManager, modServ1, "gp3", gp2);
+
 		
-		NavigatorModel model=new NavigatorModel();
+		NavigatorModel model = new NavigatorModel();
+		model.update(modManager);
+		NavNode navModule1 = model.getNodeByName(rootGp.getPackageName());
+		NavNode navGp1 = model.getNodeByName(gp1.getName());
+		NavNode navGp2 = model.getNodeByName(gp1.getName());
+		NavNode navGp3 = model.getNodeByName(gp1.getName());
+		
+		assertTrue(navModule1.isDirty());
+		assertFalse(navModule1.isSubmodulesDirty());
+		assertFalse(navGp1.isDirty());
+		assertFalse(navGp1.isSubmodulesDirty());
+		assertFalse(navGp2.isDirty());
+		assertFalse(navGp2.isSubmodulesDirty());
+		assertFalse(navGp3.isDirty());
+		assertFalse(navGp3.isSubmodulesDirty());
+		
+		saveModule(modManager, modServ1);		
+		
 		model.update(modManager);
 		
+		assertFalse(navModule1.isDirty());
+		assertFalse(navModule1.isSubmodulesDirty());
+		assertFalse(navGp1.isDirty());
+		assertFalse(navGp1.isSubmodulesDirty());
+		assertFalse(navGp2.isDirty());
+		assertFalse(navGp2.isSubmodulesDirty());
+		assertFalse(navGp3.isDirty());
+		assertFalse(navGp3.isSubmodulesDirty());
 		
+		String modId2=createModule(modManager, gp3, "module2", "module2");
+		CMModuleService modServ2 = modManager.getServiceByModuleUniqueIdentifierId(modId2);
+		CMGroup rootGp2 = modServ2.getRootGroup();
+		
+		model.update(modManager);
+		
+		NavNode navModule2 = model.getNodeByName(rootGp2.getPackageName());
+		
+		assertFalse(navModule1.isDirty());
+		assertFalse(navModule1.isSubmodulesDirty());
+		assertFalse(navGp1.isDirty());
+		assertFalse(navGp1.isSubmodulesDirty());
+		assertFalse(navGp2.isDirty());
+		assertFalse(navGp2.isSubmodulesDirty());
+		assertFalse(navGp3.isDirty());
+		assertFalse(navGp3.isSubmodulesDirty());
+		assertFalse(navModule2.isDirty());
+		assertFalse(navModule2.isSubmodulesDirty());
+		
+		
+		CMGroup gp2_1 = createGroup(modManager, modServ2, "gp2_1", rootGp2);		
+		
+		model.update(modManager);
+		
+		NavNode navGp2_1 = model.getNodeByName(gp2_1.getName());
+		
+		assertFalse(navModule1.isDirty());
+		assertTrue(navModule1.isSubmodulesDirty());
+		assertFalse(navGp1.isDirty());
+		assertTrue(navGp1.isSubmodulesDirty());
+		assertFalse(navGp2.isDirty());
+		assertTrue(navGp2.isSubmodulesDirty());
+		assertFalse(navGp3.isDirty());
+		assertTrue(navGp3.isSubmodulesDirty());
+		assertTrue(navModule2.isDirty());
+		assertFalse(navModule2.isSubmodulesDirty());
+		assertFalse(navGp2_1.isDirty());
+		assertFalse(navGp2_1.isSubmodulesDirty());
+		
+
 	}
 }

@@ -31,12 +31,7 @@ public class CMLoadModuleJob extends CMJob {
 	@Override
 	public boolean isUndoRedoJob() {
 		return true;
-	}
-
-	@Override
-	public boolean isMarkAsNotDirty() {
-		return true;
-	}
+	}	
 
 	@Override
 	public void doRun(com.weelgo.core.IProgressMonitor monitor) {

@@ -6,9 +6,15 @@ import static com.weelgo.core.CoreUtils.isNotNullOrEmpty;
 import java.util.List;
 import java.util.Map;
 
+import com.weelgo.core.INamedObject;
 import com.weelgo.core.IProgressMonitor;
+import com.weelgo.core.IUuidObject;
 
-public abstract class CMGenericDataSource {
+public abstract class CMGenericDataSource implements IUuidObject, INamedObject {
+
+	private String uuid;
+	private String name;
+	private HierarchicalTreeSystemProvider hierarchicalTreeSystemProvider = new FileSystemProvider();
 
 	public abstract void load(IProgressMonitor progressMonitor, Map<String, CMModuleService> servicesMap);
 
@@ -17,8 +23,6 @@ public abstract class CMGenericDataSource {
 	public abstract void save(IProgressMonitor progressMonitor, CMModuleService moduleService);
 
 	public abstract List<Object> getContainers();
-
-	private HierarchicalTreeSystemProvider hierarchicalTreeSystemProvider = new FileSystemProvider();
 
 	public HierarchicalTreeSystemProvider getHierarchicalTreeSystemProvider() {
 		return hierarchicalTreeSystemProvider;
@@ -74,4 +78,21 @@ public abstract class CMGenericDataSource {
 
 	public abstract Object createModule(IProgressMonitor progressMonitor, Object moduleRootFolder,
 			CMModuleService service);
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 }

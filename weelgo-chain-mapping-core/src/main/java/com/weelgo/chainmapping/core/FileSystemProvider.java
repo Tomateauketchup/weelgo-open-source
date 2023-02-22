@@ -12,12 +12,32 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.weelgo.core.CoreUtils;
 import com.weelgo.core.exceptions.ExceptionsUtils;
 import com.weelgo.core.json.JsonUtils;
 
 public class FileSystemProvider implements HierarchicalTreeSystemProvider {
 
 	private static Logger logger = LoggerFactory.getLogger(FileSystemProvider.class);
+
+	@Override
+	public Object getFolderFromFullPath(String... path) {
+
+		if (path != null) {
+			File f = null;
+			for (String str : path) {
+				if (CoreUtils.isNotNullOrEmpty(str)) {
+					if (f == null) {
+						f = new File(str);
+					} else {
+						f = new File(f, str);
+					}
+				}
+			}
+			return f;
+		}
+		return null;
+	}
 
 	@Override
 	public <T> T deserializeJsonFile(Object file, Class<T> valueType) {
@@ -169,6 +189,17 @@ public class FileSystemProvider implements HierarchicalTreeSystemProvider {
 			ExceptionsUtils.ManageException(e, logger);
 		}
 
+	}
+
+	@Override
+	public void deleteFile(Object folderToTest) {
+		try {
+			if (folderToTest != null && folderToTest instanceof File) {
+				FileUtils.forceDelete((File) folderToTest);
+			}
+		} catch (Exception e) {
+			ExceptionsUtils.ManageException(e, logger);
+		}
 	}
 
 	@Override

@@ -2,10 +2,13 @@ package com.weelgo.eclipse.plugin.wizard;
 
 import java.util.List;
 
+import org.eclipse.core.internal.resources.Folder;
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -52,7 +55,7 @@ public class NewCMModuleWizard extends GenericWizard implements INewWizard {
 	 */
 	@Override
 	public void addPages() {
-		page = new NewCMModuleWizardPage(selection, getCurrentSelection());		
+		page = new NewCMModuleWizardPage(selection, getCurrentSelection());
 		addPage(page);
 	}
 
@@ -61,15 +64,14 @@ public class NewCMModuleWizard extends GenericWizard implements INewWizard {
 		final String containerName = page.getContainerName();
 		final String moduleName = page.geModuleName();
 		final String packageName = page.getPackageName();
-
-		
-		IResource container=ResourcesPlugin.getWorkspace().getRoot().getFolder(new Path(containerName));	
+		final String dataSourceUuid = page.getDataSourceUuid();
 
 		CMCreateModuleJob job = CMCreateModuleJob.CREATE();
 		job.setModuleName(moduleName);
 		job.setModulePackage(packageName);
-		job.setFolderContainer(container);
-		jobList.add(job);	
+		job.setFolderContainer(containerName);
+		job.setDataSourceUuid(dataSourceUuid);
+		jobList.add(job);
 
 		CMOpenChainMappingEditorJob openJob = CMOpenChainMappingEditorJob.CREATE();
 		jobList.add(openJob);

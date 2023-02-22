@@ -9,6 +9,9 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -215,7 +218,7 @@ public class EclipseHierarchicalTreeSystemProvider implements HierarchicalTreeSy
 			ExceptionsUtils.ManageException(e, logger);
 		}
 		return null;
-	}	
+	}
 
 	@Override
 	public void deleteFolder(Object folderToTest) {
@@ -227,7 +230,39 @@ public class EclipseHierarchicalTreeSystemProvider implements HierarchicalTreeSy
 		} catch (Exception e) {
 			ExceptionsUtils.ManageException(e, logger);
 		}
+	}
 
+	@Override
+	public void deleteFile(Object folderToTest) {
+		try {
+			if (folderToTest != null && folderToTest instanceof IFile) {
+				IFile c = (IFile) folderToTest;
+				c.delete(true, null);
+			}
+		} catch (Exception e) {
+			ExceptionsUtils.ManageException(e, logger);
+		}
+	}
+
+	@Override
+	public Object getFolderFromFullPath(String... path) {
+		IContainer root = ResourcesPlugin.getWorkspace().getRoot();
+		if (path != null) {
+			IPath f = null;
+			for (String str : path) {
+				if (CoreUtils.isNotNullOrEmpty(str)) {
+					if (f == null) {
+						f = new Path(str);
+					} else {
+						f = f.append(str);
+					}
+				}
+			}
+			if (f != null) {
+				return root.getFolder(f);
+			}
+		}
+		return null;
 	}
 
 }

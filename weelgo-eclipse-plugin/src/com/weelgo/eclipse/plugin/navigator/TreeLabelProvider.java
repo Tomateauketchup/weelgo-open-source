@@ -81,7 +81,7 @@ public class TreeLabelProvider extends LabelProvider {
 		if (modService == null) {
 			CMGenericDataSource e = getModulesManager().isRootContainerOfDataSource(element);
 			if (e != null) {
-				return ImagesFactory.getIconImage(ImagesFactory.GROUP_PROJECT);
+				return ImagesFactory.getIconImage(ImagesFactory.PROJECT_FOLDER);
 			}
 		}
 

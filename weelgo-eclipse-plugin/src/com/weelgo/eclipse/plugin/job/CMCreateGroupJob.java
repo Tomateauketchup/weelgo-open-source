@@ -12,18 +12,18 @@ import com.weelgo.eclipse.plugin.ImagesFactory;
 
 public class CMCreateGroupJob extends CMJob {
 
-	private Object selectedParent;
+	private CMGroup selectedParent;
 
 	@Override
 	public boolean isUndoRedoJob() {
 		return true;
 	}
 
-	public Object getSelectedParent() {
+	public CMGroup getSelectedParent() {
 		return selectedParent;
 	}
 
-	public void setSelectedParent(Object selectedParent) {
+	public void setSelectedParent(CMGroup selectedParent) {
 		this.selectedParent = selectedParent;
 	}
 
@@ -67,7 +67,7 @@ public class CMCreateGroupJob extends CMJob {
 	@Execute
 	public void execute(CurrentSelectionService currentSelectionService) {
 
-		setSelectedParent(currentSelectionService.getCurrentSelection());
+		setSelectedParent(currentSelectionService.find(CMGroup.class));
 		doSchedule();
 
 	}

@@ -24,6 +24,7 @@ import com.weelgo.eclipse.plugin.EventBroker;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.ImagesFactory;
 import com.weelgo.eclipse.plugin.ProgressMonitorAdapter;
+import com.weelgo.eclipse.plugin.SelectionAdapter;
 import com.weelgo.eclipse.plugin.undoredo.UndoRedoService;
 
 public abstract class CMJob extends Job {
@@ -35,9 +36,13 @@ public abstract class CMJob extends Job {
 	private EventBroker eventBroker;
 	@Inject
 	private UndoRedoService undoRedoService;
+	@Inject
+	private SelectionAdapter selectionAdapter;
 	private String moduleUniqueIdentifier;
 	private String beginTaskMessage = "Starting Weelgo job ...";
 	private String undoRedoTargetName;
+	private String eventTopic = null;
+	private Object eventObject = null;
 
 	public CMJob() {
 		super("Weelgo Job");
@@ -76,6 +81,12 @@ public abstract class CMJob extends Job {
 					getServices().getModulesManager().markAllModelAsNotDirty();
 				}
 			}
+
+			// We send event after
+			if (CoreUtils.isNotNullOrEmpty(eventTopic)) {
+				eventBroker.sentEvent(eventTopic, eventObject);
+			}
+
 		} catch (Exception e) {
 
 			if (isUndoRedoJob()) {
@@ -146,15 +157,16 @@ public abstract class CMJob extends Job {
 	}
 
 	public CMModuleService getModuleService(Object o) {
-		return getServices().findModuleService(o);
+		return selectionAdapter.findModuleService(o);
 	}
 
-	public boolean sentEvent(String topic) {
-		return getEventBroker().sentEvent(topic, null);
+	public void sentEvent(String topic) {
+		eventTopic = topic;
 	}
 
-	public boolean sentEvent(String topic, Object data) {
-		return getEventBroker().sentEvent(topic, data);
+	public void sentEvent(String topic, Object data) {
+		eventTopic = topic;
+		eventObject = data;
 	}
 
 	public String getBeginTaskMessage() {
@@ -166,14 +178,6 @@ public abstract class CMJob extends Job {
 	}
 
 	public abstract void doRun(com.weelgo.core.IProgressMonitor monitor);
-
-	public EventBroker getEventBroker() {
-		return eventBroker;
-	}
-
-	public void setEventBroker(EventBroker eventBroker) {
-		this.eventBroker = eventBroker;
-	}
 
 	public CMService getServices() {
 		return services;

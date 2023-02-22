@@ -16,12 +16,13 @@ public class ImagesFactory {
 	public static final String FILE_ICON = "file.png";
 	public static final String FOLDER_ICON = "folder.gif";
 	public static final String GROUP_ICON = "package.gif";
-	public static final String GROUP_PROJECT = "project.gif";
+	public static final String PROJECT_FOLDER = "project.gif";
 	public static final String SAVE_ICON = "save.png";
 	public static final String LOAD_ICON = "load.png";
 	public static final String MODIFY_ICON = "modify.gif";
 	public static final String ARROW_LEFT = "arrow_left.gif";
 	public static final String UNDO = "undo_redo_view.gif";
+	public static final String SOURCE = "source.png";
 	
 	private static final Map<String, Image> imagesMap = new HashMap<String, Image>();
 

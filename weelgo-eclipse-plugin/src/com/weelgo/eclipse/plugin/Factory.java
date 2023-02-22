@@ -57,6 +57,8 @@ public class Factory {
 	private CurrentSelectionService currentSelection;
 	@Inject
 	private UndoRedoService undoRedoService;
+	@Inject
+	private SelectionAdapter selectionAdapter;
 
 	private List<String> openedProjects = new ArrayList<>();
 	private boolean isFirstLoadDone = false;
@@ -83,8 +85,7 @@ public class Factory {
 						return;
 
 					if (Factory.getFactory().isWorkspaceModified()) {
-						CMLoadAllModulesJob j = CMLoadAllModulesJob.CREATE();
-						j.doSchedule();
+						factory.getEventBroker().sentEvent(CMEvents.WORKSPACE_FOLDER_MODIFIED);
 					}
 				}
 			};
@@ -99,6 +100,11 @@ public class Factory {
 	public static Factory getFactory() {
 		loadFactory();
 		return factory;
+	}
+
+	public static SelectionAdapter getSelectionAdapter() {
+		loadFactory();
+		return factory.selectionAdapter;
 	}
 
 	public static Object getCurrentSelection() {
@@ -178,7 +184,7 @@ public class Factory {
 
 	public boolean isWorkspaceModified() {
 
-		// TODO améliorer la détection de ressource : quand un nouveau projet arrive ou		
+		// TODO améliorer la détection de ressource : quand un nouveau projet arrive ou
 		// est supprimé, il faut uniquement loader pour ce projet et pas loader les
 		// autres car il est possible que le modèle soit modifié
 		List<String> oldList = openedProjects;

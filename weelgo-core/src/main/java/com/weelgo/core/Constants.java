@@ -1,7 +1,11 @@
 package com.weelgo.core;
 
+import java.io.File;
+
 public class Constants {
 
+	
+	public static final String FILE_SYSTEM_SEPARATOR=File.separator;
 	public static final int DATE_TIME_NOT_DEF = -1;
 	// INFO : The maximum length of a pathname is 256 characters, which includes all
 	// parent directories and the filename

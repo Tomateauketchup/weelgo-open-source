@@ -10,6 +10,7 @@ public class CMCreateModuleJob extends CMDatabaseModifierJob {
 	private Object folderContainer;
 	private String moduleName;
 	private String modulePackage;
+	private String dataSourceUuid;
 
 	public CMCreateModuleJob() {
 		super("Create module", "Creating new module ...");
@@ -23,19 +24,25 @@ public class CMCreateModuleJob extends CMDatabaseModifierJob {
 	public boolean isUndoRedoAllModulesJob() {
 		return false;
 	}
-	
+
 	@Override
-	public boolean isUndoRedoJob() {		
+	public boolean isMarkAsNotDirty() {
+		return true;
+	}
+
+	@Override
+	public boolean isUndoRedoJob() {
 		return true;
 	}
 
 	@Override
 	public void doRun(IProgressMonitor monitor) {
-		String moduleId = getServices().createModule(monitor, folderContainer, moduleName, modulePackage);
+		String moduleId = getServices().createModule(monitor, folderContainer, moduleName, modulePackage,
+				dataSourceUuid);
 		setModuleUniqueIdentifier(moduleId);
 		sentEvent(CMEvents.MODULE_CREATED, moduleId);
 	}
-	
+
 	@Override
 	public String getUndoRedoLabel() {
 		return "Create module";
@@ -68,6 +75,14 @@ public class CMCreateModuleJob extends CMDatabaseModifierJob {
 
 	public void setModulePackage(String modulePackage) {
 		this.modulePackage = modulePackage;
+	}
+
+	public String getDataSourceUuid() {
+		return dataSourceUuid;
+	}
+
+	public void setDataSourceUuid(String dataSourceUuid) {
+		this.dataSourceUuid = dataSourceUuid;
 	}
 
 }

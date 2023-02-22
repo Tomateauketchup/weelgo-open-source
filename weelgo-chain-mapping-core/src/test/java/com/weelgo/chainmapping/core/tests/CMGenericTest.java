@@ -10,6 +10,8 @@ import com.weelgo.core.json.tests.GenericTest;
 
 public class CMGenericTest extends GenericTest {
 
+	public static final String FILESYSTEM_DATASOURCE_UUID = "filesystem-data-source";
+
 	public CMModulesManager createModulesManager(CMModulesManager mm) throws Exception {
 		return createModulesManager((File) getFileSystemDataSource(mm).getRootFolder());
 	}
@@ -20,9 +22,10 @@ public class CMGenericTest extends GenericTest {
 
 	public CMModulesManager createModulesManager(File rootFolder) throws Exception {
 		CMFileSystemDataSource ds = new CMFileSystemDataSource();
+		ds.setUuid(FILESYSTEM_DATASOURCE_UUID);
 		ds.setRootFolder(rootFolder);
 		CMModulesManager modManager = new CMModulesManager();
-		modManager.getSources().add(ds);
+		modManager.addDataSource(ds);
 
 		return modManager;
 	}
@@ -35,13 +38,13 @@ public class CMGenericTest extends GenericTest {
 	public String createModule(CMModulesManager mm, Object containerFolderOfCMGroup, String name, String packageName)
 			throws Exception {
 		CMFileSystemDataSource ds = getFileSystemDataSource(mm);
-		String id = mm.createModule(null, ds, containerFolderOfCMGroup, name, packageName);
+		String id = mm.createModule(null, containerFolderOfCMGroup, name, packageName, ds.getUuid());
 		mm.getServiceByModuleUniqueIdentifierId(id).getUndoRedoManager().saveModel(null);
 		return id;
 	}
 
 	public CMFileSystemDataSource getFileSystemDataSource(CMModulesManager mm) {
-		return (CMFileSystemDataSource) mm.getSources().get(0);
+		return (CMFileSystemDataSource) mm.getDataSourceByUuid(FILESYSTEM_DATASOURCE_UUID);
 	}
 
 	public CMGroup createGroup(CMModulesManager mm, CMModuleService modServ, String name, String packageName,
