@@ -3,7 +3,6 @@ package com.weelgo.chainmapping.core;
 import com.weelgo.core.ICloneableObject;
 import com.weelgo.core.INamedObject;
 import com.weelgo.core.IUpdatableUuidObject;
-import com.weelgo.core.IUpdatablebject;
 import com.weelgo.core.IUuidObject;
 
 public class CMTask implements IUuidObject, INamedObject, IModuleUniqueIdentifierObject, ICloneableObject<CMTask>,

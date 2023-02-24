@@ -2,14 +2,6 @@ package com.weelgo.eclipse.plugin.wizard;
 
 import java.util.List;
 
-import org.eclipse.core.internal.resources.Folder;
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.INewWizard;
@@ -18,12 +10,8 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.weelgo.core.exceptions.ExceptionsUtils;
-import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.job.CMCreateModuleJob;
 import com.weelgo.eclipse.plugin.job.CMJob;
-import com.weelgo.eclipse.plugin.job.CMLoadAllModulesJob;
-import com.weelgo.eclipse.plugin.job.CMOpenChainMappingEditorJob;
 
 /**
  * This is a sample new wizard. Its role is to create a new file resource in the
@@ -72,9 +60,6 @@ public class NewCMModuleWizard extends GenericWizard implements INewWizard {
 		job.setFolderContainer(containerName);
 		job.setDataSourceUuid(dataSourceUuid);
 		jobList.add(job);
-
-		CMOpenChainMappingEditorJob openJob = CMOpenChainMappingEditorJob.CREATE();
-		jobList.add(openJob);
 	}
 
 	/**

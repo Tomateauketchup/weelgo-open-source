@@ -33,15 +33,12 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 	private CMGroup rootGroup;
 	private List<CMGroup> groups = new ArrayList<>();
 	private List<CMTask> tasks = new ArrayList<>();
-	private List<CMDeliverable> deliverables = new ArrayList<>();
 
 	private Map<String, IUuidObject> objectMapByUuid;
 	private Map<String, CMGroup> groupMapByUuid;
 	private Map<String, CMGroup> groupMapByPackagePath;
 	private Map<String, CMTask> taskMapByUuid;
-	private Map<String, CMDeliverable> deliverableMapByUuid;
 	private Map<String, List<CMTask>> taskChilds;
-	private Map<String, List<CMDeliverable>> deliverableChilds;
 	private Map<String, List<CMGroup>> groupChilds;
 
 	public CMModuleService() {
@@ -61,7 +58,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 			@Override
 			public void modelSaved() {
-				if (CoreUtils.isNotNullOrEmpty(lastSaveDataFingerprint) == false) {
+				if (!CoreUtils.isNotNullOrEmpty(lastSaveDataFingerprint)) {
 					markServiceSaved();
 				}
 			}
@@ -191,8 +188,8 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		Object parentFolder = ds.getHierarchicalTreeSystemProvider().getParentFolder(getContainer());
 		Object groupFolder = ds.getFolderOfGroup(parentFolder, gp);
 		CMModuleService ser = mm.findModuleService(groupFolder);
-		if (ser != null && CoreUtils.isStrictlyEqualsString(ser.getModuleUniqueIdentifier(),
-				getModuleUniqueIdentifier()) == false) {
+		if (ser != null && !CoreUtils.isStrictlyEqualsString(ser.getModuleUniqueIdentifier(),
+				getModuleUniqueIdentifier())) {
 			throwDynamicException(WeelgoException.MODULE_ALREADY_EXIST);
 		}
 
@@ -280,12 +277,10 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		if (groupMapByUuid == null || forceReload) {
 			groupMapByUuid = new HashMap<>();
 			taskMapByUuid = new HashMap<>();
-			deliverableMapByUuid = new HashMap<>();
 			objectMapByUuid = new HashMap<>();
 			groupMapByPackagePath = new HashMap<>();
 
 			taskChilds = new HashMap<>();
-			deliverableChilds = new HashMap<>();
 			groupChilds = new HashMap<>();
 
 			if (groups != null) {
@@ -325,24 +320,6 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 					}
 				}
 			}
-
-			if (deliverables != null) {
-				for (CMDeliverable obj : deliverables) {
-					if (obj != null) {
-						deliverableMapByUuid.put(obj.getUuid(), obj);
-						objectMapByUuid.put(obj.getUuid(), obj);
-
-						if (isNotNullOrEmpty(obj.getGroupUuid())) {
-							List<CMDeliverable> lst = deliverableChilds.get(obj.getGroupUuid());
-							if (lst == null) {
-								lst = new ArrayList<>();
-								deliverableChilds.put(obj.getGroupUuid(), lst);
-							}
-							lst.add(obj);
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -370,7 +347,6 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			};
 
 			addInList.accept(groupChilds);
-			addInList.accept(deliverableChilds);
 			addInList.accept(taskChilds);
 
 			return arl;
@@ -391,7 +367,6 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		if (toPopulate != null) {
 			toPopulate.setGroups(CoreUtils.cloneList(groups));
 			toPopulate.setTasks(CoreUtils.cloneList(tasks));
-			toPopulate.setDeliverables(CoreUtils.cloneList(deliverables));
 
 			Map map = CoreUtils.putListIntoMap(groups);
 			if (rootGroup != null) {
@@ -410,7 +385,6 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 			CoreUtils.updateList(objectToUpdate.groups, groups);
 			CoreUtils.updateList(objectToUpdate.tasks, tasks);
-			CoreUtils.updateList(objectToUpdate.deliverables, deliverables);
 		}
 	}
 
@@ -468,14 +442,6 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 	public void setTasks(List<CMTask> tasks) {
 		this.tasks = tasks;
-	}
-
-	public List<CMDeliverable> getDeliverables() {
-		return deliverables;
-	}
-
-	public void setDeliverables(List<CMDeliverable> deliverables) {
-		this.deliverables = deliverables;
 	}
 
 	@Override

@@ -8,6 +8,8 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.jface.viewers.DoubleClickEvent;
+import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
@@ -15,9 +17,12 @@ import org.eclipse.swt.widgets.Composite;
 
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.navigator.NavigatorModel;
+import com.weelgo.core.CoreUtils;
 import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.CMService;
 import com.weelgo.eclipse.plugin.Factory;
+import com.weelgo.eclipse.plugin.SelectionAdapter;
+import com.weelgo.eclipse.plugin.chainmapping.editor.ChainMappingEditor;
 import com.weelgo.eclipse.plugin.job.CMJob;
 
 public class WeelgoNavigatorViewPart {
@@ -28,6 +33,9 @@ public class WeelgoNavigatorViewPart {
 
 	@Inject
 	private CMService services;
+
+	@Inject
+	SelectionAdapter selectionAdapter;
 
 	@PostConstruct
 	public void postConstruct(Composite parent, EMenuService menuService, IEclipseContext eclipseContext,
@@ -46,6 +54,17 @@ public class WeelgoNavigatorViewPart {
 		viewer.addSelectionChangedListener(event -> {
 			IStructuredSelection selection = viewer.getStructuredSelection();
 			selectionService.setSelection(selection.getFirstElement());
+		});
+		viewer.addDoubleClickListener(new IDoubleClickListener() {
+
+			@Override
+			public void doubleClick(DoubleClickEvent event) {
+				String serviceUuid = selectionAdapter
+						.findModuleUniqueIdentifierObjectId(viewer.getStructuredSelection());
+				if (CoreUtils.isNotNullOrEmpty(serviceUuid)) {
+					ChainMappingEditor.openEditor(serviceUuid);
+				}
+			}
 		});
 		menuService.registerContextMenu(viewer.getControl(), "com.weelgo.eclipse.plugin.navigator.ContextMenu");
 

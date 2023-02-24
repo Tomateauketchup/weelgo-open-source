@@ -23,5 +23,15 @@
             apply="always">
       </fragment>
    </extension>
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            class="com.weelgo.eclipse.plugin.chainmapping.editor.ChainMappingEditor"
+            default="false"
+            icon="icons/chain_mapping.png"
+            id="com.weelgo.eclipse.plugin.chainmapping.editor.ChainMappingEditor"
+            name="Chain-mapping editor">
+      </editor>
+   </extension>
 
 </plugin>
