@@ -82,6 +82,9 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 
 	public CMModuleService findModuleService(Object o) {
 
+		if (o != null && o instanceof String) {
+			return getServiceByModuleUniqueIdentifierId((String) o);
+		}
 		if (o != null && o instanceof IModuleUniqueIdentifierObject) {
 			IModuleUniqueIdentifierObject ob = (IModuleUniqueIdentifierObject) o;
 			return getServiceByModuleUniqueIdentifierId(ob.getModuleUniqueIdentifier());
@@ -152,15 +155,14 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		}
 	}
 
-	public Object getFolderFromFullPath(String datasourceUuid,String... path)
-	{
+	public Object getFolderFromFullPath(String datasourceUuid, String... path) {
 		CoreUtils.assertNotNullOrEmpty(path);
 		CoreUtils.assertNotNullOrEmpty(datasourceUuid);
 		CMGenericDataSource ds = getDataSourceByUuid(datasourceUuid);
 		CoreUtils.assertNotNullOrEmpty(ds);
 		return ds.getHierarchicalTreeSystemProvider().getFolderFromFullPath(path);
 	}
-	
+
 	public Object getFolderOfGroup(CMModuleService ser, CMGroup group) {
 		if (ser != null && group != null) {
 			CMGenericDataSource ds = getDataSourceOfModuleService(ser);
@@ -262,14 +264,15 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 
 		CMGenericDataSource ds = getDataSourceByUuid(dataSourceUuid);
 		assertNotNullOrEmpty(ds);
-		
-		if(moduleParentFolderOrCMGroup instanceof String)
-		{
+
+		if (moduleParentFolderOrCMGroup instanceof String) {
 			String path = (String) moduleParentFolderOrCMGroup;
-			moduleParentFolderOrCMGroup=ds.getHierarchicalTreeSystemProvider().getFolderFromFullPath(new String[] {path,modulePackageName});
-			moduleParentFolderOrCMGroup=ds.getHierarchicalTreeSystemProvider().getParentFolder(moduleParentFolderOrCMGroup);
+			moduleParentFolderOrCMGroup = ds.getHierarchicalTreeSystemProvider()
+					.getFolderFromFullPath(new String[] { path, modulePackageName });
+			moduleParentFolderOrCMGroup = ds.getHierarchicalTreeSystemProvider()
+					.getParentFolder(moduleParentFolderOrCMGroup);
 		}
-		
+
 		Object moduleParentFolder = moduleParentFolderOrCMGroup;
 
 		if (moduleParentFolderOrCMGroup != null && moduleParentFolderOrCMGroup instanceof CMGroup) {
@@ -718,7 +721,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		}
 		return null;
 	}
-	
+
 	// TODO mettre en place l'implémentation des modules dans des modules
 
 }

@@ -15,6 +15,7 @@ import org.eclipse.core.resources.IResourceChangeListener;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Creatable;
@@ -25,6 +26,11 @@ import org.eclipse.e4.ui.model.application.commands.MCommandsFactory;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MHandledMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
+import org.eclipse.gef.EditPart;
+import org.eclipse.gef.commands.Command;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -217,6 +223,34 @@ public class Factory {
 
 	public static ZoneId getTimeZone() {
 		return ZoneId.systemDefault();
+	}
+
+	public static Point getCursorPosition(Control control) {
+		Display display = Display.getDefault();
+		Point point = control.toControl(display.getCursorLocation());
+		FigureCanvas figureCanvas = (FigureCanvas) control;
+		org.eclipse.draw2d.geometry.Point location = figureCanvas.getViewport().getViewLocation();
+		point = new Point(point.x + location.x, point.y + location.y);
+		return point;
+	}
+
+	public static Command createCommand(Runnable r) {
+		Command c = new Command() {
+
+			@Override
+			public void execute() {
+
+				r.run();
+			}
+		};
+		return c;
+	}
+
+	public static void dispose(Object o) {
+		CoreUtils.dispose(o);
+		if (o instanceof EditPart) {
+			CoreUtils.dispose(((EditPart) o).getChildren());
+		}
 	}
 
 }

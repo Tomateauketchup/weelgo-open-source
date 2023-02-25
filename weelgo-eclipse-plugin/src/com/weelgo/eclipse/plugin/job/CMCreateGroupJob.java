@@ -12,19 +12,9 @@ import com.weelgo.eclipse.plugin.ImagesFactory;
 
 public class CMCreateGroupJob extends CMJob {
 
-	private CMGroup selectedParent;
-
 	@Override
 	public boolean isUndoRedoJob() {
 		return true;
-	}
-
-	public CMGroup getSelectedParent() {
-		return selectedParent;
-	}
-
-	public void setSelectedParent(CMGroup selectedParent) {
-		this.selectedParent = selectedParent;
 	}
 
 	public CMCreateGroupJob() {
@@ -46,12 +36,17 @@ public class CMCreateGroupJob extends CMJob {
 	}
 
 	@Override
+	public boolean canExecuteJob() {
+		return getSelectedObject(CMGroup.class) != null;
+	}
+
+	@Override
 	public void doRun(IProgressMonitor monitor) {
 
-		CMModuleService ser = getModuleService(selectedParent);
-		if (ser != null && selectedParent instanceof CMGroup) {
+		CMGroup gp = getSelectedObject(CMGroup.class);
+		CMModuleService ser = getModuleService(gp);
+		if (ser != null) {
 			setModuleUniqueIdentifier(ser.getModuleUniqueIdentifier());
-			CMGroup gp = (CMGroup) selectedParent;
 			String[] ret = getServices().getModulesManager().findNameForNewGroup(ser, gp.getUuid());
 			if (ret != null && ret.length > 1) {
 				CMGroup newGp = ser.createGroup(getServices().getModulesManager(), ret[0], ret[1], gp.getUuid());
@@ -67,7 +62,7 @@ public class CMCreateGroupJob extends CMJob {
 	@Execute
 	public void execute(CurrentSelectionService currentSelectionService) {
 
-		setSelectedParent(currentSelectionService.find(CMGroup.class));
+		setSelectedObject(currentSelectionService.find(CMGroup.class));
 		doSchedule();
 
 	}

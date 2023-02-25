@@ -12,6 +12,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.jobs.MultiRule;
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PlatformUI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +27,8 @@ import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.ImagesFactory;
 import com.weelgo.eclipse.plugin.ProgressMonitorAdapter;
 import com.weelgo.eclipse.plugin.SelectionAdapter;
+import com.weelgo.eclipse.plugin.chainmapping.editor.ChainMappingEditor;
+import com.weelgo.eclipse.plugin.chainmapping.editor.ChainMappingEditorInput;
 import com.weelgo.eclipse.plugin.undoredo.UndoRedoService;
 
 public abstract class CMJob extends Job {
@@ -43,6 +47,14 @@ public abstract class CMJob extends Job {
 	private String undoRedoTargetName;
 	private String eventTopic = null;
 	private Object eventObject = null;
+	private Object selectedObject;
+
+	public void createServices() {
+		services = Factory.getCMServices();
+		eventBroker = Factory.getEventBroker();
+		undoRedoService = Factory.getUndoRedoService();
+		selectionAdapter = Factory.getSelectionAdapter();
+	}
 
 	public CMJob() {
 		super("Weelgo Job");
@@ -63,46 +75,60 @@ public abstract class CMJob extends Job {
 		setRule(new CMJobRule(""));
 	}
 
+	public boolean canExecuteJob() {
+		return true;
+	}
+
 	@Override
 	public IStatus run(IProgressMonitor monitor) {
 
-		try {
-			doRun(ProgressMonitorAdapter.beginTask(getBeginTaskMessage(), 100, monitor));
+		if (canExecuteJob()) {
+			try {
+				doRun(ProgressMonitorAdapter.beginTask(getBeginTaskMessage(), 100, monitor));
 
-			if (isUndoRedoJob()) {
-				undoRedoService.saveModel(getModuleUniqueIdentifier(), getUndoRedoLabel(), getUndoRedoIcon(),
-						getUndoRedoTargetName());
-				if (isMarkAsNotDirty()) {
-					getServices().getModulesManager().markModelAsNotDirty(getModuleUniqueIdentifier());
+				if (isUndoRedoJob()) {
+					undoRedoService.saveModel(getModuleUniqueIdentifier(), getUndoRedoLabel(), getUndoRedoIcon(),
+							getUndoRedoTargetName());
+					if (isMarkAsNotDirty()) {
+						getServices().getModulesManager().markModelAsNotDirty(getModuleUniqueIdentifier());
+					}
+				} else if (isUndoRedoAllModulesJob()) {
+					undoRedoService.saveAllModel(getUndoRedoLabel(), getUndoRedoIcon());
+					if (isMarkAsNotDirty()) {
+						getServices().getModulesManager().markAllModelAsNotDirty();
+					}
 				}
-			} else if (isUndoRedoAllModulesJob()) {
-				undoRedoService.saveAllModel(getUndoRedoLabel(), getUndoRedoIcon());
-				if (isMarkAsNotDirty()) {
-					getServices().getModulesManager().markAllModelAsNotDirty();
+
+				// We send event after
+				if (CoreUtils.isNotNullOrEmpty(eventTopic)) {
+					eventBroker.sentEvent(eventTopic, eventObject);
 				}
-			}
 
-			// We send event after
-			if (CoreUtils.isNotNullOrEmpty(eventTopic)) {
-				eventBroker.sentEvent(eventTopic, eventObject);
-			}
+				executeSync(() -> {
 
-		} catch (Exception e) {
+					try {
+						postJobUISync();
+					} catch (Exception e) {
+						ExceptionsUtils.ManageException(e, logger);
+					}
+				});
 
-			if (isUndoRedoJob()) {
-				undoRedoService.restoreModel(getModuleUniqueIdentifier());
-			} else if (isUndoRedoAllModulesJob()) {
-				undoRedoService.restoreAllModel();
+			} catch (Exception e) {
+
+				if (isUndoRedoJob()) {
+					undoRedoService.restoreModel(getModuleUniqueIdentifier());
+				} else if (isUndoRedoAllModulesJob()) {
+					undoRedoService.restoreAllModel();
+				}
+				ExceptionsUtils.ManageException(e, logger);
 			}
-			ExceptionsUtils.ManageException(e, logger);
 		}
 
 		return Status.OK_STATUS;
 	}
 
-	public void createServices() {
-		services = Factory.getCMServices();
-		eventBroker = Factory.getEventBroker();
+	public void postJobUISync() {
+
 	}
 
 	public boolean isUndoRedoJob() {
@@ -141,6 +167,18 @@ public abstract class CMJob extends Job {
 		}
 		setRule(combinedRule);
 
+	}
+
+	public <T> T getSelectedObject(Class<T> c) {
+		return selectionAdapter.find(selectedObject, c);
+	}
+
+	public Object getSelectedObject() {
+		return selectedObject;
+	}
+
+	public void setSelectedObject(Object selectedObject) {
+		this.selectedObject = selectedObject;
 	}
 
 	public String getUndoRedoTargetName() {
@@ -208,6 +246,16 @@ public abstract class CMJob extends Job {
 		uiName = CoreUtils.cleanString(uiName);
 		updateUI("Update " + uiName, "Updating " + uiName + " ...", runnable);
 
+	}
+
+	public void executeSync(Runnable c) {
+		Factory.getUiSynchronize().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				c.run();
+			}
+		});
 	}
 
 	public static void updateUI(String jobName, String jobMessageName,

@@ -15,9 +15,13 @@ public class SaveHandler {
 	@Execute
 	public void execute(CMService cmService, CurrentSelectionService currentSelectionService) {
 		String str = currentSelectionService.findModuleUniqueIdentifierObjectId();
-		if (CoreUtils.isNotNullOrEmpty(str)) {
+		executeWithModuleIdentifier(str);
+	}
+
+	public void executeWithModuleIdentifier(String id) {
+		if (CoreUtils.isNotNullOrEmpty(id)) {
 			CMSaveModuleJob j = CMSaveModuleJob.CREATE();
-			j.setModuleUniqueIdentifier(str);
+			j.setModuleUniqueIdentifier(id);
 			j.doSchedule();
 		}
 	}

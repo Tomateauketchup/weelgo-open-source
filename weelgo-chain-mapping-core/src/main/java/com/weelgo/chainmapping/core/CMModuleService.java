@@ -134,6 +134,34 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		this.container = parentContainer;
 	}
 
+	public String findNameForNewTask(String parentGroupUuid) {
+		CMGroup gp = getGroupByUuid(parentGroupUuid);
+		if (gp != null) {
+			List<CMTask> childs = getTaskChilds(parentGroupUuid);
+			Map<String, CMTask> map = new HashMap<>();
+			if (childs != null) {
+				for (CMTask cmTask : childs) {
+					if (cmTask != null) {
+						map.put(cmTask.getName(), cmTask);
+					}
+				}
+			}
+
+			String nameTmp = "";
+			int index = 0;
+			boolean stop = false;
+			do {
+
+				index++;
+				nameTmp = "New task " + index;
+
+			} while (map.containsKey(nameTmp));
+
+			return nameTmp;
+		}
+		return "";
+	}
+
 	public boolean isPackageAlreadyExists(String packageName, String parentGroupUuid) {
 
 		packageName = cleanString(packageName);
@@ -188,8 +216,8 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		Object parentFolder = ds.getHierarchicalTreeSystemProvider().getParentFolder(getContainer());
 		Object groupFolder = ds.getFolderOfGroup(parentFolder, gp);
 		CMModuleService ser = mm.findModuleService(groupFolder);
-		if (ser != null && !CoreUtils.isStrictlyEqualsString(ser.getModuleUniqueIdentifier(),
-				getModuleUniqueIdentifier())) {
+		if (ser != null
+				&& !CoreUtils.isStrictlyEqualsString(ser.getModuleUniqueIdentifier(), getModuleUniqueIdentifier())) {
 			throwDynamicException(WeelgoException.MODULE_ALREADY_EXIST);
 		}
 
@@ -200,6 +228,27 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		needReloadObjects();
 
 		return gp;
+	}
+
+	public <T extends CMNode> T changeNodeNamePosition(String taskUuid, String nameposition) {
+		assertNotNullOrEmpty(taskUuid);
+		if (CMNode.NAME_BOTTOM.equals(nameposition) == false && CMNode.NAME_TOP.equals(nameposition) == false
+				&& CMNode.NAME_RIGHT.equals(nameposition) == false && CMNode.NAME_LEFT.equals(nameposition) == false) {
+			throwInvalidInput();
+		}
+		T tsk = getObjectByUuid(taskUuid);
+		assertNotNullOrEmpty(tsk);
+		tsk.setNamePosition(nameposition);
+		return tsk;
+	}
+
+	public <T extends CMNode> T moveNode(String taskUuid, int posX, int posY) {
+		assertNotNullOrEmpty(taskUuid);
+		T tsk = getObjectByUuid(taskUuid);
+		assertNotNullOrEmpty(tsk);
+		tsk.setPositionX(posX);
+		tsk.setPositionY(posY);
+		return tsk;
 	}
 
 	public CMTask createTask(String taskName, String parentGroupUuid, int posX, int posY) {
@@ -223,12 +272,13 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			throwDynamicException(WeelgoException.OBJECT_ALREADY_EXIST);
 		}
 
-		CMTask task = new CMTask();
+		CMTask task = CMFactory.create(CMTask.class);
 		task.setGroupUuid(gp.getUuid());
 		task.setName(taskName);
 		task.setUuid(taskUuid);
-		task.setPosX(posX);
-		task.setPosY(posX);
+		task.setPositionX(posX);
+		task.setPositionY(posY);
+		task.setModuleUniqueIdentifier(getModuleUniqueIdentifier());
 
 		tasks.add(task);
 
@@ -237,10 +287,10 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		return task;
 	}
 
-	public Object getObjectByUuid(String uuid) {
+	public <T> T getObjectByUuid(String uuid) {
 		loadObjectsIntoMap(false);
 		if (objectMapByUuid != null) {
-			return objectMapByUuid.get(uuid);
+			return (T) objectMapByUuid.get(uuid);
 		}
 		return null;
 	}
@@ -358,6 +408,14 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		if (isNotNullOrEmpty(parentUuid)) {
 			loadObjectsIntoMap(false);
 			return groupChilds.get(parentUuid);
+		}
+		return null;
+	}
+
+	public List<CMTask> getTaskChilds(String parentUuid) {
+		if (isNotNullOrEmpty(parentUuid)) {
+			loadObjectsIntoMap(false);
+			return taskChilds.get(parentUuid);
 		}
 		return null;
 	}

@@ -5,10 +5,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -18,6 +16,26 @@ import com.weelgo.core.exceptions.AssertNotNullOrEmptyCustomFatal;
 import com.weelgo.core.exceptions.ExceptionsUtils;
 
 public class CoreUtils {
+
+	public static void disposeList(List objects) {
+		if (objects != null) {
+			for (Object o : objects) {
+				if (o != null && o instanceof IDisposableObject) {
+					dispose(o);
+				}
+			}
+		}
+	}
+
+	public static void dispose(Object o) {
+		if (o != null) {
+			if (o instanceof IDisposableObject) {
+				((IDisposableObject) o).disposeObject();
+			} else if (o instanceof List) {
+				disposeList((List) o);
+			}
+		}
+	}
 
 	public static boolean isInstanceOf(Object o, Class... possibleClasses) {
 		if (possibleClasses != null) {
