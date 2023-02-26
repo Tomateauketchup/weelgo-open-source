@@ -1,5 +1,7 @@
 package com.weelgo.eclipse.plugin.navigator;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -16,6 +18,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import com.weelgo.chainmapping.core.CMGroup;
+import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.chainmapping.core.navigator.NavigatorModel;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.eclipse.plugin.CMEvents;
@@ -119,6 +122,24 @@ public class WeelgoNavigatorViewPart {
 	@Inject
 	@Optional
 	public void getModuleSavedEvent(@UIEventTopic(CMEvents.MODULE_SAVED) String modulId) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getNodesRemovedEvent(@UIEventTopic(CMEvents.NODES_REMOVED) List nodes) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getNodesPositionChangedEvent(@UIEventTopic(CMEvents.NODES_POSITION_CHANGED) List nodes) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getTaskCreatedEvent(@UIEventTopic(CMEvents.TASK_CREATED) CMTask tsk) {
 		refreshView();
 	}
 

@@ -11,6 +11,7 @@ public class ImagesFactory {
 
 	public static final int ICON_SIZE_IN_PX=16;
 	public static final String TASK_ICON = "task.png";
+	public static final String REMOVE_ICON = "remove.png";
 	public static final String CHAIN_MAPPING_ICON = "chain_mapping.png";
 	public static final String DELIVERABLE_ICON = "deliverable.gif";
 	public static final String FILE_ICON = "file.png";

@@ -2,10 +2,7 @@ package com.weelgo.core;
 
 import static com.weelgo.core.CoreUtils.cleanString;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 
 import com.weelgo.core.exceptions.ExceptionsUtils;
 import com.weelgo.core.exceptions.WeelgoException;
@@ -21,7 +18,7 @@ public class ValidatorUtils {
 		ArrayList<String> arl = new ArrayList<>();
 		CoreUtils.putArrayIntoList(invalidFileNameStrings, arl);
 		arl.add(" ");
-		invalidPackageNameStrings = (String[]) arl.toArray(new String[arl.size()]);
+		invalidPackageNameStrings = arl.toArray(new String[arl.size()]);
 	}
 
 	public static void checkTaskName(String name) {
@@ -43,7 +40,7 @@ public class ValidatorUtils {
 	}
 
 	public static boolean isValidPackageName(String name) {
-		return isValidString(name, Constants.NAME_MAX_LENGTH, invalidPackageNameStrings);
+		return isValidString(name, Constants.NAME_MAX_LENGTH, false, invalidPackageNameStrings);
 	}
 
 	public static boolean isValidModuleName(String name) {
@@ -59,11 +56,16 @@ public class ValidatorUtils {
 	}
 
 	public static boolean isValidFileName(String name) {
-		return isValidString(name, Constants.NAME_MAX_LENGTH, invalidFileNameStrings);
+		return isValidString(name, Constants.NAME_MAX_LENGTH, false, invalidFileNameStrings);
 	}
 
-	public static boolean isValidString(String name, int maxLength, String[] invalidStrings) {
+	public static boolean isValidString(String name, int maxLength, boolean allowEmpty, String[] invalidStrings) {
 		name = cleanString(name);
+		if (!allowEmpty) {
+			if (!CoreUtils.isNotNullOrEmpty(name)) {
+				return false;
+			}
+		}
 		if (name.length() > maxLength) {
 			return false;
 		}

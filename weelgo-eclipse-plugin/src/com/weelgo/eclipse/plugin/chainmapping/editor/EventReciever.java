@@ -1,5 +1,7 @@
 package com.weelgo.eclipse.plugin.chainmapping.editor;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
@@ -47,10 +49,12 @@ public class EventReciever implements IDisposableObject, EventHandler {
 	@PostConstruct
 	public void postContruct() {
 		eventBroker.subscribe(CMEvents.TASK_CREATED, this);
+		eventBroker.subscribe(CMEvents.NODES_REMOVED, this);
 		eventBroker.subscribe(CMEvents.MODULE_UNDO_REDO_OPERATION_DONE, this);
 		eventBroker.subscribe(CMEvents.MODULE_SAVED, this);
+		eventBroker.subscribe(CMEvents.ALL_MODULE_SAVED, this);
 		eventBroker.subscribe(CMEvents.GROUP_CREATED, this);
-		eventBroker.subscribe(CMEvents.TASK_POSITION_CHANGED, this);
+		eventBroker.subscribe(CMEvents.NODES_POSITION_CHANGED, this);
 	}
 
 	@Override
@@ -58,14 +62,15 @@ public class EventReciever implements IDisposableObject, EventHandler {
 		String topic = event.getTopic();
 		Object object = event.getProperty(IEventBroker.DATA);
 
-		if (CMEvents.isTopicForMe(topic, CMEvents.TASK_CREATED, CMEvents.MODULE_UNDO_REDO_OPERATION_DONE,
-				CMEvents.MODULE_SAVED, CMEvents.GROUP_CREATED, CMEvents.TASK_POSITION_CHANGED)) {
+		if (CMEvents.isTopicForMe(topic, CMEvents.TASK_CREATED, CMEvents.NODES_REMOVED,
+				CMEvents.MODULE_UNDO_REDO_OPERATION_DONE, CMEvents.MODULE_SAVED, CMEvents.GROUP_CREATED,
+				CMEvents.ALL_MODULE_SAVED, CMEvents.NODES_POSITION_CHANGED)) {
 			if (isForMe(object)) {
 
 				getChainMappingEditor().refreshIsDirty();
 
 				boolean refreshForCreationOrRemove = CMEvents.isTopicForMe(topic, CMEvents.TASK_CREATED,
-						CMEvents.MODULE_UNDO_REDO_OPERATION_DONE, CMEvents.GROUP_CREATED);
+						CMEvents.NODES_REMOVED, CMEvents.MODULE_UNDO_REDO_OPERATION_DONE, CMEvents.GROUP_CREATED);
 
 				boolean refreshVisuals = CMEvents.isTopicForMe(topic, CMEvents.MODULE_UNDO_REDO_OPERATION_DONE);
 
@@ -109,5 +114,7 @@ public class EventReciever implements IDisposableObject, EventHandler {
 	public void setChainMappingEditor(ChainMappingEditor chainMappingEditor) {
 		this.chainMappingEditor = chainMappingEditor;
 	}
+	
+	//TODO créer une vue miniature dans laquelle tout le réseau est présent et à partir duquel on peut sélectionner des zones
 
 }

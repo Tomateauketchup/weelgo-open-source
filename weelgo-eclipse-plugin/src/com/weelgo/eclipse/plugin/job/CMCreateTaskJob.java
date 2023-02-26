@@ -53,6 +53,9 @@ public class CMCreateTaskJob extends CMJob {
 				taskName = ser.findNameForNewTask(gp.getUuid());
 			}
 			CMTask tsk = ser.createTask(taskName, gp.getUuid(), positionX, positionY);
+			if (tsk != null) {
+				setUndoRedoTargetName(tsk.getName());
+			}
 			sentEvent(CMEvents.TASK_CREATED, tsk);
 		}
 	}

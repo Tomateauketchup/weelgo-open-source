@@ -14,10 +14,8 @@ import org.eclipse.gef.MouseWheelZoomHandler;
 import org.eclipse.gef.RootEditPart;
 import org.eclipse.gef.editparts.ScalableRootEditPart;
 import org.eclipse.gef.editparts.ZoomManager;
-import org.eclipse.gef.palette.MarqueeToolEntry;
 import org.eclipse.gef.palette.PaletteGroup;
 import org.eclipse.gef.palette.PaletteRoot;
-import org.eclipse.gef.palette.PanningSelectionToolEntry;
 import org.eclipse.gef.palette.SelectionToolEntry;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.actions.GEFActionConstants;
@@ -35,12 +33,12 @@ import org.slf4j.LoggerFactory;
 
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.IModuleUniqueIdentifierObject;
-import com.weelgo.core.CoreUtils;
 import com.weelgo.core.IDisposableObject;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.KeyHelper;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.CreateTaskAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.GenericSelectionAction;
+import com.weelgo.eclipse.plugin.chainmapping.editor.actions.RemoveNodesAction;
 import com.weelgo.eclipse.plugin.handlers.SaveHandler;
 import com.weelgo.eclipse.plugin.job.CMOpenChainMappingEditorJob;
 
@@ -56,7 +54,7 @@ public class ChainMappingEditor extends GraphicalEditorWithFlyoutPalette
 		setEditDomain(new DefaultEditDomain(this) {
 
 			@Override
-			public void keyDown(KeyEvent keyEvent, EditPartViewer viewer) {				
+			public void keyDown(KeyEvent keyEvent, EditPartViewer viewer) {
 				if (KeyHelper.isCTRL_Z(keyEvent)) {
 					Factory.getUndoRedoService().undoModel(getModuleUniqueIdentifier());
 				}
@@ -111,13 +109,16 @@ public class ChainMappingEditor extends GraphicalEditorWithFlyoutPalette
 		manager.setZoomLevels(zoomLevels);
 
 		// On ajoute certains zooms prédéfinis
-		List<String> zoomContributions = new ArrayList<String>();
+		List<String> zoomContributions = new ArrayList<>();
 		zoomContributions.add(ZoomManager.FIT_ALL);
 		zoomContributions.add(ZoomManager.FIT_HEIGHT);
 		zoomContributions.add(ZoomManager.FIT_WIDTH);
 		manager.setZoomLevelContributions(zoomContributions);
 
 		configureKeyHandler();
+
+		DynamicContextMenu menu = new DynamicContextMenu(viewer, getActionRegistry());
+		viewer.setContextMenu(menu);
 	}
 
 	@Override
@@ -152,8 +153,7 @@ public class ChainMappingEditor extends GraphicalEditorWithFlyoutPalette
 
 	}
 
-	public void refreshIsDirty()
-	{
+	public void refreshIsDirty() {
 		boolean isDirty = getChainMappingEditorInput().isDirty();
 		String name = getChainMappingEditorInput().getName();
 		if (isDirty) {
@@ -161,20 +161,18 @@ public class ChainMappingEditor extends GraphicalEditorWithFlyoutPalette
 		}
 		setPartName(name);
 	}
-	
-	public void refreshForCreationOrRemove()
-	{
+
+	public void refreshForCreationOrRemove() {
 		getGraphicalViewer().getContents().refresh();
 	}
-	
-	public void refreshVisualsOnly()
-	{
+
+	public void refreshVisualsOnly() {
 		CMEditorEditPart ep = getEditorEditPart();
 		if (ep != null) {
 			ep.refreshVisualsOnly();
 		}
-	}	
-	
+	}
+
 	public CMEditorEditPart getEditorEditPart() {
 		RootEditPart root = getGraphicalViewer().getRootEditPart();
 		if (root != null) {
@@ -188,6 +186,7 @@ public class ChainMappingEditor extends GraphicalEditorWithFlyoutPalette
 		super.createActions();
 
 		addAction(new CreateTaskAction(this));
+		addAction(new RemoveNodesAction(this));
 	}
 
 	public void addAction(GenericSelectionAction selectAct) {
@@ -215,6 +214,7 @@ public class ChainMappingEditor extends GraphicalEditorWithFlyoutPalette
 
 		return root;
 	}
+
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {

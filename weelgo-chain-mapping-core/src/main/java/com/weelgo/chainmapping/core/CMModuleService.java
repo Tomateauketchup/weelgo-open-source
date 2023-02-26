@@ -230,25 +230,56 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		return gp;
 	}
 
-	public <T extends CMNode> T changeNodeNamePosition(String taskUuid, String nameposition) {
-		assertNotNullOrEmpty(taskUuid);
-		if (CMNode.NAME_BOTTOM.equals(nameposition) == false && CMNode.NAME_TOP.equals(nameposition) == false
-				&& CMNode.NAME_RIGHT.equals(nameposition) == false && CMNode.NAME_LEFT.equals(nameposition) == false) {
-			throwInvalidInput();
+	public List<CMNode> moveNodes(List<CMNode> lst) {
+		List<CMNode> arl = new ArrayList<>();
+
+		if (lst != null) {
+			for (CMNode n : lst) {
+				if (n != null) {
+					CMNode realNode = getObjectByUuid(n.getUuid());
+					if (realNode != null) {
+						realNode.setPositionX(n.getPositionX());
+						realNode.setPositionY(n.getPositionY());
+						arl.add(realNode);
+					}
+				}
+			}
 		}
-		T tsk = getObjectByUuid(taskUuid);
-		assertNotNullOrEmpty(tsk);
-		tsk.setNamePosition(nameposition);
-		return tsk;
+		return arl;
 	}
 
-	public <T extends CMNode> T moveNode(String taskUuid, int posX, int posY) {
-		assertNotNullOrEmpty(taskUuid);
-		T tsk = getObjectByUuid(taskUuid);
-		assertNotNullOrEmpty(tsk);
-		tsk.setPositionX(posX);
-		tsk.setPositionY(posY);
-		return tsk;
+	public List<CMNode> changeNodeNamePosition(List<CMNode> lst) {
+		List<CMNode> arl = new ArrayList<>();
+
+		if (lst != null) {
+			for (CMNode n : lst) {
+				if (n != null) {
+					CMNode realNode = getObjectByUuid(n.getUuid());
+					if (realNode != null) {
+						String nameposition = n.getNamePosition();
+						if (CMNode.NAME_BOTTOM.equals(nameposition) == false
+								&& CMNode.NAME_TOP.equals(nameposition) == false
+								&& CMNode.NAME_RIGHT.equals(nameposition) == false
+								&& CMNode.NAME_LEFT.equals(nameposition) == false) {
+							throwInvalidInput();
+						}
+						realNode.setNamePosition(nameposition);
+						arl.add(realNode);
+					}
+				}
+			}
+		}
+		return arl;
+	}
+
+	public void removeNodes(String[] nodesUuid) {
+		if (nodesUuid != null) {
+			for (String uuid : nodesUuid) {
+				CoreUtils.removeObjectFromList(uuid, tasks);
+			}
+		}
+
+		needReloadObjects();
 	}
 
 	public CMTask createTask(String taskName, String parentGroupUuid, int posX, int posY) {

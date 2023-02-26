@@ -1,5 +1,7 @@
 package com.weelgo.eclipse.plugin.chainmapping.editor.actions;
 
+import java.util.List;
+
 import org.eclipse.gef.ui.actions.SelectionAction;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IWorkbenchPart;
@@ -23,6 +25,10 @@ public abstract class GenericSelectionAction extends SelectionAction {
 		return getSelectionAdapter().find(getSelection(), wantedClass);
 	}
 
+	public <T> List<T> findList(Class<T> wantedClass) {
+		return getSelectionAdapter().findList(getSelection(), wantedClass);
+	}
+
 	public Point getCursorPosition() {
 		return Factory.getCursorPosition(getChainMappingEditor().getGraphicalViewer().getControl());
 	}
@@ -30,6 +36,7 @@ public abstract class GenericSelectionAction extends SelectionAction {
 	public ChainMappingEditor getChainMappingEditor() {
 		return (ChainMappingEditor) getWorkbenchPart();
 	}
+
 	@Override
 	protected boolean calculateEnabled() {
 		return true;

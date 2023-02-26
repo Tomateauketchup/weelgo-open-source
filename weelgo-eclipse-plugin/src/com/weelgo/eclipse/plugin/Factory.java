@@ -26,9 +26,11 @@ import org.eclipse.e4.ui.model.application.commands.MCommandsFactory;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MHandledMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
+import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.ui.PlatformUI;
@@ -116,6 +118,11 @@ public class Factory {
 	public static Object getCurrentSelection() {
 		loadFactory();
 		return factory.currentSelection.getCurrentSelection();
+	}
+
+	public static CurrentSelectionService getCurrentSelectionService() {
+		loadFactory();
+		return factory.currentSelection;
 	}
 
 	public static CMService getCMServices() {
@@ -251,6 +258,14 @@ public class Factory {
 		if (o instanceof EditPart) {
 			CoreUtils.dispose(((EditPart) o).getChildren());
 		}
+	}
+
+	public static GridLayout createGridLayout(int numColumns) {
+		return new GridLayout(numColumns, false);
+	}
+
+	public static GridLayout createGridLayout(int numColumns, boolean makeColumnsEqualWidth) {
+		return new GridLayout(numColumns, makeColumnsEqualWidth);
 	}
 
 }

@@ -42,7 +42,7 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 
 	@PostConstruct
 	public void postContruct() {
-		eventBroker.subscribe(CMEvents.TASK_POSITION_CHANGED, this);
+		eventBroker.subscribe(CMEvents.NODES_POSITION_CHANGED, this);
 	}
 
 	@Override
@@ -54,7 +54,7 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 	}
 
 	public void eventRecieved(String topic, Object object) {
-		if (CMEvents.isTopicForMe(topic, CMEvents.TASK_POSITION_CHANGED)) {
+		if (CMEvents.isTopicForMe(topic, CMEvents.NODES_POSITION_CHANGED)) {
 			if (isEventForMeUuidObject(object)) {
 				refreshVisuals();
 			}

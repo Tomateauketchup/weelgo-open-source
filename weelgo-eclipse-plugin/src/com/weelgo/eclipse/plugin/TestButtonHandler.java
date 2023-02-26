@@ -69,14 +69,14 @@ public class TestButtonHandler {
 //		// create a new part based on a part descriptor
 //		// if multiple parts of this type are allowed a new part
 //		// is always generated
-//		i++;
+		i++;
 //		MPlaceholder o = modelService.findPlaceholderFor(window, application);
-//		MPart part = partService.createPart("com.weelgo.eclipse.plugin.chainmapping.editor.ChainMappingEditorPart");
-//		part.setLabel("New Dynamic Part " + i);
-//		part.getPersistedState().put("some key", String.valueOf(i));
+		MPart part = partService.createPart("com.weelgo.eclipse.plugin.selectionViewer.SelectionViewerPart");
+		part.setLabel("New Dynamic Part " + i);
+		part.getPersistedState().put("some key", String.valueOf(i));
 //		partStack.getChildren().add(part);
 //		// the provided part is be shown
-//		partService.showPart(part, PartState.ACTIVATE);
+		partService.showPart(part, PartState.ACTIVATE);
 		
 	}
 }

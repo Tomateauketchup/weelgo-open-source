@@ -35,6 +35,7 @@ public class CMNode<T extends CMNode> implements IUuidObject, INamedObject, IMod
 			toPopulate.setGroupUuid(getGroupUuid());
 			toPopulate.setPositionX(getPositionX());
 			toPopulate.setPositionY(getPositionY());
+			toPopulate.setNamePosition(getNamePosition());
 		}
 	}
 

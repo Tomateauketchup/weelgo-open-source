@@ -406,4 +406,36 @@ public class CoreUtils {
 		return str;
 	}
 
+	public static <T> void removeObjectFromList(String uuid, List<T> list) {
+		if (list != null && uuid != null) {
+			ArrayList<T> arlToRemove = new ArrayList<T>();
+
+			for (T t : list) {
+				if (t != null && t instanceof IUuidObject && uuid.equals(((IUuidObject) t).getUuid()))
+					arlToRemove.add(t);
+			}
+			list.removeAll(arlToRemove);
+		}
+	}
+
+	public static List<String> transformListToStringList(List lst) {
+		List<String> arl = new ArrayList<>();
+		if (lst != null) {
+			for (Object o : lst) {
+				if (o != null && o instanceof IUuidObject) {
+					arl.add(((IUuidObject) o).getUuid());
+				}
+			}
+		}
+		return arl;
+	}
+
+	public static String[] transformListToStringArray(List lst) {
+		List<String> arl = transformListToStringList(lst);
+		if (arl != null && arl.size() > 0) {
+			return (String[]) arl.toArray(new String[arl.size()]);
+		}
+		return null;
+	}
+
 }

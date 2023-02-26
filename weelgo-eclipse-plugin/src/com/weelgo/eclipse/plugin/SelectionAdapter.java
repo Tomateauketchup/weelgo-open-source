@@ -1,5 +1,8 @@
 package com.weelgo.eclipse.plugin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -59,10 +62,49 @@ public class SelectionAdapter {
 		return "";
 	}
 
+	public <T> List<T> findList(Object objectToCheck, Class<T> wantedClass) {
+		List<T> arl = new ArrayList<T>();
+
+		List listToCheck = null;
+
+		if (objectToCheck instanceof ISelection) {
+			if (objectToCheck instanceof IStructuredSelection s) {
+
+				listToCheck = s.toList();
+
+			}
+		} else if (objectToCheck instanceof List) {
+			listToCheck = (List) objectToCheck;
+		}
+
+		if (listToCheck != null) {
+			for (Object ob : listToCheck) {
+				T o = find(ob, wantedClass);
+				if (o != null) {
+					arl.add(o);
+				}
+			}
+		}
+
+		if (arl.size() > 0) {
+			return arl;
+		}
+		return null;
+	}
+
 	public <T> T find(Object objectToCheck, Class<T> wantedClass) {
 
 		if (CoreUtils.isInstanceOf(objectToCheck, wantedClass)) {
 			return (T) objectToCheck;
+		}
+
+		if (objectToCheck instanceof List lst) {
+			for (Object ob : lst) {
+				T o = find(ob, wantedClass);
+				if (o != null) {
+					return o;
+				}
+			}
 		}
 
 		if (objectToCheck instanceof ISelection) {

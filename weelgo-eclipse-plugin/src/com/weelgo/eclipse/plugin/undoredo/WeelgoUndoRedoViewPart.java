@@ -85,7 +85,7 @@ public class WeelgoUndoRedoViewPart {
 		parent.setBackground(ColorFactory.WHITE_COLOR);
 		container = new Composite(parent, SWT.NONE);
 
-		GridLayout layout = new GridLayout();
+		GridLayout layout =Factory.createGridLayout(1);
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		layout.horizontalSpacing = 0;
@@ -94,7 +94,7 @@ public class WeelgoUndoRedoViewPart {
 
 		selectorComposite = new Composite(container, SWT.NONE);
 //		compTmp.setBackground(ColorFactory.BLUE_COLOR);
-		selectorComposite.setLayout(new GridLayout(3, false));
+		selectorComposite.setLayout(Factory.createGridLayout(3));
 
 		Image image = ImagesFactory.getIconImage(ImagesFactory.CHAIN_MAPPING_ICON);
 		Label imgLabel = new Label(selectorComposite, SWT.NONE);
@@ -220,16 +220,22 @@ public class WeelgoUndoRedoViewPart {
 	public void getGroupCreatedEvent(@UIEventTopic(CMEvents.GROUP_CREATED) CMGroup gp) {
 		refreshView();
 	}
-	
+
 	@Inject
 	@Optional
 	public void getTaskCreatedEvent(@UIEventTopic(CMEvents.TASK_CREATED) CMTask tsk) {
 		refreshView();
 	}
-	
+
 	@Inject
 	@Optional
-	public void getTaskMovedEvent(@UIEventTopic(CMEvents.TASK_POSITION_CHANGED) CMTask tsk) {
+	public void getNodesRemovedEvent(@UIEventTopic(CMEvents.NODES_REMOVED) List nodes) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getNodesMovedEvent(@UIEventTopic(CMEvents.NODES_POSITION_CHANGED) List nodes) {
 		refreshView();
 	}
 
