@@ -2,6 +2,7 @@ package com.weelgo.eclipse.plugin;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -17,6 +18,7 @@ import com.weelgo.chainmapping.core.IDataSourceObject;
 import com.weelgo.chainmapping.core.IModuleUniqueIdentifierObject;
 import com.weelgo.chainmapping.core.navigator.NavNode;
 import com.weelgo.core.CoreUtils;
+import com.weelgo.core.IUuidObject;
 import com.weelgo.core.undoredo.UndoRedoNode;
 import com.weelgo.eclipse.plugin.undoredo.NodeModel;
 
@@ -62,6 +64,10 @@ public class SelectionAdapter {
 		return "";
 	}
 
+	public List findList(Object objectToCheck) {
+		return find(objectToCheck, List.class);
+	}
+
 	public <T> List<T> findList(Object objectToCheck, Class<T> wantedClass) {
 		List<T> arl = new ArrayList<T>();
 
@@ -92,6 +98,23 @@ public class SelectionAdapter {
 		return null;
 	}
 
+	public <T> T findUuidObject(Object objectToCheck, String uuid) {
+		IUuidObject o = find(objectToCheck, IUuidObject.class);
+		if (o != null && CoreUtils.isStrictlyEqualsString(o.getUuid(), uuid)) {
+			return (T) o;
+		}
+
+		Map map = find(objectToCheck, Map.class);
+		if (map != null && map.size() > 0) {
+			Object key = map.keySet().iterator().next();
+			Object val = map.values().iterator().next();
+			if (key instanceof String && val instanceof IUuidObject) {
+				return (T) map.get(uuid);
+			}
+		}
+		return null;
+	}
+
 	public <T> T find(Object objectToCheck, Class<T> wantedClass) {
 
 		if (CoreUtils.isInstanceOf(objectToCheck, wantedClass)) {
@@ -110,9 +133,10 @@ public class SelectionAdapter {
 		if (objectToCheck instanceof ISelection) {
 			if (objectToCheck instanceof IStructuredSelection s) {
 
-				Object fst = s.getFirstElement();
-
-				T o = find(fst, wantedClass);
+				
+				List listToCheck = s.toList();			
+				
+				T o = find(listToCheck, wantedClass);
 				if (o != null) {
 					return o;
 				}

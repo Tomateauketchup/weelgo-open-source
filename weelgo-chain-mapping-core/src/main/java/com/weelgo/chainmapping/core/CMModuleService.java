@@ -18,14 +18,16 @@ import com.weelgo.core.CoreUtils;
 import com.weelgo.core.ICloneableObject;
 import com.weelgo.core.INamedObject;
 import com.weelgo.core.IUpdatablebject;
+import com.weelgo.core.IUuidGenerator;
 import com.weelgo.core.IUuidObject;
+import com.weelgo.core.UuidGenerator;
 import com.weelgo.core.exceptions.ExceptionsUtils;
 import com.weelgo.core.exceptions.WeelgoException;
 import com.weelgo.core.undoredo.IUndoRedoModelProvider;
 import com.weelgo.core.undoredo.UndoRedoManager;
 
 public class CMModuleService implements IUuidObject, INamedObject, IModuleUniqueIdentifierObject,
-		ICloneableObject<CMModuleService>, IUpdatablebject<CMModuleService> {
+		ICloneableObject<CMModuleService>, IUpdatablebject<CMModuleService>, IUuidGenerator {
 
 	private UndoRedoManager undoRedoManager = CMFactory.create(UndoRedoManager.class);
 	private Object container;
@@ -33,6 +35,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 	private CMGroup rootGroup;
 	private List<CMGroup> groups = new ArrayList<>();
 	private List<CMTask> tasks = new ArrayList<>();
+	private IUuidGenerator uuidGenerator = new UuidGenerator();
 
 	private Map<String, IUuidObject> objectMapByUuid;
 	private Map<String, CMGroup> groupMapByUuid;
@@ -47,6 +50,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			@Override
 			public void pushToModel(CMModuleService o) {
 				if (o != null) {
+					o=o.cloneObject();
 					o.updateObject(getThisModuleService());
 				}
 			}
@@ -96,17 +100,26 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 				checkGroup(gp);
 			}
 		}
+		if (groups != null) {
+			for (CMTask tk : tasks) {
+				checkTask(tk);
+			}
+		}
 
 		// TODO il faut faire les vérification de noms et autres ici
 
 		needReloadObjects();
 	}
 
+	public void checkTask(CMTask tsk) {
+		if (tsk != null) {
+			tsk.setModuleUniqueIdentifier(rootGroup.getModuleUniqueIdentifier());
+		}
+	}
+
 	public void checkGroup(CMGroup gp) {
 		if (gp != null) {
-			gp.setModuleUniqueIdentifier(rootGroup.getModuleUniqueIdentifier());
-			gp.calculateUuid(rootGroup.getModuleUniqueIdentifier());
-			gp.calculateGroupUuid(rootGroup.getModuleUniqueIdentifier());
+			gp.setModuleUniqueIdentifier(rootGroup.getModuleUniqueIdentifier());			
 			gp.calculatePackageFullPath();
 		}
 	}
@@ -201,6 +214,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		}
 
 		CMGroup gp = new CMGroup();
+		gp.setUuid(generateUuid());
 		gp.setName(name);
 		gp.setPackageName(packageName);
 		gp.setPackageParentPath(createPackageParentPath(parent));
@@ -248,7 +262,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		return arl;
 	}
 
-	public List<CMNode> changeNodeNamePosition(List<CMNode> lst) {
+	public List<CMNode> modifyNodeNamePosition(List<CMNode> lst) {
 		List<CMNode> arl = new ArrayList<>();
 
 		if (lst != null) {
@@ -282,6 +296,20 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		needReloadObjects();
 	}
 
+	public CMTask modifyTaskName(String taskName, String taskUuid) {
+		taskName = cleanString(taskName);
+		checkTaskName(taskName);
+
+		CMTask task = getObjectByUuid(taskUuid);
+		assertNotNullOrEmpty(task);
+		task.setName(taskName);
+
+		checkTask(task);
+		needReloadObjects();
+
+		return task;
+	}
+
 	public CMTask createTask(String taskName, String parentGroupUuid, int posX, int posY) {
 		taskName = cleanString(taskName);
 		parentGroupUuid = cleanString(parentGroupUuid);
@@ -297,7 +325,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			}
 		}
 
-		String taskUuid = CoreUtils.createPackageString(gp.getUuid(), taskName);
+		String taskUuid = generateUuid();
 		// We check if there is already a task with same UUID
 		if (getObjectByUuid(taskUuid) != null) {
 			throwDynamicException(WeelgoException.OBJECT_ALREADY_EXIST);
@@ -313,6 +341,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 		tasks.add(task);
 
+		checkTask(task);
 		needReloadObjects();
 
 		return task;
@@ -572,5 +601,23 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 	@Override
 	public String toString() {
 		return getName();
+	}
+
+	public IUuidGenerator getUuidGenerator() {
+		return uuidGenerator;
+	}
+
+	public void setUuidGenerator(IUuidGenerator uuidGenerator) {
+		this.uuidGenerator = uuidGenerator;
+	}
+
+	@Override
+	public String generateUuid() {
+		return uuidGenerator.generateUuid();
+	}
+
+	@Override
+	public String generateUuid(int length) {
+		return uuidGenerator.generateUuid(length);
 	}
 }

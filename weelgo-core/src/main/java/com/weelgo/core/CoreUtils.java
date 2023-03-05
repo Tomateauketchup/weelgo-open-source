@@ -16,6 +16,18 @@ import com.weelgo.core.exceptions.AssertNotNullOrEmptyCustomFatal;
 import com.weelgo.core.exceptions.ExceptionsUtils;
 
 public class CoreUtils {
+	
+	public static IUuidGenerator uuidGenerator=new UuidGenerator();
+
+	public static void disposeMap(Map objects) {
+		if (objects != null && objects.size() > 0) {
+			for (Object o : objects.values()) {
+				if (o != null && o instanceof IDisposableObject) {
+					dispose(o);
+				}
+			}
+		}
+	}
 
 	public static void disposeList(List objects) {
 		if (objects != null) {
@@ -33,6 +45,8 @@ public class CoreUtils {
 				((IDisposableObject) o).disposeObject();
 			} else if (o instanceof List) {
 				disposeList((List) o);
+			} else if (o instanceof Map) {
+				disposeMap((Map) o);
 			}
 		}
 	}
@@ -196,13 +210,12 @@ public class CoreUtils {
 	}
 
 	public static String generateUUIDString() {
-		return generateUUID().toString();
+		return uuidGenerator.generateUuid();
+	}
+	public static String generateUUIDString(int nbChar) {
+		return uuidGenerator.generateUuid(nbChar);
 	}
 
-	public static UUID generateUUID() {
-		UUID id = UUID.randomUUID();
-		return id;
-	}
 
 	public static File getFileFromUrlPath(String urlPath) throws Exception {
 
@@ -217,16 +230,7 @@ public class CoreUtils {
 
 	}
 
-	public static String generateUUIDString(int nbChar) {
-		char[] uuidChar = generateUUIDString().toCharArray();
-		String newUUID = "";
-		for (int i = 0; i < nbChar; i++) {
-			newUUID += uuidChar[i];
-		}
-
-		return newUUID;
-	}
-
+	
 	public static String removeEnd(final String str, final String elementToRemove) {
 		if (isNullOrEmpty(str) || isNullOrEmpty(elementToRemove)) {
 			return str;
@@ -422,8 +426,12 @@ public class CoreUtils {
 		List<String> arl = new ArrayList<>();
 		if (lst != null) {
 			for (Object o : lst) {
-				if (o != null && o instanceof IUuidObject) {
-					arl.add(((IUuidObject) o).getUuid());
+				if (o != null) {
+					if (o instanceof IUuidObject) {
+						arl.add(((IUuidObject) o).getUuid());
+					} else if (o instanceof String) {
+						arl.add((String) o);
+					}
 				}
 			}
 		}

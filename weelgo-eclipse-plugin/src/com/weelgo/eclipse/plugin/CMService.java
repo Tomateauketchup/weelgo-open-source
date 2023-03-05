@@ -93,4 +93,8 @@ public class CMService {
 		return getModulesManager().getFolderFullPathOfObject(gp);
 	}
 
+	public Object findThisObject(Object currentData) {
+		return getModulesManager().findThisObject(currentData);
+	}
+
 }

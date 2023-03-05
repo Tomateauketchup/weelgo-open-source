@@ -57,7 +57,11 @@ public class CurrentSelectionService {
 		return selectionAdapter.findDataSourceUuid(objectToCheck);
 	}
 
-	public  <T> List<T> findList(Class<T> c) {
+	public <T> List<T> findList(Class<T> c) {
 		return selectionAdapter.findList(currentSelection, c);
+	}
+
+	public List findList() {
+		return selectionAdapter.findList(currentSelection);
 	}
 }

@@ -68,6 +68,20 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		return null;
 	}
 
+	public Object findThisObject(Object o) {
+		if (o != null) {
+			if (o instanceof IUuidObject) {
+				if (o instanceof IModuleUniqueIdentifierObject) {
+					CMModuleService ser = findModuleService(o);
+					if (ser != null) {
+						return ser.getObjectByUuid(((IUuidObject) o).getUuid());
+					}
+				}
+			}
+		}
+		return null;
+	}
+
 	public CMGenericDataSource findDataSource(Object o) {
 		if (sourcesMap != null) {
 			for (Map.Entry<String, CMGenericDataSource> entry : sourcesMap.entrySet()) {
@@ -298,6 +312,7 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		gp.setName(moduleName);
 		gp.setPackageName(modulePackageName);
 		gp.setType(CMGroup.TYPE_MODULE);
+		gp.setUuid(service.generateUuid());
 		service.check();
 
 		Object moduleFolder = ds.createModule(progressMonitor, moduleParentFolder, service);

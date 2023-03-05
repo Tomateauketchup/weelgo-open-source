@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude.Include;
 @JsonInclude(Include.NON_EMPTY)
 public class JSN_CMGroup {
 
+	private String uuid;
 	private String name;
 	private String package_name;
 	private String package_parent_path;
@@ -41,6 +42,14 @@ public class JSN_CMGroup {
 
 	public void setPackage_parent_path(String package_parent_path) {
 		this.package_parent_path = package_parent_path;
+	}
+
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 }

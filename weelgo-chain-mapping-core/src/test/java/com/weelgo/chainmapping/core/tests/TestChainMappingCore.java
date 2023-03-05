@@ -15,6 +15,7 @@ import com.weelgo.chainmapping.core.CMFileSystemDataSource;
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMModulesManager;
+import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.chainmapping.core.navigator.NavNode;
 import com.weelgo.chainmapping.core.navigator.NavigatorModel;
 import com.weelgo.core.CoreUtils;
@@ -69,6 +70,13 @@ public class TestChainMappingCore extends CMGenericTest {
 
 		CMModuleService modServ1 = modManager.getServiceByModuleUniqueIdentifierId(modId1);
 		CMModuleService modServ2 = modManager.getServiceByModuleUniqueIdentifierId(modId2);
+
+		assertNotNullOrEmpty(modServ1.getRootGroup().getUuid());
+		assertNotNullOrEmpty(modServ2.getRootGroup().getUuid());
+		assertNotNullOrEmpty(modServ1.getGroups().get(0).getUuid());
+		assertNotNullOrEmpty(modServ2.getGroups().get(0).getUuid());
+		assertEquals(modServ1.getRootGroup().getUuid(), modServ1.getGroups().get(0).getUuid());
+		assertEquals(modServ2.getRootGroup().getUuid(), modServ2.getGroups().get(0).getUuid());
 
 		CMGroup gp1_1 = createGroup(modManager, modServ1, "mon_gp1", modServ1.getRootGroup());
 		CMGroup gp2_1 = createGroup(modManager, modServ1, "mon_gp2", gp1_1);
@@ -673,6 +681,57 @@ public class TestChainMappingCore extends CMGenericTest {
 	}
 
 	@Test
+	public void testCreateTask() throws Exception {
+
+		CMModulesManager modManager = createModulesManager();
+		String modId1 = createModule(modManager, "Module 1", "module_1");
+		CMModuleService modServ1 = modManager.getServiceByModuleUniqueIdentifierId(modId1);
+		CMGroup rootGp = modServ1.getRootGroup();
+
+		CMTask tsk1 = createTask(modServ1, "tsk1", rootGp);
+		tsk1 = modServ1.modifyTaskName("tsk_1", tsk1.getUuid());
+
+		CMTask tsk2 = createTask(modServ1, "tsk1", rootGp);
+
+	}
+
+	@Test
+	public void testUndoRedo2() throws Exception {
+		CMModulesManager modManager = createModulesManager();
+		String modId1 = createModule(modManager, "Module 1", "module_1");
+		CMModuleService modServ1 = modManager.getServiceByModuleUniqueIdentifierId(modId1);
+		CMGroup rootGp = modServ1.getRootGroup();
+
+		CMTask t1 = createTask(modServ1, "tsk1", rootGp);
+		CMTask t2 = createTask(modServ1, "tsk2", rootGp);
+
+		undo(modServ1);
+		undo(modServ1);
+		
+		assertNullOrEmpty(modServ1.getObject(t1));
+		assertNullOrEmpty(modServ1.getObject(t2));
+		
+		redo(modServ1);
+		assertNotNullOrEmpty(modServ1.getObject(t1));
+		assertNullOrEmpty(modServ1.getObject(t2));
+		redo(modServ1);
+		
+		assertNotNullOrEmpty(modServ1.getObject(t1));
+		assertNotNullOrEmpty(modServ1.getObject(t2));
+
+		modifyTaskName(modServ1, t2, "tk2NewName");
+
+		undo(modServ1);
+		
+		assertNotNullOrEmpty(modServ1.getObject(t1));
+		assertNotNullOrEmpty(modServ1.getObject(t2));
+		
+		t2 = modServ1.getObject(t2);
+		assertEquals("tsk2", t2.getName());
+
+	}
+
+	@Test
 	public void testNavigator() throws Exception {
 
 		CMModulesManager modManager = createModulesManager();
@@ -685,14 +744,13 @@ public class TestChainMappingCore extends CMGenericTest {
 		CMGroup gp2 = createGroup(modManager, modServ1, "gp2", gp1);
 		CMGroup gp3 = createGroup(modManager, modServ1, "gp3", gp2);
 
-		
 		NavigatorModel model = new NavigatorModel();
 		model.update(modManager);
 		NavNode navModule1 = model.getNodeByName(rootGp.getPackageName());
 		NavNode navGp1 = model.getNodeByName(gp1.getName());
 		NavNode navGp2 = model.getNodeByName(gp1.getName());
 		NavNode navGp3 = model.getNodeByName(gp1.getName());
-		
+
 		assertTrue(navModule1.isDirty());
 		assertFalse(navModule1.isSubmodulesDirty());
 		assertFalse(navGp1.isDirty());
@@ -701,11 +759,11 @@ public class TestChainMappingCore extends CMGenericTest {
 		assertFalse(navGp2.isSubmodulesDirty());
 		assertFalse(navGp3.isDirty());
 		assertFalse(navGp3.isSubmodulesDirty());
-		
-		saveModule(modManager, modServ1);		
-		
+
+		saveModule(modManager, modServ1);
+
 		model.update(modManager);
-		
+
 		assertFalse(navModule1.isDirty());
 		assertFalse(navModule1.isSubmodulesDirty());
 		assertFalse(navGp1.isDirty());
@@ -714,15 +772,15 @@ public class TestChainMappingCore extends CMGenericTest {
 		assertFalse(navGp2.isSubmodulesDirty());
 		assertFalse(navGp3.isDirty());
 		assertFalse(navGp3.isSubmodulesDirty());
-		
-		String modId2=createModule(modManager, gp3, "module2", "module2");
+
+		String modId2 = createModule(modManager, gp3, "module2", "module2");
 		CMModuleService modServ2 = modManager.getServiceByModuleUniqueIdentifierId(modId2);
 		CMGroup rootGp2 = modServ2.getRootGroup();
-		
+
 		model.update(modManager);
-		
+
 		NavNode navModule2 = model.getNodeByName(rootGp2.getPackageName());
-		
+
 		assertFalse(navModule1.isDirty());
 		assertFalse(navModule1.isSubmodulesDirty());
 		assertFalse(navGp1.isDirty());
@@ -733,14 +791,13 @@ public class TestChainMappingCore extends CMGenericTest {
 		assertFalse(navGp3.isSubmodulesDirty());
 		assertFalse(navModule2.isDirty());
 		assertFalse(navModule2.isSubmodulesDirty());
-		
-		
-		CMGroup gp2_1 = createGroup(modManager, modServ2, "gp2_1", rootGp2);		
-		
+
+		CMGroup gp2_1 = createGroup(modManager, modServ2, "gp2_1", rootGp2);
+
 		model.update(modManager);
-		
+
 		NavNode navGp2_1 = model.getNodeByName(gp2_1.getName());
-		
+
 		assertFalse(navModule1.isDirty());
 		assertTrue(navModule1.isSubmodulesDirty());
 		assertFalse(navGp1.isDirty());
@@ -753,7 +810,6 @@ public class TestChainMappingCore extends CMGenericTest {
 		assertFalse(navModule2.isSubmodulesDirty());
 		assertFalse(navGp2_1.isDirty());
 		assertFalse(navGp2_1.isSubmodulesDirty());
-		
 
 	}
 }

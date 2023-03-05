@@ -20,9 +20,10 @@ public class CMEditorEditPartFactory implements EditPartFactory {
 		AbstractGraphicalEditPart part = null;
 		if (model instanceof CMModuleService) {
 			part = Factory.create(CMEditorEditPart.class);
-		}
-		if (model instanceof CMTask) {
+		} else if (model instanceof CMTask) {
 			part = Factory.create(TaskEditPart.class);
+		} else if (model instanceof CornerModel) {
+			part = Factory.create(CornerEditPart.class);
 		}
 
 		part.setModel(model);

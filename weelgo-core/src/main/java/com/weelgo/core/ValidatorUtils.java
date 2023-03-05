@@ -10,7 +10,7 @@ import com.weelgo.core.exceptions.WeelgoException;
 public class ValidatorUtils {
 
 	public static String[] invalidFileNameStrings = new String[] { "NUL", "*", "?", "<", ">", "|", "\"", "\\", "/", ":",
-			".", "..", "#", "$", "+", "%", "!", "`", "&", "'", "{", "}", "=", "@" };
+			".", "..", "$", "+", "%", "!", "&", "{", "}", "=", "@" };
 
 	public static String[] invalidPackageNameStrings;
 
@@ -18,6 +18,9 @@ public class ValidatorUtils {
 		ArrayList<String> arl = new ArrayList<>();
 		CoreUtils.putArrayIntoList(invalidFileNameStrings, arl);
 		arl.add(" ");
+		arl.add("'");
+		arl.add("`");
+		arl.add("#");
 		invalidPackageNameStrings = arl.toArray(new String[arl.size()]);
 	}
 

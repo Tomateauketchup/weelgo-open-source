@@ -55,6 +55,8 @@ public class EventReciever implements IDisposableObject, EventHandler {
 		eventBroker.subscribe(CMEvents.ALL_MODULE_SAVED, this);
 		eventBroker.subscribe(CMEvents.GROUP_CREATED, this);
 		eventBroker.subscribe(CMEvents.NODES_POSITION_CHANGED, this);
+		eventBroker.subscribe(CMEvents.NODES_NAME_POSITION_CHANGED, this);
+		eventBroker.subscribe(CMEvents.TASK_NAME_MODIFIED, this);
 	}
 
 	@Override
@@ -64,7 +66,8 @@ public class EventReciever implements IDisposableObject, EventHandler {
 
 		if (CMEvents.isTopicForMe(topic, CMEvents.TASK_CREATED, CMEvents.NODES_REMOVED,
 				CMEvents.MODULE_UNDO_REDO_OPERATION_DONE, CMEvents.MODULE_SAVED, CMEvents.GROUP_CREATED,
-				CMEvents.ALL_MODULE_SAVED, CMEvents.NODES_POSITION_CHANGED)) {
+				CMEvents.ALL_MODULE_SAVED, CMEvents.NODES_POSITION_CHANGED, CMEvents.NODES_NAME_POSITION_CHANGED,
+				CMEvents.TASK_NAME_MODIFIED)) {
 			if (isForMe(object)) {
 
 				getChainMappingEditor().refreshIsDirty();
@@ -114,7 +117,8 @@ public class EventReciever implements IDisposableObject, EventHandler {
 	public void setChainMappingEditor(ChainMappingEditor chainMappingEditor) {
 		this.chainMappingEditor = chainMappingEditor;
 	}
-	
-	//TODO créer une vue miniature dans laquelle tout le réseau est présent et à partir duquel on peut sélectionner des zones
+
+	// TODO créer une vue miniature dans laquelle tout le réseau est présent et à
+	// partir duquel on peut sélectionner des zones
 
 }

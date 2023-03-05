@@ -1,6 +1,6 @@
 package com.weelgo.eclipse.plugin.chainmapping.editor.actions;
 
-import org.eclipse.swt.graphics.Point;
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.weelgo.chainmapping.core.CMGroup;

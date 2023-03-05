@@ -12,6 +12,7 @@ public class Populator {
 			to.setPackageName(src.getPackage_name());
 			to.setPackageParentPath(src.getPackage_parent_path());
 			to.setType(src.getType());
+			to.setUuid(src.getUuid());
 		}
 	}
 
@@ -19,6 +20,7 @@ public class Populator {
 		if (source instanceof CMGroup && toPopulate instanceof JSN_CMGroup) {
 			JSN_CMGroup to = (JSN_CMGroup) toPopulate;
 			CMGroup src = (CMGroup) source;
+			to.setUuid(src.getUuid());
 			to.setName(src.getName());
 			to.setPackage_name(src.getPackageName());
 			to.setPackage_parent_path(src.getPackageParentPath());

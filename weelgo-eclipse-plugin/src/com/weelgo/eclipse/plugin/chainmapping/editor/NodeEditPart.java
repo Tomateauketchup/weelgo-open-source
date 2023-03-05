@@ -26,6 +26,7 @@ public abstract class NodeEditPart extends CMGenericEditPart {
 		parent.setLayoutConstraint(this, nodeFigure, layout);
 
 		nodeFigure.getMainShape().setBackgroundColor(ColorFactory.GREY_COLOR);
+//		System.out.println("x:" + p.figureX + ", y:" + p.figureY);
 
 	}
 
@@ -132,12 +133,12 @@ public abstract class NodeEditPart extends CMGenericEditPart {
 
 	public void recalculateMousePosition(Rectangle rect) {
 		ShapesPositions p = calculatePositions();
-		
-		int deltaX=p.figureX-p.nodeX;
-		rect.x=rect.x-deltaX;
-		
-		int deltaY=p.figureY-p.nodeY;
-		rect.y=rect.y-deltaY;
+
+		int deltaX = p.figureX - p.nodeX;
+		rect.x = rect.x - deltaX;
+
+		int deltaY = p.figureY - p.nodeY;
+		rect.y = rect.y - deltaY;
 	}
 
 	@Override
@@ -174,6 +175,7 @@ public abstract class NodeEditPart extends CMGenericEditPart {
 
 	}
 
-	//TODO quand on change de la vue chain mapping à une autre vue et qu'on revient, on pred le CTRL S
-	
+	// TODO quand on change de la vue chain mapping à une autre vue et qu'on
+	// revient, on pred le CTRL S
+
 }

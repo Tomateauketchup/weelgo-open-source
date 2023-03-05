@@ -260,12 +260,30 @@ public class Factory {
 		}
 	}
 
+	public static GridLayout createGridLayoutNoMargin(int numColumns) {
+		GridLayout layout = createGridLayout(numColumns);
+		layout.marginLeft = 0;
+		layout.marginRight = 0;
+		layout.marginTop = 0;
+		layout.marginBottom = 0;
+		layout.marginHeight = 0;
+		layout.marginWidth = 0;
+		return layout;
+	}
+
 	public static GridLayout createGridLayout(int numColumns) {
 		return new GridLayout(numColumns, false);
 	}
 
 	public static GridLayout createGridLayout(int numColumns, boolean makeColumnsEqualWidth) {
 		return new GridLayout(numColumns, makeColumnsEqualWidth);
+	}
+
+	public static Object findThisObject(Object currentData) {
+		if (currentData != null) {
+			return getCMServices().findThisObject(currentData);
+		}
+		return null;
 	}
 
 }

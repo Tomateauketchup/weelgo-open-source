@@ -2,8 +2,8 @@ package com.weelgo.eclipse.plugin.chainmapping.editor.actions;
 
 import java.util.List;
 
+import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.gef.ui.actions.SelectionAction;
-import org.eclipse.swt.graphics.Point;
 import org.eclipse.ui.IWorkbenchPart;
 
 import com.weelgo.eclipse.plugin.Factory;
@@ -30,7 +30,7 @@ public abstract class GenericSelectionAction extends SelectionAction {
 	}
 
 	public Point getCursorPosition() {
-		return Factory.getCursorPosition(getChainMappingEditor().getGraphicalViewer().getControl());
+		return getChainMappingEditor().getEditorEditPart().getCursorPosition();
 	}
 
 	public ChainMappingEditor getChainMappingEditor() {

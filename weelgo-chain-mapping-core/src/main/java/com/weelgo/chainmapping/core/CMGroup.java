@@ -30,23 +30,9 @@ IUpdatableUuidObject<CMGroup> {
 		return !isModule();
 	}
 
-	public void calculateUuid(String moduleUniqueIdentifier) {
-		setUuid(CoreUtils.createPackageUuid(moduleUniqueIdentifier,
-				CoreUtils.createPackageString(packageParentPath, packageName)));
-	}
-
 	public void calculatePackageFullPath() {
 		setPackageFullPath(CoreUtils.createPackageString(packageParentPath, packageName));
-	}
-
-	public void calculateGroupUuid(String moduleUniqueIdentifier) {
-		if (CoreUtils.isNotNullOrEmpty(packageParentPath)) {
-			setGroupUuid(CoreUtils.createPackageUuid(moduleUniqueIdentifier, packageParentPath));
-		} else {
-			setGroupUuid(null);
-		}
-
-	}
+	}	
 
 	@Override
 	public void populateObject(CMGroup gp) {

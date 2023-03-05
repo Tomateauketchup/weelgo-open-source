@@ -133,13 +133,25 @@ public class WeelgoNavigatorViewPart {
 
 	@Inject
 	@Optional
-	public void getNodesPositionChangedEvent(@UIEventTopic(CMEvents.NODES_POSITION_CHANGED) List nodes) {
+	public void getNodesPositionChangedEvent(@UIEventTopic(CMEvents.NODES_POSITION_CHANGED) Object nodes) {
+		refreshView();
+	}
+	
+	@Inject
+	@Optional
+	public void getNodesNamePositionChangedEvent(@UIEventTopic(CMEvents.NODES_NAME_POSITION_CHANGED) Object nodes) {
 		refreshView();
 	}
 
 	@Inject
 	@Optional
 	public void getTaskCreatedEvent(@UIEventTopic(CMEvents.TASK_CREATED) CMTask tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getTaskNameModifiedEvent(@UIEventTopic(CMEvents.TASK_NAME_MODIFIED) CMTask tsk) {
 		refreshView();
 	}
 

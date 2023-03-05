@@ -6,6 +6,7 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
 import org.eclipse.e4.core.services.events.IEventBroker;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
@@ -43,6 +44,9 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 	@PostConstruct
 	public void postContruct() {
 		eventBroker.subscribe(CMEvents.NODES_POSITION_CHANGED, this);
+		eventBroker.subscribe(CMEvents.NODES_NAME_POSITION_CHANGED, this);
+		eventBroker.subscribe(CMEvents.TASK_NAME_MODIFIED, this);
+
 	}
 
 	@Override
@@ -54,9 +58,11 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 	}
 
 	public void eventRecieved(String topic, Object object) {
-		if (CMEvents.isTopicForMe(topic, CMEvents.NODES_POSITION_CHANGED)) {
+		if (CMEvents.isTopicForMe(topic, CMEvents.NODES_POSITION_CHANGED, CMEvents.NODES_NAME_POSITION_CHANGED,
+				CMEvents.TASK_NAME_MODIFIED)) {
 			if (isEventForMeUuidObject(object)) {
 				refreshVisuals();
+				doCalculateAdnRefreshCorners();
 			}
 		}
 	}
@@ -74,8 +80,8 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 
 	public boolean isEventForMeUuidObject(Object object) {
 		if (object != null) {
-			IUuidObject o = selectionAdapter.find(object, IUuidObject.class);
-			if (o != null && CoreUtils.isStrictlyEqualsString(getUuid(), o.getUuid())) {
+			IUuidObject o = selectionAdapter.findUuidObject(object, getUuid());
+			if (o != null) {
 				return true;
 			}
 		}
@@ -104,6 +110,13 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 					p.refreshVisualsOnly();
 				}
 			}
+		}
+	}
+
+	public void doCalculateAdnRefreshCorners() {
+		EditPart parent = getParent();
+		if (parent instanceof CMEditorEditPart p) {
+			p.calculateAndrefreshCorners();
 		}
 	}
 

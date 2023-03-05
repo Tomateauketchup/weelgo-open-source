@@ -226,6 +226,12 @@ public class WeelgoUndoRedoViewPart {
 	public void getTaskCreatedEvent(@UIEventTopic(CMEvents.TASK_CREATED) CMTask tsk) {
 		refreshView();
 	}
+	
+	@Inject
+	@Optional
+	public void getTaskNameModifiedEvent(@UIEventTopic(CMEvents.TASK_NAME_MODIFIED) CMTask tsk) {
+		refreshView();
+	}
 
 	@Inject
 	@Optional
@@ -235,7 +241,13 @@ public class WeelgoUndoRedoViewPart {
 
 	@Inject
 	@Optional
-	public void getNodesMovedEvent(@UIEventTopic(CMEvents.NODES_POSITION_CHANGED) List nodes) {
+	public void getNodesPositionCHangedEvent(@UIEventTopic(CMEvents.NODES_POSITION_CHANGED) Object nodes) {
+		refreshView();
+	}
+	
+	@Inject
+	@Optional
+	public void getNodesNamePositionChangedEvent(@UIEventTopic(CMEvents.NODES_NAME_POSITION_CHANGED) Object nodes) {
 		refreshView();
 	}
 

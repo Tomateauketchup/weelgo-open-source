@@ -6,6 +6,7 @@ import com.weelgo.chainmapping.core.CMFileSystemDataSource;
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMModulesManager;
+import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.core.json.tests.GenericTest;
 
 public class CMGenericTest extends GenericTest {
@@ -63,6 +64,19 @@ public class CMGenericTest extends GenericTest {
 
 	public CMGroup createGroup(CMModulesManager mm, CMModuleService modServ, String packageName, CMGroup parenGp) {
 		return createGroup(mm, modServ, packageName, packageName, parenGp);
+	}
+
+	public CMTask createTask(CMModuleService modServ, String taskName, CMGroup parenGp) {
+		CMTask t = modServ.createTask(taskName, parenGp.getUuid(), 0, 0);
+		saveInUndoRedoManager(modServ);
+		return t;
+	}
+	
+	public CMTask modifyTaskName(CMModuleService modServ,CMTask t,String newName)
+	{
+		t=modServ.modifyTaskName(newName, t.getUuid());
+		saveInUndoRedoManager(modServ);
+		return t;
 	}
 
 	public void saveInUndoRedoManager(CMModuleService modServ) {
