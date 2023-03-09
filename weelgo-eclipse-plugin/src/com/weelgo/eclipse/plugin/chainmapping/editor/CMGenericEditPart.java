@@ -11,6 +11,7 @@ import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 import org.osgi.service.event.Event;
 import org.osgi.service.event.EventHandler;
 
+import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.IModuleUniqueIdentifierObject;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.IDisposableObject;
@@ -46,6 +47,7 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 		eventBroker.subscribe(CMEvents.NODES_POSITION_CHANGED, this);
 		eventBroker.subscribe(CMEvents.NODES_NAME_POSITION_CHANGED, this);
 		eventBroker.subscribe(CMEvents.TASK_NAME_MODIFIED, this);
+		eventBroker.subscribe(CMEvents.LINK_CREATED, this);
 
 	}
 
@@ -59,9 +61,11 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 
 	public void eventRecieved(String topic, Object object) {
 		if (CMEvents.isTopicForMe(topic, CMEvents.NODES_POSITION_CHANGED, CMEvents.NODES_NAME_POSITION_CHANGED,
-				CMEvents.TASK_NAME_MODIFIED)) {
+				CMEvents.TASK_NAME_MODIFIED, CMEvents.LINK_CREATED)) {
 			if (isEventForMeUuidObject(object)) {
 				refreshVisuals();
+				refreshSourceConnections();
+				refreshTargetConnections();
 				doCalculateAdnRefreshCorners();
 			}
 		}
@@ -108,6 +112,8 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 			for (Object o : childs) {
 				if (o != null && o instanceof CMGenericEditPart p) {
 					p.refreshVisualsOnly();
+					p.refreshSourceConnections();
+					p.refreshTargetConnections();
 				}
 			}
 		}
@@ -118,6 +124,19 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 		if (parent instanceof CMEditorEditPart p) {
 			p.calculateAndrefreshCorners();
 		}
+	}
+
+	public CMModuleService getModuleService() {
+		if (this instanceof CMEditorEditPart p) {
+			return p.getModuleServiceModel();
+		} else {
+			EditPart parent = getParent();
+			if (parent instanceof CMEditorEditPart p) {
+				return p.getModuleServiceModel();
+			}
+		}
+
+		return null;
 	}
 
 }

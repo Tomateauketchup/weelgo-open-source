@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.ui.IEditorPart;
 
 import com.weelgo.chainmapping.core.CMGroup;
+import com.weelgo.chainmapping.core.CMLink;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.core.CoreUtils;
@@ -85,7 +86,7 @@ public class WeelgoUndoRedoViewPart {
 		parent.setBackground(ColorFactory.WHITE_COLOR);
 		container = new Composite(parent, SWT.NONE);
 
-		GridLayout layout =Factory.createGridLayout(1);
+		GridLayout layout = Factory.createGridLayout(1);
 		layout.marginWidth = 0;
 		layout.marginHeight = 0;
 		layout.horizontalSpacing = 0;
@@ -226,7 +227,13 @@ public class WeelgoUndoRedoViewPart {
 	public void getTaskCreatedEvent(@UIEventTopic(CMEvents.TASK_CREATED) CMTask tsk) {
 		refreshView();
 	}
-	
+
+	@Inject
+	@Optional
+	public void getLinkCreatedEvent(@UIEventTopic(CMEvents.LINK_CREATED) Object o) {
+		refreshView();
+	}
+
 	@Inject
 	@Optional
 	public void getTaskNameModifiedEvent(@UIEventTopic(CMEvents.TASK_NAME_MODIFIED) CMTask tsk) {
@@ -244,7 +251,7 @@ public class WeelgoUndoRedoViewPart {
 	public void getNodesPositionCHangedEvent(@UIEventTopic(CMEvents.NODES_POSITION_CHANGED) Object nodes) {
 		refreshView();
 	}
-	
+
 	@Inject
 	@Optional
 	public void getNodesNamePositionChangedEvent(@UIEventTopic(CMEvents.NODES_NAME_POSITION_CHANGED) Object nodes) {

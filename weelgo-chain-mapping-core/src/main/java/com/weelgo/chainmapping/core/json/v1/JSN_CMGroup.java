@@ -1,5 +1,8 @@
 package com.weelgo.chainmapping.core.json.v1;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
@@ -11,6 +14,7 @@ public class JSN_CMGroup {
 	private String package_name;
 	private String package_parent_path;
 	private String type;
+	private List<JSN_CMTask> tasks = new ArrayList<>();
 
 	public String getType() {
 		return type;
@@ -50,6 +54,14 @@ public class JSN_CMGroup {
 
 	public void setUuid(String uuid) {
 		this.uuid = uuid;
+	}
+
+	public List<JSN_CMTask> getTasks() {
+		return tasks;
+	}
+
+	public void setTasks(List<JSN_CMTask> tasks) {
+		this.tasks = tasks;
 	}
 
 }

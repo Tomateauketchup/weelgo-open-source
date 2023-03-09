@@ -1,5 +1,9 @@
 package com.weelgo.eclipse.plugin.chainmapping.editor;
 
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IExecutionListener;
+import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.draw2d.ScalableFigure;
@@ -22,16 +26,20 @@ import org.eclipse.gef.palette.PaletteGroup;
 import org.eclipse.gef.palette.PaletteRoot;
 import org.eclipse.gef.palette.PanningSelectionToolEntry;
 import org.eclipse.gef.palette.SelectionToolEntry;
+import org.eclipse.gef.tools.ConnectionCreationTool;
 import org.eclipse.gef.tools.PanningSelectionTool;
 import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.gef.ui.parts.GraphicalEditor;
+import org.eclipse.gef.ui.parts.GraphicalEditorWithFlyoutPalette;
 import org.eclipse.gef.ui.parts.ScrollingGraphicalViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IPropertyListener;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.commands.ICommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +49,7 @@ import com.weelgo.chainmapping.core.IModuleUniqueIdentifierObject;
 import com.weelgo.core.IDisposableObject;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.KeyHelper;
+import com.weelgo.eclipse.plugin.chainmapping.editor.actions.ActivateToolAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.CreateTaskAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.GenericSelectionAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.ModifyNodeNamePositionAction;
@@ -54,7 +63,7 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 
 	private EventReciever eventReciever;
 	private static Logger logger = LoggerFactory.getLogger(ChainMappingEditor.class);
-
+	private IExecutionListener saveListener;
 	public static final String ID = "com.weelgo.eclipse.plugin.chainmapping.editor.ChainMappingEditor";
 
 	@Override
@@ -140,10 +149,10 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 				if (KeyHelper.isCTRL_Y(keyEvent)) {
 					Factory.getUndoRedoService().redoModel(getModuleUniqueIdentifier());
 				}
-				if (KeyHelper.isCTRL_S(keyEvent)) {
-					SaveHandler sh = new SaveHandler();
-					sh.executeWithModuleIdentifier(getModuleUniqueIdentifier());
-				}
+//				if (KeyHelper.isCTRL_S(keyEvent)) {
+//					SaveHandler sh = new SaveHandler();
+//					sh.executeWithModuleIdentifier(getModuleUniqueIdentifier());
+//				}
 				super.keyDown(keyEvent, viewer);
 			}
 
@@ -152,6 +161,16 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 		getEditDomain().setActiveTool(getEditDomain().getDefaultTool());
 		eventReciever = EventReciever.CREATE();
 		eventReciever.setChainMappingEditor(this);
+
+	}
+
+	public void selectTool(String tool) {
+		if (ActivateToolAction.TOOL_LINK.equals(tool)) {
+			LinkTool t = new LinkTool();
+			getEditDomain().setActiveTool(t);
+		} else if (ActivateToolAction.TOOL_SELECTION.equals(tool)) {
+			getEditDomain().setActiveTool(getEditDomain().getDefaultTool());
+		}
 	}
 
 	@Override
@@ -219,6 +238,9 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 				getActionRegistry().getAction(VAlignNodesAction.V_ALIGN_NODES));
 		keyHandler.put(KeyStroke.getPressed('p', 'p', 0),
 				getActionRegistry().getAction(PackAlignNodesAction.PACK_ALIGN_NODES));
+		keyHandler.put(KeyStroke.getPressed('l', 'l', 0), getActionRegistry().getAction(ActivateToolAction.TOOL_LINK));
+		keyHandler.put(KeyStroke.getPressed('s', 's', 0),
+				getActionRegistry().getAction(ActivateToolAction.TOOL_SELECTION));
 
 		keyHandler.put(KeyStroke.getPressed(SWT.ARROW_DOWN, 0),
 				getActionRegistry().getAction(ModifyNodeNamePositionAction.MODIFY_NODES_NAME_POSITION_BOTTOM));
@@ -237,13 +259,18 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 
 	}
 
-	public void refreshIsDirty() {
-		boolean isDirty = getChainMappingEditorInput().isDirty();
-		String name = getChainMappingEditorInput().getName();
-		if (isDirty) {
-			name = "*" + name;
-		}
-		setPartName(name);
+	@Override
+	public boolean isDirty() {
+		return getChainMappingEditorInput().isDirty();
+	}
+
+	@Override
+	public void doSave(IProgressMonitor monitor) {
+		SaveHandler.executeWithModuleIdentifier(getModuleUniqueIdentifier());
+	}
+
+	public void checkDirty() {
+		firePropertyChange(PROP_DIRTY);
 	}
 
 	public void refreshForCreationOrRemove() {
@@ -285,6 +312,9 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 		addAction(new ModifyNodeNamePositionAction(CMNode.NAME_LEFT, this));
 		addAction(new ModifyNodeNamePositionAction(CMNode.NAME_RIGHT, this));
 
+		addAction(new ActivateToolAction(ActivateToolAction.TOOL_LINK, this));
+		addAction(new ActivateToolAction(ActivateToolAction.TOOL_SELECTION, this));
+
 	}
 
 	public void addAction(GenericSelectionAction selectAct) {
@@ -312,11 +342,6 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 		root.setDefaultEntry(panEntry);
 
 		return root;
-	}
-
-	@Override
-	public void doSave(IProgressMonitor monitor) {
-
 	}
 
 	public static void openEditor(final String moduleUniqueIdentifier) {

@@ -26,6 +26,7 @@ import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMModulesManager;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.exceptions.ExceptionsUtils;
+import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.CMService;
 import com.weelgo.eclipse.plugin.EventBroker;
 import com.weelgo.eclipse.plugin.Factory;
@@ -85,6 +86,11 @@ public abstract class CMJob extends Job {
 	public boolean canExecuteJob() {
 		return true;
 	}
+	
+	public boolean makeEditorDirty()
+	{
+		return true;
+	}
 
 	@Override
 	public IStatus run(IProgressMonitor monitor) {
@@ -122,6 +128,11 @@ public abstract class CMJob extends Job {
 					});
 
 					sendStateToJobHandlers(CMJobHandler.STATUS_OK);
+					
+					if(makeEditorDirty())
+					{
+						sentEvent(CMEvents.CHECK_EDITOR_DIRTY);
+					}
 
 				} catch (Exception e) {
 

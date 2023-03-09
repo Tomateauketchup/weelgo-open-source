@@ -18,7 +18,7 @@ public class SaveHandler {
 		executeWithModuleIdentifier(str);
 	}
 
-	public void executeWithModuleIdentifier(String id) {
+	public static void executeWithModuleIdentifier(String id) {
 		if (CoreUtils.isNotNullOrEmpty(id)) {
 			CMSaveModuleJob j = CMSaveModuleJob.CREATE();
 			j.setModuleUniqueIdentifier(id);

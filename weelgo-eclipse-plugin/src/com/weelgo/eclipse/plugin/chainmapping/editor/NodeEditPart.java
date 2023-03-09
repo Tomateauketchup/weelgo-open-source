@@ -1,12 +1,18 @@
 package com.weelgo.eclipse.plugin.chainmapping.editor;
 
-import org.eclipse.draw2d.geometry.Rectangle;
-import org.eclipse.gef.EditPolicy;
+import java.util.List;
 
+import org.eclipse.draw2d.ConnectionAnchor;
+import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.ConnectionEditPart;
+import org.eclipse.gef.EditPolicy;
+import org.eclipse.gef.Request;
+
+import com.weelgo.chainmapping.core.CMLink;
 import com.weelgo.chainmapping.core.CMNode;
 import com.weelgo.eclipse.plugin.ColorFactory;
 
-public abstract class NodeEditPart extends CMGenericEditPart {
+public abstract class NodeEditPart extends CMGenericEditPart implements org.eclipse.gef.NodeEditPart {
 
 	@Override
 	protected void refreshVisuals() {
@@ -28,6 +34,24 @@ public abstract class NodeEditPart extends CMGenericEditPart {
 		nodeFigure.getMainShape().setBackgroundColor(ColorFactory.GREY_COLOR);
 //		System.out.println("x:" + p.figureX + ", y:" + p.figureY);
 
+	}
+	
+	@Override
+	public void refresh() {
+		// TODO Auto-generated method stub
+		super.refresh();
+	}
+	
+	@Override
+	protected void refreshSourceConnections() {
+		// TODO Auto-generated method stub
+		super.refreshSourceConnections();
+	}
+	
+	@Override
+	protected void refreshTargetConnections() {
+		// TODO Auto-generated method stub
+		super.refreshTargetConnections();
 	}
 
 	public ShapesPositions calculatePositions() {
@@ -143,7 +167,37 @@ public abstract class NodeEditPart extends CMGenericEditPart {
 
 	@Override
 	protected void createEditPolicies() {
+		installEditPolicy(EditPolicy.GRAPHICAL_NODE_ROLE, new LinkEditPolicy());
+	}
 
+	@Override
+	protected List<CMLink> getModelSourceConnections() {
+		return getModuleService().getOutputLinks(getModelNode());
+	}
+
+	@Override
+	protected List<CMLink> getModelTargetConnections() {
+		return getModuleService().getInputLinks(getModelNode());
+	}
+
+	@Override
+	public ConnectionAnchor getSourceConnectionAnchor(ConnectionEditPart arg0) {
+		return ((NodeFigure) getFigure()).getConnectionAnchor();
+	}
+
+	@Override
+	public ConnectionAnchor getSourceConnectionAnchor(Request arg0) {
+		return ((NodeFigure) getFigure()).getConnectionAnchor();
+	}
+
+	@Override
+	public ConnectionAnchor getTargetConnectionAnchor(ConnectionEditPart arg0) {
+		return ((NodeFigure) getFigure()).getConnectionAnchor();
+	}
+
+	@Override
+	public ConnectionAnchor getTargetConnectionAnchor(Request arg0) {
+		return ((NodeFigure) getFigure()).getConnectionAnchor();
 	}
 
 	public NodeFigure getNodeFigure() {

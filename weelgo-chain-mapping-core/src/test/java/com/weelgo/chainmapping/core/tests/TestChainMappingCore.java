@@ -693,6 +693,16 @@ public class TestChainMappingCore extends CMGenericTest {
 
 		CMTask tsk2 = createTask(modServ1, "tsk1", rootGp);
 
+		saveModule(modManager, modServ1);
+
+		loadAllModules(modManager);
+		modServ1 = modManager.getServiceByModuleUniqueIdentifierId(modId1);
+		CMTask tsk2Tmp = modServ1.getObject(tsk2);
+
+		assertEquals(tsk2.getName(), tsk2Tmp.getName());
+		assertEquals(tsk2.getUuid(), tsk2Tmp.getUuid());
+		
+
 	}
 
 	@Test
@@ -707,25 +717,25 @@ public class TestChainMappingCore extends CMGenericTest {
 
 		undo(modServ1);
 		undo(modServ1);
-		
+
 		assertNullOrEmpty(modServ1.getObject(t1));
 		assertNullOrEmpty(modServ1.getObject(t2));
-		
+
 		redo(modServ1);
 		assertNotNullOrEmpty(modServ1.getObject(t1));
 		assertNullOrEmpty(modServ1.getObject(t2));
 		redo(modServ1);
-		
+
 		assertNotNullOrEmpty(modServ1.getObject(t1));
 		assertNotNullOrEmpty(modServ1.getObject(t2));
 
 		modifyTaskName(modServ1, t2, "tk2NewName");
 
 		undo(modServ1);
-		
+
 		assertNotNullOrEmpty(modServ1.getObject(t1));
 		assertNotNullOrEmpty(modServ1.getObject(t2));
-		
+
 		t2 = modServ1.getObject(t2);
 		assertEquals("tsk2", t2.getName());
 

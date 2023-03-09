@@ -56,7 +56,9 @@ public class EventReciever implements IDisposableObject, EventHandler {
 		eventBroker.subscribe(CMEvents.GROUP_CREATED, this);
 		eventBroker.subscribe(CMEvents.NODES_POSITION_CHANGED, this);
 		eventBroker.subscribe(CMEvents.NODES_NAME_POSITION_CHANGED, this);
+		eventBroker.subscribe(CMEvents.CHECK_EDITOR_DIRTY, this);
 		eventBroker.subscribe(CMEvents.TASK_NAME_MODIFIED, this);
+
 	}
 
 	@Override
@@ -67,10 +69,11 @@ public class EventReciever implements IDisposableObject, EventHandler {
 		if (CMEvents.isTopicForMe(topic, CMEvents.TASK_CREATED, CMEvents.NODES_REMOVED,
 				CMEvents.MODULE_UNDO_REDO_OPERATION_DONE, CMEvents.MODULE_SAVED, CMEvents.GROUP_CREATED,
 				CMEvents.ALL_MODULE_SAVED, CMEvents.NODES_POSITION_CHANGED, CMEvents.NODES_NAME_POSITION_CHANGED,
-				CMEvents.TASK_NAME_MODIFIED)) {
+				CMEvents.TASK_NAME_MODIFIED, CMEvents.CHECK_EDITOR_DIRTY)) {
+
 			if (isForMe(object)) {
 
-				getChainMappingEditor().refreshIsDirty();
+				getChainMappingEditor().checkDirty();
 
 				boolean refreshForCreationOrRemove = CMEvents.isTopicForMe(topic, CMEvents.TASK_CREATED,
 						CMEvents.NODES_REMOVED, CMEvents.MODULE_UNDO_REDO_OPERATION_DONE, CMEvents.GROUP_CREATED);
@@ -83,6 +86,10 @@ public class EventReciever implements IDisposableObject, EventHandler {
 				if (refreshVisuals) {
 					getChainMappingEditor().refreshVisualsOnly();
 				}
+			}
+
+			if (CMEvents.CHECK_EDITOR_DIRTY.equals(topic)) {
+				getChainMappingEditor().checkDirty();
 			}
 		}
 	}

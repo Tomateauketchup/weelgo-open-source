@@ -103,8 +103,9 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 		forceMarkToShow(folder);
 		Object dataFile = getHierarchicalTreeSystemProvider().getFile(folder, GROUP_DATA_FILE_NAME);
 
+		Map<String, List<String>> inputsMap = new HashMap<>();
 		// Si le fichier existe on le lit
-		currentService = loadGroupOrModule(dataFile, currentService, servicesMap);
+		currentService = loadGroupOrModule(dataFile, currentService, servicesMap, inputsMap);
 
 		List<Object> childFolders = getHierarchicalTreeSystemProvider().getChildFolders(folder);
 
@@ -114,6 +115,25 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 					load(child, currentService, servicesMap);
 				}
 			}
+		}
+		Map<String, CMLink> linksMap = new HashMap<>();
+		// On créé les liens
+		for (Map.Entry<String, List<String>> entry : inputsMap.entrySet()) {
+			String output = entry.getKey();
+			List<String> inputs = entry.getValue();
+			if (CoreUtils.isNotNullOrEmpty(output) && inputs != null) {
+				for (String input : inputs) {
+					if (CoreUtils.isNotNullOrEmpty(input)) {
+						CMLink lnk = new CMLink();
+						lnk.setSourceUuid(input);
+						lnk.setTargetUuid(output);
+						CoreUtils.putObjectIntoMap(lnk, linksMap);
+					}
+				}
+			}
+		}
+		if (currentService != null) {
+			currentService.setLinks(CoreUtils.putMapIntoList(linksMap));
 		}
 
 	}
@@ -167,7 +187,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 	}
 
 	public CMModuleService loadGroupOrModule(Object dataFile, CMModuleService currentService,
-			Map<String, CMModuleService> servicesMap) {
+			Map<String, CMModuleService> servicesMap, Map<String, List<String>> inputsMap) {
 
 		if (getHierarchicalTreeSystemProvider().isFileExist(dataFile)) {
 			// Si le fichier existe on le lit
@@ -175,9 +195,12 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 				JSN_CMGroup gp = getHierarchicalTreeSystemProvider().deserializeJsonFile(dataFile, JSN_CMGroup.class);
 				if (gp != null) {
 					CMGroup newGp = new CMGroup();
-					Populator.jsonToModelPopulator(gp, newGp);
+					Populator.jsonToModelPopulator(gp, newGp, currentService, null);
 
 					if (newGp.isModule()) {
+
+						currentService = new CMModuleService();
+						Populator.jsonToModelPopulator(gp, newGp, currentService, inputsMap);
 
 						// If the group is a module, there is a file with the unique identifier
 						Object parentFolder = getHierarchicalTreeSystemProvider().getParentFolder(dataFile);
@@ -195,7 +218,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 								"Module unique identifier can't be null or empty.");
 						newGp.setModuleUniqueIdentifier(modUniqueIdentifier);
 						// On a détecté un nouveau module, il faut créer un service
-						currentService = new CMModuleService();
+
 						currentService.setRootGroup(newGp);
 						currentService.getGroups().add(newGp);
 						currentService.setContainer(parentFolder);
@@ -263,7 +286,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 			if (groups != null) {
 				for (CMGroup gp : groups) {
 					if (gp != null) {
-						String folderId = saveGroup(progressMonitor, moduleRootFolderParent, gp);
+						String folderId = saveGroup(progressMonitor, moduleRootFolderParent, gp, service);
 						if (CoreUtils.isNotNullOrEmpty(folderId)) {
 							map.put(folderId, gp);
 						}
@@ -289,18 +312,18 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 			if (keep == false) {
 				// We check if there is module in subfolder
 				keep = hasModuleInFolder(folderToTest);
-				
-				if(keep)
-				{
-					//If there is a module, we need to check if it's in this folder
-					Object moduleFile = getHierarchicalTreeSystemProvider().getFile(folderToTest, MODULE_DATA_FILE_NAME);
+
+				if (keep) {
+					// If there is a module, we need to check if it's in this folder
+					Object moduleFile = getHierarchicalTreeSystemProvider().getFile(folderToTest,
+							MODULE_DATA_FILE_NAME);
 					if (getHierarchicalTreeSystemProvider().isFile(moduleFile)
 							&& getHierarchicalTreeSystemProvider().isFileExist(moduleFile)) {
-						//We do nothing
-					}else
-					{
-						//We remove the group file
-						Object groupFile = getHierarchicalTreeSystemProvider().getFile(folderToTest, GROUP_DATA_FILE_NAME);
+						// We do nothing
+					} else {
+						// We remove the group file
+						Object groupFile = getHierarchicalTreeSystemProvider().getFile(folderToTest,
+								GROUP_DATA_FILE_NAME);
 						if (getHierarchicalTreeSystemProvider().isFile(groupFile)
 								&& getHierarchicalTreeSystemProvider().isFileExist(groupFile)) {
 							getHierarchicalTreeSystemProvider().deleteFile(groupFile);
@@ -343,7 +366,8 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 		return false;
 	}
 
-	public String saveGroup(IProgressMonitor progressMonitor, Object moduleRootFolder, CMGroup group) {
+	public String saveGroup(IProgressMonitor progressMonitor, Object moduleRootFolder, CMGroup group,
+			CMModuleService moduleServices) {
 		try {
 
 			assertNotNullOrEmptyFatal(moduleRootFolder);
@@ -357,7 +381,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 			}
 
 			JSN_CMGroup jsn = new JSN_CMGroup();
-			Populator.modelToJsonPopulator(group, jsn);
+			Populator.modelToJsonPopulator(group, jsn, moduleServices);
 			Object jsnFile = getHierarchicalTreeSystemProvider().getFile(groupFolder, GROUP_DATA_FILE_NAME);
 			getHierarchicalTreeSystemProvider().serialiseInJsonFile(jsnFile, jsn);
 			return getHierarchicalTreeSystemProvider().getUniqueIdForFolderOrFile(groupFolder);
@@ -390,7 +414,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 			String packageName = service.getRootGroup().getPackageName();
 			assertNotNullOrEmptyFatal(service.getRootGroup().getModuleUniqueIdentifier());
 			assertNotNullOrEmptyFatal(packageName);
-			
+
 			assertTrue(ValidatorUtils.isValidPackageName(packageName), WeelgoException.INVALID_PACKAGE_NAME);
 
 			Object moduleFolder = getHierarchicalTreeSystemProvider().getFolder(moduleParentFolder, packageName);
