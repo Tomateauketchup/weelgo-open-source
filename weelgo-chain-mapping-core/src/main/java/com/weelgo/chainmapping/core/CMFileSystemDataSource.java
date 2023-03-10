@@ -55,7 +55,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 		if (rootFolder != null) {
 			if (getHierarchicalTreeSystemProvider().isFolderExist(rootFolder)) {
 				Map<String, CMModuleService> loadedServices = new HashMap<>();
-				load(rootFolder, null, loadedServices);
+				load(rootFolder, null, null, loadedServices);
 
 				// We have the services loaded
 				for (Map.Entry<String, CMModuleService> entry : loadedServices.entrySet()) {
@@ -99,41 +99,45 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 		}
 	}
 
-	public void load(Object folder, CMModuleService currentService, Map<String, CMModuleService> servicesMap) {
+	public void load(Object folder, CMModuleService currentService, Map<String, List<String>> inputsMap,
+			Map<String, CMModuleService> servicesMap) {
 		forceMarkToShow(folder);
 		Object dataFile = getHierarchicalTreeSystemProvider().getFile(folder, GROUP_DATA_FILE_NAME);
 
-		Map<String, List<String>> inputsMap = new HashMap<>();
 		// Si le fichier existe on le lit
-		currentService = loadGroupOrModule(dataFile, currentService, servicesMap, inputsMap);
-
+		Object[] ob = loadGroupOrModule(dataFile, currentService, servicesMap, inputsMap);
+		currentService = (CMModuleService) ob[0];
+		inputsMap = (Map<String, List<String>>) ob[1];
 		List<Object> childFolders = getHierarchicalTreeSystemProvider().getChildFolders(folder);
 
 		if (childFolders != null) {
 			for (Object child : childFolders) {
 				if (child != null) {
-					load(child, currentService, servicesMap);
+					load(child, currentService, inputsMap, servicesMap);
 				}
 			}
 		}
-		Map<String, CMLink> linksMap = new HashMap<>();
-		// On créé les liens
-		for (Map.Entry<String, List<String>> entry : inputsMap.entrySet()) {
-			String output = entry.getKey();
-			List<String> inputs = entry.getValue();
-			if (CoreUtils.isNotNullOrEmpty(output) && inputs != null) {
-				for (String input : inputs) {
-					if (CoreUtils.isNotNullOrEmpty(input)) {
-						CMLink lnk = new CMLink();
-						lnk.setSourceUuid(input);
-						lnk.setTargetUuid(output);
-						CoreUtils.putObjectIntoMap(lnk, linksMap);
+
+		if (inputsMap != null) {
+			Map<String, CMLink> linksMap = new HashMap<>();
+			// On créé les liens
+			for (Map.Entry<String, List<String>> entry : inputsMap.entrySet()) {
+				String output = entry.getKey();
+				List<String> inputs = entry.getValue();
+				if (CoreUtils.isNotNullOrEmpty(output) && inputs != null) {
+					for (String input : inputs) {
+						if (CoreUtils.isNotNullOrEmpty(input)) {
+							CMLink lnk = new CMLink();
+							lnk.setSourceUuid(input);
+							lnk.setTargetUuid(output);
+							CoreUtils.putObjectIntoMap(lnk, linksMap);
+						}
 					}
 				}
 			}
-		}
-		if (currentService != null) {
-			currentService.setLinks(CoreUtils.putMapIntoList(linksMap));
+			if (currentService != null) {
+				currentService.setLinks(CoreUtils.putMapIntoList(linksMap));
+			}
 		}
 
 	}
@@ -186,7 +190,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 		}
 	}
 
-	public CMModuleService loadGroupOrModule(Object dataFile, CMModuleService currentService,
+	public Object[] loadGroupOrModule(Object dataFile, CMModuleService currentService,
 			Map<String, CMModuleService> servicesMap, Map<String, List<String>> inputsMap) {
 
 		if (getHierarchicalTreeSystemProvider().isFileExist(dataFile)) {
@@ -195,12 +199,18 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 				JSN_CMGroup gp = getHierarchicalTreeSystemProvider().deserializeJsonFile(dataFile, JSN_CMGroup.class);
 				if (gp != null) {
 					CMGroup newGp = new CMGroup();
-					Populator.jsonToModelPopulator(gp, newGp, currentService, null);
+					Object[] ob = Populator.jsonToModelPopulator(gp, newGp, null, currentService, inputsMap);
+
+					CMModuleService serTmp = (CMModuleService) ob[0];
+					Map<String, List<String>> inputsMapTmp = (Map<String, List<String>>) ob[1];
+
+					if (currentService == null || currentService.equals(serTmp) == false) {
+						// Un nouveau service a été détecté
+						currentService = serTmp;
+						inputsMap = inputsMapTmp;
+					}
 
 					if (newGp.isModule()) {
-
-						currentService = new CMModuleService();
-						Populator.jsonToModelPopulator(gp, newGp, currentService, inputsMap);
 
 						// If the group is a module, there is a file with the unique identifier
 						Object parentFolder = getHierarchicalTreeSystemProvider().getParentFolder(dataFile);
@@ -237,7 +247,7 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 				ExceptionsUtils.ManageException(e, logger);
 			}
 		}
-		return currentService;
+		return new Object[] { currentService, inputsMap };
 	}
 
 	public class CMUpdateListProcessor<T extends IUuidObject> extends IUuidUpdateListProcessor<T> {

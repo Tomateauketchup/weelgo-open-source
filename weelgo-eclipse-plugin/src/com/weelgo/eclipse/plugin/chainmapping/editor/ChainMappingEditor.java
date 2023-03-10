@@ -1,5 +1,7 @@
 package com.weelgo.eclipse.plugin.chainmapping.editor;
 
+import java.util.List;
+
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IExecutionListener;
@@ -47,6 +49,7 @@ import org.eclipse.ui.commands.ICommandService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.weelgo.chainmapping.core.CMLink;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMNode;
 import com.weelgo.chainmapping.core.IModuleUniqueIdentifierObject;
@@ -59,7 +62,7 @@ import com.weelgo.eclipse.plugin.chainmapping.editor.actions.CreateTaskAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.GenericSelectionAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.ModifyNodeNamePositionAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.PackAlignNodesAction;
-import com.weelgo.eclipse.plugin.chainmapping.editor.actions.RemoveNodesAction;
+import com.weelgo.eclipse.plugin.chainmapping.editor.actions.RemoveElementsAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.VAlignNodesAction;
 import com.weelgo.eclipse.plugin.handlers.SaveHandler;
 import com.weelgo.eclipse.plugin.job.CMOpenChainMappingEditorJob;
@@ -154,6 +157,10 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 		configureGraphicalViewer();
 		hookGraphicalViewer();
 		initializeGraphicalViewer();
+	}
+
+	public List getSelectedElements(Class... wantedClass) {
+		return Factory.getSelectionAdapter().findListMulti(getGraphicalViewer().getSelection(), wantedClass);
 	}
 
 	public ChainMappingEditor() {
@@ -267,6 +274,8 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 				getActionRegistry().getAction(ActivateToolAction.TOOL_LINK));
 		keyHandler.put(KeyStroke.getPressed(SELECTION_TOOL_KEY, SELECTION_TOOL_KEY, 0),
 				getActionRegistry().getAction(ActivateToolAction.TOOL_SELECTION));
+		keyHandler.put(KeyStroke.getPressed(SWT.DEL, 127, 0),
+				getActionRegistry().getAction(RemoveElementsAction.REMOVE_ELEMENTS));
 
 		keyHandler.put(KeyStroke.getPressed(SWT.ARROW_DOWN, 0),
 				getActionRegistry().getAction(ModifyNodeNamePositionAction.MODIFY_NODES_NAME_POSITION_BOTTOM));
@@ -330,7 +339,7 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 
 		addAction(new CreateTaskAction(this));
 		addAction(new CreateNeedAction(this));
-		addAction(new RemoveNodesAction(this));
+		addAction(new RemoveElementsAction(this));
 		addAction(new VAlignNodesAction(this));
 		addAction(new PackAlignNodesAction(this));
 

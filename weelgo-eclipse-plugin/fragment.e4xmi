@@ -56,10 +56,12 @@
     <elements xsi:type="commands:Command" xmi:id="_UfSqAKyqEe2Yx_P2nyaC7A" elementId="com.weelgo.eclipse.plugin.commands.CreateCMGroupCommand" commandName="Create group"/>
     <elements xsi:type="commands:Command" xmi:id="_06EQAK1qEe2CHMmgcvMd4w" elementId="com.weelgo.eclipse.plugin.commands.CMLoadAllModulesCommand" commandName="Load all modules"/>
     <elements xsi:type="commands:Command" xmi:id="_2kFxUK34Ee2LUdqnK6Q47w" elementId="com.weelgo.eclipse.plugin.commands.saveAllModulesCommand" commandName="Save all modules"/>
+    <elements xsi:type="commands:Command" xmi:id="_q5DW0L9tEe2O7I_rham4hA" elementId="com.weelgo.eclipse.plugin.commands.MoveElementsIntoCMGroupCommand" commandName="Move into group"/>
   </fragments>
   <fragments xsi:type="fragment:StringModelFragment" xmi:id="_fBwjMKyqEe2Yx_P2nyaC7A" featurename="handlers" parentElementId="xpath:/">
     <elements xsi:type="commands:Handler" xmi:id="_gRhh8KyqEe2Yx_P2nyaC7A" elementId="com.weelgo.eclipse.plugin.job.CMCreateGroupJob" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.job.CMCreateGroupJob" command="_UfSqAKyqEe2Yx_P2nyaC7A"/>
     <elements xsi:type="commands:Handler" xmi:id="__7krEK1pEe2CHMmgcvMd4w" elementId="com.weelgo.eclipse.plugin.job.CMLoadAllModulesJob" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.job.CMLoadAllModulesJob" command="_06EQAK1qEe2CHMmgcvMd4w"/>
     <elements xsi:type="commands:Handler" xmi:id="_9rRPYK34Ee2LUdqnK6Q47w" elementId="com.weelgo.eclipse.plugin.job.CMSaveAllModulesJob" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.job.CMSaveAllModulesJob" command="_2kFxUK34Ee2LUdqnK6Q47w"/>
+    <elements xsi:type="commands:Handler" xmi:id="_yYpU4L9tEe2O7I_rham4hA" elementId="com.weelgo.eclipse.plugin.job.CMMoveElementsIntoGroupJob" contributionURI="bundleclass://com.weelgo.eclipse.plugin/com.weelgo.eclipse.plugin.job.CMMoveElementsIntoGroupJob" command="_q5DW0L9tEe2O7I_rham4hA"/>
   </fragments>
 </fragment:ModelFragments>

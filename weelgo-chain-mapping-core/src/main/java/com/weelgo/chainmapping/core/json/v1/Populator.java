@@ -1,5 +1,6 @@
 package com.weelgo.chainmapping.core.json.v1;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -11,8 +12,8 @@ import com.weelgo.chainmapping.core.CMTask;
 
 public class Populator {
 
-	public static void jsonToModelPopulator(Object source, Object toPopulate, CMModuleService module,
-			Map<String, List<String>> inputsMap) {
+	public static Object[] jsonToModelPopulator(Object source, Object toPopulate, CMGroup parentGroup,
+			CMModuleService module, Map<String, List<String>> inputsMap) {
 		if (source instanceof JSN_CMGroup && toPopulate instanceof CMGroup) {
 			CMGroup to = (CMGroup) toPopulate;
 			JSN_CMGroup src = (JSN_CMGroup) source;
@@ -22,13 +23,18 @@ public class Populator {
 			to.setType(src.getType());
 			to.setUuid(src.getUuid());
 
+			if (to.isModule()) {
+				module = new CMModuleService();
+				inputsMap = new HashMap<>();
+			}
+
 			if (module != null) {
 				List<JSN_CMTask> tasks = src.getTasks();
 				if (tasks != null) {
 					for (JSN_CMTask t : tasks) {
 						if (t != null) {
 							CMTask tsk = new CMTask();
-							jsonToModelPopulator(t, tsk, module, inputsMap);
+							jsonToModelPopulator(t, tsk, to, module, inputsMap);
 							module.getTasks().add(tsk);
 							module.needReloadObjects();
 						}
@@ -39,7 +45,7 @@ public class Populator {
 					for (JSN_CMNeed t : needs) {
 						if (t != null) {
 							CMNeed tsk = new CMNeed();
-							jsonToModelPopulator(t, tsk, module, inputsMap);
+							jsonToModelPopulator(t, tsk, to, module, inputsMap);
 							module.getNeeds().add(tsk);
 							module.needReloadObjects();
 						}
@@ -50,7 +56,9 @@ public class Populator {
 		} else if (source instanceof JSN_CMTask && toPopulate instanceof CMTask) {
 			CMTask to = (CMTask) toPopulate;
 			JSN_CMTask src = (JSN_CMTask) source;
-			to.setGroupUuid(src.getGroup_uuid());
+			if (parentGroup != null) {
+				to.setGroupUuid(parentGroup.getUuid());
+			}
 			to.setName(src.getName());
 			to.setNamePosition(src.getName_position());
 			to.setPositionX(src.getPosition_x());
@@ -62,7 +70,9 @@ public class Populator {
 		} else if (source instanceof JSN_CMNeed && toPopulate instanceof CMNeed) {
 			CMNeed to = (CMNeed) toPopulate;
 			JSN_CMNeed src = (JSN_CMNeed) source;
-			to.setGroupUuid(src.getGroup_uuid());
+			if (parentGroup != null) {
+				to.setGroupUuid(parentGroup.getUuid());
+			}
 			to.setName(src.getName());
 			to.setNamePosition(src.getName_position());
 			to.setPositionX(src.getPosition_x());
@@ -72,6 +82,7 @@ public class Populator {
 				inputsMap.put(src.getUuid(), src.getInputs());
 			}
 		}
+		return new Object[] { module, inputsMap };
 	}
 
 	public static void modelToJsonPopulator(Object source, Object toPopulate, CMModuleService module) {
@@ -108,7 +119,6 @@ public class Populator {
 		} else if (source instanceof CMTask && toPopulate instanceof JSN_CMTask) {
 			JSN_CMTask to = (JSN_CMTask) toPopulate;
 			CMTask src = (CMTask) source;
-			to.setGroup_uuid(src.getGroupUuid());
 			to.setName(src.getName());
 			to.setName_position(src.getNamePosition());
 			to.setPosition_x(src.getPositionX());
@@ -128,7 +138,6 @@ public class Populator {
 		} else if (source instanceof CMNeed && toPopulate instanceof JSN_CMNeed) {
 			JSN_CMNeed to = (JSN_CMNeed) toPopulate;
 			CMNeed src = (CMNeed) source;
-			to.setGroup_uuid(src.getGroupUuid());
 			to.setName(src.getName());
 			to.setName_position(src.getNamePosition());
 			to.setPosition_x(src.getPositionX());

@@ -15,6 +15,7 @@ import com.weelgo.chainmapping.core.CMFileSystemDataSource;
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMModulesManager;
+import com.weelgo.chainmapping.core.CMNode;
 import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.chainmapping.core.navigator.NavNode;
 import com.weelgo.chainmapping.core.navigator.NavigatorModel;
@@ -701,7 +702,6 @@ public class TestChainMappingCore extends CMGenericTest {
 
 		assertEquals(tsk2.getName(), tsk2Tmp.getName());
 		assertEquals(tsk2.getUuid(), tsk2Tmp.getUuid());
-		
 
 	}
 
@@ -738,6 +738,31 @@ public class TestChainMappingCore extends CMGenericTest {
 
 		t2 = modServ1.getObject(t2);
 		assertEquals("tsk2", t2.getName());
+
+	}
+
+	@Test
+	public void testNavigator2() throws Exception {
+
+		CMModulesManager modManager = createModulesManager();
+		String modId1 = createModule(modManager, "Module 1", "module_1");
+		CMModuleService modServ1 = modManager.getServiceByModuleUniqueIdentifierId(modId1);
+		CMGroup rootGp = modServ1.getRootGroup();
+		File rootFolder = (File) modServ1.getContainer();
+
+		CMGroup gp1 = createGroup(modManager, modServ1, "gp1", rootGp);
+
+		NavigatorModel model = new NavigatorModel();
+		model.update(modManager);
+		NavNode navGp1 = model.getNodeByName(gp1.getName());
+		assertTrue(navGp1.isGroup());
+
+		saveAllModules(modManager);
+
+		loadAllModules(modManager);
+		model.update(modManager);
+		navGp1 = model.getNodeByName(gp1.getName());
+		assertTrue(navGp1.isGroup());
 
 	}
 
@@ -822,4 +847,86 @@ public class TestChainMappingCore extends CMGenericTest {
 		assertFalse(navGp2_1.isSubmodulesDirty());
 
 	}
+
+	@Test
+	public void testLinks() throws Exception {
+
+		CMModulesManager modManager = createModulesManager();
+		String modId1 = createModule(modManager, "Module 1", "module_1");
+		CMModuleService modServ1 = modManager.getServiceByModuleUniqueIdentifierId(modId1);
+		CMGroup rootGp = modServ1.getRootGroup();
+		File rootFolder = (File) modServ1.getContainer();
+
+		CMGroup gp1 = createGroup(modManager, modServ1, "gp1", rootGp);
+		CMGroup gp2 = createGroup(modManager, modServ1, "gp2", gp1);
+
+		CMTask t1 = createTask(modServ1, "t1", rootGp);
+		CMTask t2 = createTask(modServ1, "t2", gp1);
+		CMTask t3 = createTask(modServ1, "t3", gp2);
+
+		linkNodes(modServ1, t1, t2);
+		linkNodes(modServ1, t2, t3);
+
+		List<CMNode> lst = modServ1.getInputElements(t1);
+		assertNullOrEmpty(lst);
+
+		lst = modServ1.getInputElements(t2);
+		assertEquals(1, lst.size());
+		assertEquals(t1.getUuid(), lst.get(0).getUuid());
+
+		lst = modServ1.getInputElements(t3);
+		assertEquals(1, lst.size());
+		assertEquals(t2.getUuid(), lst.get(0).getUuid());
+
+		saveAllModules(modManager);
+
+		loadAllModules(modManager);
+
+		lst = modServ1.getInputElements(t1);
+		assertNullOrEmpty(lst);
+
+		lst = modServ1.getInputElements(t2);
+		assertEquals(1, lst.size());
+		assertEquals(t1.getUuid(), lst.get(0).getUuid());
+
+		lst = modServ1.getInputElements(t3);
+		assertEquals(1, lst.size());
+		assertEquals(t2.getUuid(), lst.get(0).getUuid());
+		
+		try {
+			moveElementsIntoGroup(modServ1,gp2,rootGp);
+			fail();
+		} catch (Exception e) {
+			assertDynamicException(WeelgoException.LOOP_IN_GROUPS, e);
+		}
+		
+
+		moveElementsIntoGroup(modServ1,gp1,t1,t2,t3,gp2);
+		
+		t1=modServ1.getObject(t1);
+		t2=modServ1.getObject(t2);
+		t3=modServ1.getObject(t3);
+		gp1=modServ1.getObject(gp1);
+		gp2=modServ1.getObject(gp2);
+		
+		assertEquals(gp1.getUuid(), t1.getGroupUuid());
+		assertEquals(gp1.getUuid(), t2.getGroupUuid());
+		assertEquals(gp1.getUuid(), t3.getGroupUuid());
+		assertEquals(gp1.getUuid(), gp2.getGroupUuid());
+		assertEquals(rootGp.getUuid(), gp1.getGroupUuid());
+		
+		lst = modServ1.getInputElements(t1);
+		assertNullOrEmpty(lst);
+
+		lst = modServ1.getInputElements(t2);
+		assertEquals(1, lst.size());
+		assertEquals(t1.getUuid(), lst.get(0).getUuid());
+
+		lst = modServ1.getInputElements(t3);
+		assertEquals(1, lst.size());
+		assertEquals(t2.getUuid(), lst.get(0).getUuid());
+		
+	}
+
+	
 }

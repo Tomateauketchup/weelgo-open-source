@@ -12,7 +12,8 @@ public class CMEvents {
 	public static final String NEED_CREATED = "CM/NEED_CREATED";
 	public static final String LINK_CREATED = "CM/LINK_CREATED";
 	public static final String TASK_NAME_MODIFIED = "CM/TASK_NAME_MODIFIED";
-	public static final String NODES_REMOVED = "CM/NODES_REMOVED";
+	public static final String ELEMENTS_REMOVED = "CM/ELEMENTS_REMOVED";
+	public static final String ELEMENTS_MOVED_INTO_GROUP = "CM/ELEMENTS_MOVED_INTO_GROUP";
 	public static final String NODES_POSITION_CHANGED = "CM/NODES_POSITION_CHANGED";
 	public static final String NODES_NAME_POSITION_CHANGED = "CM/NODES_NAME_POSITION_CHANGED";
 	public static final String MODULE_CREATED = "CM/MODULE_CREATED";

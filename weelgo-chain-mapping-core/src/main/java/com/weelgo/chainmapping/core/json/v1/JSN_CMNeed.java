@@ -11,7 +11,6 @@ public class JSN_CMNeed {
 
 	private String uuid;
 	private String name;
-	private String group_uuid;
 	private int position_x;
 	private int position_y;
 	private String name_position;
@@ -31,14 +30,6 @@ public class JSN_CMNeed {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getGroup_uuid() {
-		return group_uuid;
-	}
-
-	public void setGroup_uuid(String group_uuid) {
-		this.group_uuid = group_uuid;
 	}
 
 	public int getPosition_x() {

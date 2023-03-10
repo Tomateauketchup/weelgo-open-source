@@ -1,24 +1,27 @@
 package com.weelgo.eclipse.plugin.job;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.weelgo.chainmapping.core.CMLink;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMNode;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.IProgressMonitor;
+import com.weelgo.core.IUuidObject;
 import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.ImagesFactory;
 
-public class CMRemoveNodesJob extends CMJob {
+public class CMRemoveElementsJob extends CMJob {
 
-	public CMRemoveNodesJob() {
-		super("Remove node(s)", "Removing node(s) ...");
+	public CMRemoveElementsJob() {
+		super("Remove element(s)", "Removing element(s) ...");
 	}
 
 	@Override
 	public String getUndoRedoLabel() {
-		return "Remove node(s)";
+		return "Remove element(s)";
 	}
 
 	@Override
@@ -31,15 +34,14 @@ public class CMRemoveNodesJob extends CMJob {
 		return ImagesFactory.REMOVE_ICON;
 	}
 
-	public static CMRemoveNodesJob CREATE() {
-		return Factory.create(CMRemoveNodesJob.class);
+	public static CMRemoveElementsJob CREATE() {
+		return Factory.create(CMRemoveElementsJob.class);
 	}
 
 	@Override
 	public boolean canExecuteJob() {
-		List<CMNode> selection = (List<CMNode>) getSelectedObject();
-
-		if (selection != null && selection.size() > 0) {
+		List arl =  (List) getSelectedObject();		
+		if (arl != null && arl.size() > 0) {
 			return true;
 		}
 
@@ -50,17 +52,18 @@ public class CMRemoveNodesJob extends CMJob {
 	@Override
 	public void doRun(IProgressMonitor monitor) {
 
-		List<CMNode> selection = (List<CMNode>) getSelectedObject();
-		if (selection != null && selection.size() > 0) {
-			CMNode node = selection.get(0);
+		List<IUuidObject> arl = (List<IUuidObject>) getSelectedObject();		
+
+		if (arl != null && arl.size() > 0) {
+			IUuidObject node = arl.get(0);
 			if (node != null) {
 				CMModuleService ser = getModuleService(node);
 				if (ser != null) {
-					setModuleUniqueIdentifier(node.getModuleUniqueIdentifier());
-					String[] uuids = CoreUtils.transformListToStringArray(selection);
+					setModuleUniqueIdentifier(ser.getModuleUniqueIdentifier());
+					String[] uuids = CoreUtils.transformListToStringArray(arl);
 					if (uuids != null && uuids.length > 0) {
-						ser.removeNodes(uuids);
-						sentEvent(CMEvents.NODES_REMOVED, selection);
+						ser.removeElements(uuids);
+						sentEvent(CMEvents.ELEMENTS_REMOVED, arl);
 					}
 				}
 			}

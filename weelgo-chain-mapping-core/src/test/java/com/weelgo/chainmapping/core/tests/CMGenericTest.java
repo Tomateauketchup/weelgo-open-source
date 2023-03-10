@@ -6,7 +6,10 @@ import com.weelgo.chainmapping.core.CMFileSystemDataSource;
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMModulesManager;
+import com.weelgo.chainmapping.core.CMNode;
 import com.weelgo.chainmapping.core.CMTask;
+import com.weelgo.core.CoreUtils;
+import com.weelgo.core.IUuidObject;
 import com.weelgo.core.json.tests.GenericTest;
 
 public class CMGenericTest extends GenericTest {
@@ -71,10 +74,19 @@ public class CMGenericTest extends GenericTest {
 		saveInUndoRedoManager(modServ);
 		return t;
 	}
-	
-	public CMTask modifyTaskName(CMModuleService modServ,CMTask t,String newName)
-	{
-		t=modServ.modifyTaskName(newName, t.getUuid());
+
+	public void linkNodes(CMModuleService modServ, CMNode source, CMNode target) {
+		modServ.linkNodes(source.getUuid(), target.getUuid());
+		saveInUndoRedoManager(modServ);
+	}
+
+	public void moveElementsIntoGroup(CMModuleService modServ, CMGroup parentGroup, IUuidObject... object) {
+		modServ.moveElementsIntoGroup(parentGroup.getUuid(), CoreUtils.transformArrayToStringArray(object));
+		saveInUndoRedoManager(modServ);
+	}
+
+	public CMTask modifyTaskName(CMModuleService modServ, CMTask t, String newName) {
+		t = modServ.modifyTaskName(newName, t.getUuid());
 		saveInUndoRedoManager(modServ);
 		return t;
 	}

@@ -9,9 +9,19 @@ import javax.inject.Singleton;
 import org.eclipse.e4.core.di.annotations.Creatable;
 import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.services.IServiceConstants;
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import com.weelgo.chainmapping.core.IDataSourceObject;
 import com.weelgo.chainmapping.core.IModuleUniqueIdentifierObject;
+import com.weelgo.core.CoreUtils;
+import com.weelgo.core.exceptions.ExceptionsUtils;
+import com.weelgo.eclipse.plugin.chainmapping.editor.ChainMappingEditor;
+import com.weelgo.eclipse.plugin.chainmapping.editor.ChainMappingEditorInput;
 import com.weelgo.eclipse.plugin.chainmapping.editor.NodeEditPart;
 
 @Creatable
@@ -35,6 +45,33 @@ public class CurrentSelectionService {
 
 	public Object getCurrentSelection() {
 		return currentSelection;
+	}
+
+	public List findSelectedElementsIntoChainMappingEditor(String uniqueModuleIdentifier, Class... wantedClass) {
+		IWorkbenchPage page = PlatformUI.getWorkbench().getActiveWorkbenchWindow().getActivePage();
+
+		IEditorReference[] editors = page.getEditorReferences();
+		if (editors != null) {
+			for (IEditorReference r : editors) {
+				if (r != null) {
+					try {
+						IEditorInput ei = r.getEditorInput();
+						if (ei instanceof ChainMappingEditorInput c) {
+							if (CoreUtils.isStrictlyEqualsString(uniqueModuleIdentifier,
+									c.getModuleUniqueIdentifier())) {
+								IEditorPart editor = r.getEditor(false);
+								if (editor instanceof ChainMappingEditor ce) {
+									return ce.getSelectedElements(wantedClass);
+								}
+							}
+						}
+					} catch (PartInitException e) {
+						ExceptionsUtils.logException(e, null);
+					}
+				}
+			}
+		}
+		return null;
 	}
 
 	public <T> T find(Class<T> wantedClass) {

@@ -113,6 +113,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 	public void needReloadObjects() {
 		groupMapByUuid = null;
+		needReloadInputsOutputs();
 	}
 
 	public void needReloadInputsOutputs() {
@@ -384,12 +385,35 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			}
 		}
 
-		// TODO il faut faire les vérification de noms et autres ici
+		if (links != null) {
+			for (CMLink tk : links) {
+				checkLink(tk);
+			}
+		}
 
+		// TODO il faut faire les vérification de noms et autres ici
 		needReloadObjects();
+		if (groups != null) {
+			for (CMGroup gp : groups) {
+				if (gp != null) {
+					String parentPath = gp.getPackageParentPath();
+					CMGroup parent = getGroupByPackageFullPath(parentPath);
+					if (parent != null) {
+						gp.setGroupUuid(parent.getUuid());
+					}
+				}
+			}
+		}
+		;
 	}
 
 	public void checkTask(CMTask tsk) {
+		if (tsk != null) {
+			tsk.setModuleUniqueIdentifier(rootGroup.getModuleUniqueIdentifier());
+		}
+	}
+
+	public void checkLink(CMLink tsk) {
 		if (tsk != null) {
 			tsk.setModuleUniqueIdentifier(rootGroup.getModuleUniqueIdentifier());
 		}
@@ -429,6 +453,78 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 	public void setContainer(Object parentContainer) {
 		this.container = parentContainer;
+	}
+
+	public void moveElementsIntoGroup(String parentGroup, String... elementsToMove) {
+		if (elementsToMove == null || elementsToMove.length == 0) {
+			return;
+		}
+		CMGroup parent = getGroupByUuid(parentGroup);
+		assertNotNullOrEmpty(parentGroup);
+		List<CMGroup> gpList = new ArrayList<>();
+		List<CMNode> nodes = new ArrayList<>();
+		for (String uuid : elementsToMove) {
+			Object o = getObjectByUuid(uuid);
+			// On récupère les groupes en premier pour faire un check de cycle
+			if (o instanceof CMGroup) {
+				gpList.add((CMGroup) o);
+			} else if (o instanceof CMNode) {
+				nodes.add((CMNode) o);
+			}
+		}
+
+		if (gpList.size() == 0 && nodes.size() == 0) {
+			return;
+		}
+		if (gpList.size() > 0) {
+			for (CMGroup gpTmp : gpList) {
+				if (CoreUtils.isStrictlyEqualsString(parent.getUuid(), gpTmp.getUuid())
+						|| isChildOfGroup(gpTmp.getUuid(), parent.getUuid())) {
+					throwDynamicException(WeelgoException.LOOP_IN_GROUPS);
+				}
+			}
+		}
+
+		for (CMNode n : nodes) {
+			if (n != null) {
+				n.setGroupUuid(parent.getUuid());
+			}
+		}
+
+		if (gpList.size() > 0) {
+			for (CMGroup gpTmp : gpList) {
+				gpTmp.setPackageParentPath(createPackageParentPath(parent));
+				gpTmp.setGroupUuid(parent.getUuid());
+				checkGroup(gpTmp);
+			}
+		}
+		needReloadObjects();
+	}
+
+	public boolean isChildOfGroup(String parentGroupUuid, String childUuid) {
+		if (CoreUtils.isNotNullOrEmpty(parentGroupUuid) && CoreUtils.isNotNullOrEmpty(childUuid)) {
+			IUuidObject gp = getObjectByUuid(parentGroupUuid);
+			if (gp != null) {
+				List<Object> childs = getChilds(gp);
+				if (childs != null) {
+					for (Object o : childs) {
+						if (o instanceof IUuidObject) {
+							IUuidObject oi = (IUuidObject) o;
+							if (CoreUtils.isStrictlyEqualsString(childUuid, oi.getUuid())) {
+								return true;
+							}
+
+							boolean isOk = isChildOfGroup(oi.getUuid(), childUuid);
+							if (isOk) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return false;
 	}
 
 	public String findNameForNewNeed(String parentGroupUuid) {
@@ -596,10 +692,31 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		return arl;
 	}
 
-	public void removeNodes(String[] nodesUuid) {
-		if (nodesUuid != null) {
-			for (String uuid : nodesUuid) {
+	public void removeElements(String[] elementsUuid) {
+		if (elementsUuid != null) {
+			Map<String, String> uuidsToRemoveFromLink = new HashMap<>();
+			for (String uuid : elementsUuid) {
+				uuidsToRemoveFromLink.put(uuid, uuid);
+			}
+
+			for (String uuid : elementsUuid) {
 				CoreUtils.removeObjectFromList(uuid, tasks);
+				CoreUtils.removeObjectFromList(uuid, links);
+				CoreUtils.removeObjectFromList(uuid, needs);
+			}
+
+			if (links != null) {
+				ArrayList<CMLink> liksToRemove = new ArrayList<>();
+				for (CMLink o : links) {
+					if (o != null) {
+						if (o.getSourceUuid() != null && uuidsToRemoveFromLink.containsKey(o.getSourceUuid())) {
+							liksToRemove.add(o);
+						} else if (o.getTargetUuid() != null && uuidsToRemoveFromLink.containsKey(o.getTargetUuid())) {
+							liksToRemove.add(o);
+						}
+					}
+				}
+				links.removeAll(liksToRemove);
 			}
 		}
 
@@ -742,6 +859,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 				}
 				needReloadObjects();
 			}
+			checkLink(lnk);
 			return lnk;
 		}
 		return null;

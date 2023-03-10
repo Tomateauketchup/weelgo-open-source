@@ -130,7 +130,7 @@ public class WeelgoNavigatorViewPart {
 
 	@Inject
 	@Optional
-	public void getNodesRemovedEvent(@UIEventTopic(CMEvents.NODES_REMOVED) List nodes) {
+	public void getNodesRemovedEvent(@UIEventTopic(CMEvents.ELEMENTS_REMOVED) List nodes) {
 		refreshView();
 	}
 
@@ -155,6 +155,12 @@ public class WeelgoNavigatorViewPart {
 	@Inject
 	@Optional
 	public void getTaskCreatedEvent(@UIEventTopic(CMEvents.TASK_CREATED) CMTask tsk) {
+		refreshView();
+	}
+	
+	@Inject
+	@Optional
+	public void getElementsMovedIntoGroupEvent(@UIEventTopic(CMEvents.ELEMENTS_MOVED_INTO_GROUP) Object o) {
 		refreshView();
 	}
 

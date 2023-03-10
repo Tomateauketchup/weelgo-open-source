@@ -24,6 +24,11 @@ public class CMOpenChainMappingEditorJob extends CMJob {
 	}
 
 	@Override
+	public boolean makeEditorDirty() {
+		return false;
+	}
+
+	@Override
 	public void postJobUISync() {
 
 		try {

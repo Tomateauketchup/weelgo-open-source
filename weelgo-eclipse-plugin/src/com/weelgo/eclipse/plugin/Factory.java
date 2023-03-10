@@ -3,7 +3,6 @@ package com.weelgo.eclipse.plugin;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.TimeZone;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -19,14 +18,12 @@ import org.eclipse.draw2d.FigureCanvas;
 import org.eclipse.e4.core.contexts.ContextInjectionFactory;
 import org.eclipse.e4.core.contexts.IEclipseContext;
 import org.eclipse.e4.core.di.annotations.Creatable;
-import org.eclipse.e4.core.services.events.IEventBroker;
 import org.eclipse.e4.ui.di.UISynchronize;
 import org.eclipse.e4.ui.model.application.commands.MCommand;
 import org.eclipse.e4.ui.model.application.commands.MCommandsFactory;
 import org.eclipse.e4.ui.model.application.ui.menu.MDirectMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MHandledMenuItem;
 import org.eclipse.e4.ui.model.application.ui.menu.MMenuFactory;
-import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.gef.EditPart;
 import org.eclipse.gef.commands.Command;
 import org.eclipse.swt.graphics.Point;
@@ -52,6 +49,7 @@ public class Factory {
 	public static final String PLUGIN_ID = "com.weelgo.eclipse.plugin";
 
 	public static final String COMMAND_CREATE_CM_GROUP_ID = "com.weelgo.eclipse.plugin.commands.CreateCMGroupCommand";
+	public static final String COMMAND_MOVE_ELEMENTS_INTO_CM_GROUP_ID = "com.weelgo.eclipse.plugin.commands.MoveElementsIntoCMGroupCommand";
 	public static final String COMMAND_SAVE_ID = "org.eclipse.ui.file.save";
 
 	private static Factory factory = null;
@@ -93,7 +91,7 @@ public class Factory {
 						return;
 
 					if (Factory.getFactory().isWorkspaceModified()) {
-						factory.getEventBroker().sentEvent(CMEvents.WORKSPACE_FOLDER_MODIFIED);
+						Factory.getEventBroker().sentEvent(CMEvents.WORKSPACE_FOLDER_MODIFIED);
 					}
 				}
 			};
@@ -150,8 +148,9 @@ public class Factory {
 		MDirectMenuItem item = MMenuFactory.INSTANCE.createDirectMenuItem();
 		item.setLabel(label);
 		item.setContributionURI("bundleclass://com.weelgo.eclipse.plugin/" + handlerCLass.getCanonicalName());
-		item.setIconURI("platform:/plugin/com.weelgo.eclipse.plugin/icons/" + icon);
-
+		if (CoreUtils.isNotNullOrEmpty(icon)) {
+			item.setIconURI("platform:/plugin/com.weelgo.eclipse.plugin/icons/" + icon);
+		}
 		return item;
 	}
 
@@ -161,7 +160,9 @@ public class Factory {
 		cmd.setElementId(commandId);
 		item.setCommand(cmd);
 		item.setLabel(label);
-		item.setIconURI("platform:/plugin/com.weelgo.eclipse.plugin/icons/" + icon);
+		if (CoreUtils.isNotNullOrEmpty(icon)) {
+			item.setIconURI("platform:/plugin/com.weelgo.eclipse.plugin/icons/" + icon);
+		}
 		return item;
 	}
 
@@ -221,7 +222,7 @@ public class Factory {
 	}
 
 	public void doFirstModulesLoad() {
-		if (isFirstLoadDone == false) {
+		if (!isFirstLoadDone) {
 			CMLoadAllModulesJob job = CMLoadAllModulesJob.CREATE();
 			job.doSchedule();
 		}

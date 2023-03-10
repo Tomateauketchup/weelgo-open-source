@@ -29,6 +29,10 @@ public abstract class GenericSelectionAction extends SelectionAction {
 		return getSelectionAdapter().findList(getSelection(), wantedClass);
 	}
 
+	public List findListMulti(Class... wantedClass) {
+		return getSelectionAdapter().findListMulti(getSelection(), wantedClass);
+	}
+
 	public Point getCursorPosition() {
 		return getChainMappingEditor().getEditorEditPart().getCursorPosition();
 	}

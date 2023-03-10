@@ -18,6 +18,7 @@ public class WeelgoException extends RuntimeException implements Serializable {
 	public static final String MODULE_ALREADY_EXIST = "module_already_exists";
 	public static final String OBJECT_NULL_OR_EMPTY = "object_null_or_empty";
 	public static final String GROUP_ALREADY_EXIST = "group_already_exists";
+	public static final String LOOP_IN_GROUPS = "loop_in_groups";
 
 	public WeelgoException() {
 	}

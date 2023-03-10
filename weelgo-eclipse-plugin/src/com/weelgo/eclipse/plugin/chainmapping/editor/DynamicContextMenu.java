@@ -6,12 +6,14 @@ import org.eclipse.gef.ui.actions.ActionRegistry;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 
+import com.weelgo.chainmapping.core.CMLink;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.eclipse.plugin.CurrentSelectionService;
 import com.weelgo.eclipse.plugin.Factory;
+import com.weelgo.eclipse.plugin.chainmapping.editor.actions.CreateNeedAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.CreateTaskAction;
-import com.weelgo.eclipse.plugin.chainmapping.editor.actions.RemoveNodesAction;
+import com.weelgo.eclipse.plugin.chainmapping.editor.actions.RemoveElementsAction;
 
 public class DynamicContextMenu extends ContextMenuProvider {
 
@@ -30,11 +32,13 @@ public class DynamicContextMenu extends ContextMenuProvider {
 	public void buildContextMenu(IMenuManager menu) {
 
 		if (editor.isLinkTool() == false) {
-			if (selectionService.find(CMTask.class) != null) {
-				IAction action = getActionRegistry().getAction(RemoveNodesAction.REMOVE_NODES);
+			if (selectionService.find(CMTask.class) != null || selectionService.find(CMLink.class) != null) {
+				IAction action = getActionRegistry().getAction(RemoveElementsAction.REMOVE_ELEMENTS);
 				menu.add(action);
 			} else if (selectionService.find(CMModuleService.class) != null) {
 				IAction action = getActionRegistry().getAction(CreateTaskAction.CREATE_TASK);
+				menu.add(action);
+				action = getActionRegistry().getAction(CreateNeedAction.CREATE_NEED);
 				menu.add(action);
 			}
 		}

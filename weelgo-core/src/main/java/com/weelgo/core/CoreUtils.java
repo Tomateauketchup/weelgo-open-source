@@ -16,8 +16,8 @@ import com.weelgo.core.exceptions.AssertNotNullOrEmptyCustomFatal;
 import com.weelgo.core.exceptions.ExceptionsUtils;
 
 public class CoreUtils {
-	
-	public static IUuidGenerator uuidGenerator=new UuidGenerator();
+
+	public static IUuidGenerator uuidGenerator = new UuidGenerator();
 
 	public static void disposeMap(Map objects) {
 		if (objects != null && objects.size() > 0) {
@@ -212,10 +212,10 @@ public class CoreUtils {
 	public static String generateUUIDString() {
 		return uuidGenerator.generateUuid();
 	}
+
 	public static String generateUUIDString(int nbChar) {
 		return uuidGenerator.generateUuid(nbChar);
 	}
-
 
 	public static File getFileFromUrlPath(String urlPath) throws Exception {
 
@@ -230,7 +230,6 @@ public class CoreUtils {
 
 	}
 
-	
 	public static String removeEnd(final String str, final String elementToRemove) {
 		if (isNullOrEmpty(str) || isNullOrEmpty(elementToRemove)) {
 			return str;
@@ -436,6 +435,22 @@ public class CoreUtils {
 			}
 		}
 		return arl;
+	}
+
+	public static String[] transformArrayToStringArray(Object... lst) {
+		List<String> arl = new ArrayList<>();
+		if (lst != null) {
+			for (Object o : lst) {
+				if (o != null) {
+					if (o instanceof IUuidObject) {
+						arl.add(((IUuidObject) o).getUuid());
+					} else if (o instanceof String) {
+						arl.add((String) o);
+					}
+				}
+			}
+		}
+		return (String[]) arl.toArray(new String[arl.size()]);
 	}
 
 	public static String[] transformListToStringArray(List lst) {

@@ -68,6 +68,17 @@ public class SelectionAdapter {
 		return find(objectToCheck, List.class);
 	}
 
+	public List findListMulti(Object objectToCheck, Class... wantedClass) {
+		List lst = new ArrayList<>();
+		if (wantedClass != null) {
+			for (Class c : wantedClass) {
+				CoreUtils.putListIntoList(findList(objectToCheck, c), lst);
+			}
+		}
+		return lst;
+
+	}
+
 	public <T> List<T> findList(Object objectToCheck, Class<T> wantedClass) {
 		List<T> arl = new ArrayList<T>();
 
@@ -133,9 +144,8 @@ public class SelectionAdapter {
 		if (objectToCheck instanceof ISelection) {
 			if (objectToCheck instanceof IStructuredSelection s) {
 
-				
-				List listToCheck = s.toList();			
-				
+				List listToCheck = s.toList();
+
 				T o = find(listToCheck, wantedClass);
 				if (o != null) {
 					return o;
