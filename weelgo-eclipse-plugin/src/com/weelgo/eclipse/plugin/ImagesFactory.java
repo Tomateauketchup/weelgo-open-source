@@ -13,7 +13,7 @@ public class ImagesFactory {
 	public static final String TASK_ICON = "task.png";
 	public static final String REMOVE_ICON = "remove.png";
 	public static final String CHAIN_MAPPING_ICON = "chain_mapping.png";
-	public static final String DELIVERABLE_ICON = "deliverable.gif";
+	public static final String NEED_ICON = "deliverable.gif";
 	public static final String FILE_ICON = "file.png";
 	public static final String FOLDER_ICON = "folder.gif";
 	public static final String GROUP_ICON = "package.gif";

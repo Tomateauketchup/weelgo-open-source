@@ -71,6 +71,7 @@ public class CMEditorEditPart extends CMGenericEditPart {
 		CMModuleService ser = getModuleServiceModel();
 		if (ser != null) {
 			CoreUtils.putListIntoList(ser.getTasks(), arl);
+			CoreUtils.putListIntoList(ser.getNeeds(), arl);
 		}
 		return arl;
 	}

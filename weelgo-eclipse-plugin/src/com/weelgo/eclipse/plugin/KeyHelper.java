@@ -18,8 +18,16 @@ public class KeyHelper {
 	}
 
 	public static boolean isENTER(KeyEvent keyEvent) {
+		return isKey(keyEvent, SWT.CR);
+	}
+
+	public static boolean isESCAPE(KeyEvent keyEvent) {
+		return isKey(keyEvent, SWT.ESC);
+	}
+
+	public static boolean isKey(KeyEvent keyEvent, char c) {
 		if (keyEvent != null) {
-			if (keyEvent.keyCode == SWT.CR) {
+			if (keyEvent.keyCode == c) {
 				return true;
 			}
 		}

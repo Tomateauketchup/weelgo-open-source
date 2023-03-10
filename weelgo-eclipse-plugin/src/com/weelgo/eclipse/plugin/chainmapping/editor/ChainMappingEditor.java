@@ -5,7 +5,11 @@ import org.eclipse.core.commands.ExecutionException;
 import org.eclipse.core.commands.IExecutionListener;
 import org.eclipse.core.commands.NotHandledException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.draw2d.ConnectionLayer;
 import org.eclipse.draw2d.FigureCanvas;
+import org.eclipse.draw2d.FreeformLayer;
+import org.eclipse.draw2d.FreeformLayeredPane;
+import org.eclipse.draw2d.LayeredPane;
 import org.eclipse.draw2d.ScalableFigure;
 import org.eclipse.draw2d.Viewport;
 import org.eclipse.draw2d.geometry.Dimension;
@@ -50,6 +54,7 @@ import com.weelgo.core.IDisposableObject;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.KeyHelper;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.ActivateToolAction;
+import com.weelgo.eclipse.plugin.chainmapping.editor.actions.CreateNeedAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.CreateTaskAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.GenericSelectionAction;
 import com.weelgo.eclipse.plugin.chainmapping.editor.actions.ModifyNodeNamePositionAction;
@@ -60,6 +65,11 @@ import com.weelgo.eclipse.plugin.handlers.SaveHandler;
 import com.weelgo.eclipse.plugin.job.CMOpenChainMappingEditorJob;
 
 public class ChainMappingEditor extends GraphicalEditor implements IDisposableObject, IModuleUniqueIdentifierObject {
+
+	public static final char CREATE_TASK_KEY = 't';
+	public static final char CREATE_NEED_KEY = 'n';
+	public static final char SELECTION_TOOL_KEY = 's';
+	public static final char LINK_TOOL_KEY = 'l';
 
 	private EventReciever eventReciever;
 	private static Logger logger = LoggerFactory.getLogger(ChainMappingEditor.class);
@@ -73,6 +83,14 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 			@Override
 			protected void createDefaultRoot() {
 				setRootEditPart(new ScalableFreeformRootEditPart() {
+
+					@Override
+					protected LayeredPane createPrintableLayers() {
+						FreeformLayeredPane layeredPane = new FreeformLayeredPane();
+						layeredPane.add(new ConnectionLayer(), CONNECTION_LAYER);
+						layeredPane.add(new FreeformLayer(), PRIMARY_LAYER);
+						return layeredPane;
+					}
 
 					@Override
 					protected ZoomManager createZoomManager(ScalableFigure scalableFigure, Viewport viewport) {
@@ -164,9 +182,13 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 
 	}
 
+	public boolean isLinkTool() {
+		return getEditDomain().getActiveTool() instanceof LinkTool;
+	}
+
 	public void selectTool(String tool) {
 		if (ActivateToolAction.TOOL_LINK.equals(tool)) {
-			LinkTool t = new LinkTool();
+			LinkTool t = new LinkTool(this);
 			getEditDomain().setActiveTool(t);
 		} else if (ActivateToolAction.TOOL_SELECTION.equals(tool)) {
 			getEditDomain().setActiveTool(getEditDomain().getDefaultTool());
@@ -213,7 +235,7 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 
 		configureKeyHandler();
 
-		DynamicContextMenu menu = new DynamicContextMenu(viewer, getActionRegistry());
+		DynamicContextMenu menu = new DynamicContextMenu(viewer, getActionRegistry(), this);
 		viewer.setContextMenu(menu);
 	}
 
@@ -233,13 +255,17 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 	public void configureKeyHandler() {
 
 		KeyHandler keyHandler = new KeyHandler();
-		keyHandler.put(KeyStroke.getPressed('t', 't', 0), getActionRegistry().getAction(CreateTaskAction.CREATE_TASK));
+		keyHandler.put(KeyStroke.getPressed(CREATE_TASK_KEY, CREATE_TASK_KEY, 0),
+				getActionRegistry().getAction(CreateTaskAction.CREATE_TASK));
+		keyHandler.put(KeyStroke.getPressed(CREATE_NEED_KEY, CREATE_NEED_KEY, 0),
+				getActionRegistry().getAction(CreateNeedAction.CREATE_NEED));
 		keyHandler.put(KeyStroke.getPressed('v', 'v', 0),
 				getActionRegistry().getAction(VAlignNodesAction.V_ALIGN_NODES));
 		keyHandler.put(KeyStroke.getPressed('p', 'p', 0),
 				getActionRegistry().getAction(PackAlignNodesAction.PACK_ALIGN_NODES));
-		keyHandler.put(KeyStroke.getPressed('l', 'l', 0), getActionRegistry().getAction(ActivateToolAction.TOOL_LINK));
-		keyHandler.put(KeyStroke.getPressed('s', 's', 0),
+		keyHandler.put(KeyStroke.getPressed(LINK_TOOL_KEY, LINK_TOOL_KEY, 0),
+				getActionRegistry().getAction(ActivateToolAction.TOOL_LINK));
+		keyHandler.put(KeyStroke.getPressed(SELECTION_TOOL_KEY, SELECTION_TOOL_KEY, 0),
 				getActionRegistry().getAction(ActivateToolAction.TOOL_SELECTION));
 
 		keyHandler.put(KeyStroke.getPressed(SWT.ARROW_DOWN, 0),
@@ -303,6 +329,7 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 		super.createActions();
 
 		addAction(new CreateTaskAction(this));
+		addAction(new CreateNeedAction(this));
 		addAction(new RemoveNodesAction(this));
 		addAction(new VAlignNodesAction(this));
 		addAction(new PackAlignNodesAction(this));
@@ -315,6 +342,11 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 		addAction(new ActivateToolAction(ActivateToolAction.TOOL_LINK, this));
 		addAction(new ActivateToolAction(ActivateToolAction.TOOL_SELECTION, this));
 
+	}
+
+	@Override
+	public ActionRegistry getActionRegistry() {
+		return super.getActionRegistry();
 	}
 
 	public void addAction(GenericSelectionAction selectAct) {

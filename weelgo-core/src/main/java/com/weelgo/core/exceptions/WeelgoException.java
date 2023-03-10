@@ -11,6 +11,7 @@ public class WeelgoException extends RuntimeException implements Serializable {
 	public static final String FATAL_EXTERNAL = "fatal_external";
 	public static final String INVALID_INPUT = "invalid_input";
 	public static final String INVALID_TASK_NAME = "invalid_task_name";
+	public static final String INVALID_NEED_NAME = "invalid_need_name";
 	public static final String INVALID_GROUP_NAME = "invalid_group_name";
 	public static final String INVALID_PACKAGE_NAME = "invalid_package_name";
 	public static final String OBJECT_ALREADY_EXIST = "object_already_exists";

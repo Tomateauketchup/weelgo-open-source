@@ -86,9 +86,8 @@ public abstract class CMJob extends Job {
 	public boolean canExecuteJob() {
 		return true;
 	}
-	
-	public boolean makeEditorDirty()
-	{
+
+	public boolean makeEditorDirty() {
 		return true;
 	}
 
@@ -128,10 +127,9 @@ public abstract class CMJob extends Job {
 					});
 
 					sendStateToJobHandlers(CMJobHandler.STATUS_OK);
-					
-					if(makeEditorDirty())
-					{
-						sentEvent(CMEvents.CHECK_EDITOR_DIRTY);
+
+					if (makeEditorDirty()) {
+						eventBroker.sentEvent(CMEvents.CHECK_EDITOR_DIRTY);
 					}
 
 				} catch (Exception e) {

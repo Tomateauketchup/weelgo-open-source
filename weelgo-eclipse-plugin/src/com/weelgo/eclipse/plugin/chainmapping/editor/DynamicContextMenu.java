@@ -17,24 +17,27 @@ public class DynamicContextMenu extends ContextMenuProvider {
 
 	private CurrentSelectionService selectionService;
 	private ActionRegistry actionRegistry;
+	private ChainMappingEditor editor;
 
-	public DynamicContextMenu(EditPartViewer viewer, ActionRegistry actionRegistry) {
+	public DynamicContextMenu(EditPartViewer viewer, ActionRegistry actionRegistry, ChainMappingEditor editor) {
 		super(viewer);
 		selectionService = Factory.getCurrentSelectionService();
 		this.actionRegistry = actionRegistry;
+		this.editor = editor;
 	}
 
 	@Override
 	public void buildContextMenu(IMenuManager menu) {
 
-		if (selectionService.find(CMTask.class) != null) {
-			IAction action = getActionRegistry().getAction(RemoveNodesAction.REMOVE_NODES);
-			menu.add(action);
-		} else if (selectionService.find(CMModuleService.class) != null) {
-			IAction action = getActionRegistry().getAction(CreateTaskAction.CREATE_TASK);
-			menu.add(action);
+		if (editor.isLinkTool() == false) {
+			if (selectionService.find(CMTask.class) != null) {
+				IAction action = getActionRegistry().getAction(RemoveNodesAction.REMOVE_NODES);
+				menu.add(action);
+			} else if (selectionService.find(CMModuleService.class) != null) {
+				IAction action = getActionRegistry().getAction(CreateTaskAction.CREATE_TASK);
+				menu.add(action);
+			}
 		}
-
 	}
 
 	public ActionRegistry getActionRegistry() {
@@ -45,7 +48,8 @@ public class DynamicContextMenu extends ContextMenuProvider {
 		this.actionRegistry = actionRegistry;
 	}
 
-	//TODO faire déplacement d'un groupe de noeuds pour pas afficher un truc de déglingo dans le undo redo
-	//TODO faire suppression d'un groupe de noeuds
-	
+	// TODO faire déplacement d'un groupe de noeuds pour pas afficher un truc de
+	// déglingo dans le undo redo
+	// TODO faire suppression d'un groupe de noeuds
+
 }

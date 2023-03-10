@@ -9,6 +9,7 @@ public class CMEvents {
 	public static final String ALL_MODULE_SAVED = "CM/ALL_MODULE_SAVED";
 	public static final String GROUP_CREATED = "CM/GROUP_CREATED";
 	public static final String TASK_CREATED = "CM/TASK_CREATED";
+	public static final String NEED_CREATED = "CM/NEED_CREATED";
 	public static final String LINK_CREATED = "CM/LINK_CREATED";
 	public static final String TASK_NAME_MODIFIED = "CM/TASK_NAME_MODIFIED";
 	public static final String NODES_REMOVED = "CM/NODES_REMOVED";

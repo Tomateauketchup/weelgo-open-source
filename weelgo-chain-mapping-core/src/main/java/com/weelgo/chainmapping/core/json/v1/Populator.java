@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
+import com.weelgo.chainmapping.core.CMNeed;
 import com.weelgo.chainmapping.core.CMNode;
 import com.weelgo.chainmapping.core.CMTask;
 
@@ -33,12 +34,34 @@ public class Populator {
 						}
 					}
 				}
-
+				List<JSN_CMNeed> needs = src.getNeeds();
+				if (needs != null) {
+					for (JSN_CMNeed t : needs) {
+						if (t != null) {
+							CMNeed tsk = new CMNeed();
+							jsonToModelPopulator(t, tsk, module, inputsMap);
+							module.getNeeds().add(tsk);
+							module.needReloadObjects();
+						}
+					}
+				}
 			}
 
 		} else if (source instanceof JSN_CMTask && toPopulate instanceof CMTask) {
 			CMTask to = (CMTask) toPopulate;
 			JSN_CMTask src = (JSN_CMTask) source;
+			to.setGroupUuid(src.getGroup_uuid());
+			to.setName(src.getName());
+			to.setNamePosition(src.getName_position());
+			to.setPositionX(src.getPosition_x());
+			to.setPositionY(src.getPosition_y());
+			to.setUuid(src.getUuid());
+			if (inputsMap != null && src.getInputs() != null && src.getInputs().size() > 0) {
+				inputsMap.put(src.getUuid(), src.getInputs());
+			}
+		} else if (source instanceof JSN_CMNeed && toPopulate instanceof CMNeed) {
+			CMNeed to = (CMNeed) toPopulate;
+			JSN_CMNeed src = (JSN_CMNeed) source;
 			to.setGroupUuid(src.getGroup_uuid());
 			to.setName(src.getName());
 			to.setNamePosition(src.getName_position());
@@ -71,10 +94,40 @@ public class Populator {
 						}
 					}
 				}
+				List<CMNeed> needs = module.getNeedChilds(src.getUuid());
+				if (needs != null) {
+					for (CMNeed cmTask : needs) {
+						if (cmTask != null) {
+							JSN_CMNeed jsnTask = new JSN_CMNeed();
+							modelToJsonPopulator(cmTask, jsnTask, module);
+							to.getNeeds().add(jsnTask);
+						}
+					}
+				}
 			}
 		} else if (source instanceof CMTask && toPopulate instanceof JSN_CMTask) {
 			JSN_CMTask to = (JSN_CMTask) toPopulate;
 			CMTask src = (CMTask) source;
+			to.setGroup_uuid(src.getGroupUuid());
+			to.setName(src.getName());
+			to.setName_position(src.getNamePosition());
+			to.setPosition_x(src.getPositionX());
+			to.setPosition_y(src.getPositionY());
+			to.setUuid(src.getUuid());
+
+			if (module != null) {
+				List<CMNode> inputs = module.getInputElements(src);
+				if (inputs != null) {
+					for (CMNode cmNode : inputs) {
+						if (cmNode != null) {
+							to.getInputs().add(cmNode.getUuid());
+						}
+					}
+				}
+			}
+		} else if (source instanceof CMNeed && toPopulate instanceof JSN_CMNeed) {
+			JSN_CMNeed to = (JSN_CMNeed) toPopulate;
+			CMNeed src = (CMNeed) source;
 			to.setGroup_uuid(src.getGroupUuid());
 			to.setName(src.getName());
 			to.setName_position(src.getNamePosition());

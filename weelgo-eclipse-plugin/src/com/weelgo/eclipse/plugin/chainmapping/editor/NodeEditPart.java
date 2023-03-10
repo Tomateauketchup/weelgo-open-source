@@ -7,6 +7,7 @@ import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.gef.ConnectionEditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.Request;
+import org.eclipse.swt.graphics.Color;
 
 import com.weelgo.chainmapping.core.CMLink;
 import com.weelgo.chainmapping.core.CMNode;
@@ -28,30 +29,19 @@ public abstract class NodeEditPart extends CMGenericEditPart implements org.ecli
 
 		nodeFigure.setConstraint(nodeFigure.getLabelName(), new Rectangle(p.nameX, p.nameY, p.nameWidth, p.nameHeight));
 
+		nodeFigure.setConstraint(nodeFigure.getLabelBackground(),
+				new Rectangle(p.nameBackgroundX, p.nameBackgroundY, p.nameBackgroundWidth, p.nameBackgroundHeight));
+
 		Rectangle layout = new Rectangle(p.figureX, p.figureY, p.figureWidth, p.figureHeight);
 		parent.setLayoutConstraint(this, nodeFigure, layout);
 
-		nodeFigure.getMainShape().setBackgroundColor(ColorFactory.GREY_COLOR);
+		nodeFigure.getMainShape().setBackgroundColor(getNodeBackgroundColo());
 //		System.out.println("x:" + p.figureX + ", y:" + p.figureY);
 
 	}
-	
-	@Override
-	public void refresh() {
-		// TODO Auto-generated method stub
-		super.refresh();
-	}
-	
-	@Override
-	protected void refreshSourceConnections() {
-		// TODO Auto-generated method stub
-		super.refreshSourceConnections();
-	}
-	
-	@Override
-	protected void refreshTargetConnections() {
-		// TODO Auto-generated method stub
-		super.refreshTargetConnections();
+
+	public Color getNodeBackgroundColo() {
+		return ColorFactory.TASK_COLOR;
 	}
 
 	public ShapesPositions calculatePositions() {
@@ -79,9 +69,14 @@ public abstract class NodeEditPart extends CMGenericEditPart implements org.ecli
 		int shapeY = 0;
 
 		int nameHeight = textBounds.height;
-		int nameWidth = textBounds.width;
+		int nameWidth = textBounds.width + 3;
 		int nameX = 0;
 		int nameY = 0;
+
+		int nameBackgroundHeight = nameHeight;
+		int nameBackgroundWidth = nameWidth;
+		int nameBackgroundX = 0;
+		int nameBackgroundY = 0;
 
 		if (CMNode.NAME_TOP.equals(namePosition)) {
 			figureHeight = nameHeight + NodeFigure.LABEL_V_MARGIN + shapeHeight;
@@ -133,6 +128,11 @@ public abstract class NodeEditPart extends CMGenericEditPart implements org.ecli
 			figureY = figureY - Math.round((float) figureHeight / (float) 2);
 		}
 
+		nameBackgroundHeight = nameHeight;
+		nameBackgroundWidth = nameWidth;
+		nameBackgroundX = nameX;
+		nameBackgroundY = nameY;
+
 		p.nodeX = nodeX;
 		p.nodeY = nodeY;
 
@@ -150,6 +150,11 @@ public abstract class NodeEditPart extends CMGenericEditPart implements org.ecli
 		p.nameWidth = nameWidth;
 		p.nameX = nameX;
 		p.nameY = nameY;
+
+		p.nameBackgroundHeight = nameBackgroundHeight;
+		p.nameBackgroundWidth = nameBackgroundWidth;
+		p.nameBackgroundX = nameBackgroundX;
+		p.nameBackgroundY = nameBackgroundY;
 
 		return p;
 
@@ -226,6 +231,11 @@ public abstract class NodeEditPart extends CMGenericEditPart implements org.ecli
 		private int nameWidth = 0;
 		private int nameX = 0;
 		private int nameY = 0;
+
+		private int nameBackgroundHeight = 0;
+		private int nameBackgroundWidth = 0;
+		private int nameBackgroundX = 0;
+		private int nameBackgroundY = 0;
 
 	}
 

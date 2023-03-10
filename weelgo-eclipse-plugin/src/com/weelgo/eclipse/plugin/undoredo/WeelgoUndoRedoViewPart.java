@@ -41,6 +41,7 @@ import org.eclipse.ui.IEditorPart;
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMLink;
 import com.weelgo.chainmapping.core.CMModuleService;
+import com.weelgo.chainmapping.core.CMNeed;
 import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.IUuidObject;
@@ -225,6 +226,12 @@ public class WeelgoUndoRedoViewPart {
 	@Inject
 	@Optional
 	public void getTaskCreatedEvent(@UIEventTopic(CMEvents.TASK_CREATED) CMTask tsk) {
+		refreshView();
+	}
+	
+	@Inject
+	@Optional
+	public void getNeedCreatedEvent(@UIEventTopic(CMEvents.NEED_CREATED) CMNeed tsk) {
 		refreshView();
 	}
 

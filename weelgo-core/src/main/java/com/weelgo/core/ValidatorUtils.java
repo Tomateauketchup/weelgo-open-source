@@ -30,6 +30,12 @@ public class ValidatorUtils {
 		}
 	}
 
+	public static void checkNeedName(String name) {
+		if (!isValidNeedName(name)) {
+			ExceptionsUtils.throwDynamicException(WeelgoException.INVALID_TASK_NAME);
+		}
+	}
+
 	public static void checkGroupName(String name) {
 		if (!isValidGroupName(name)) {
 			ExceptionsUtils.throwDynamicException(WeelgoException.INVALID_GROUP_NAME);
@@ -55,6 +61,10 @@ public class ValidatorUtils {
 	}
 
 	public static boolean isValidTaskName(String name) {
+		return isValidFileName(name);
+	}
+
+	public static boolean isValidNeedName(String name) {
 		return isValidFileName(name);
 	}
 

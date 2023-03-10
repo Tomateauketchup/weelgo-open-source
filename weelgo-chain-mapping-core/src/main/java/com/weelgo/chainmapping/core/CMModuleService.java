@@ -7,8 +7,10 @@ import static com.weelgo.core.CoreUtils.isNotNullOrEmpty;
 import static com.weelgo.core.ValidatorUtils.checkGroupName;
 import static com.weelgo.core.ValidatorUtils.checkPackageName;
 import static com.weelgo.core.ValidatorUtils.checkTaskName;
+import static com.weelgo.core.ValidatorUtils.checkNeedName;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +37,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 	private CMGroup rootGroup;
 	private List<CMGroup> groups = new ArrayList<>();
 	private List<CMTask> tasks = new ArrayList<>();
+	private List<CMNeed> needs = new ArrayList<>();
 	private List<CMLink> links = new ArrayList<>();
 	private IUuidGenerator uuidGenerator = new UuidGenerator();
 
@@ -42,8 +45,10 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 	private Map<String, CMGroup> groupMapByUuid;
 	private Map<String, CMGroup> groupMapByPackagePath;
 	private Map<String, CMTask> taskMapByUuid;
+	private Map<String, CMNeed> needMapByUuid;
 	private Map<String, CMLink> linkMapByUuid;
 	private Map<String, List<CMTask>> taskChilds;
+	private Map<String, List<CMNeed>> needChilds;
 	private Map<String, List<CMGroup>> groupChilds;
 	private Map<String, List<CMNode>> inputs;
 	private Map<String, List<CMNode>> outputs;
@@ -56,6 +61,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			toPopulate.setGroups(CoreUtils.cloneList(groups));
 			toPopulate.setTasks(CoreUtils.cloneList(tasks));
 			toPopulate.setLinks(CoreUtils.cloneList(links));
+			toPopulate.setNeeds(CoreUtils.cloneList(needs));
 
 			Map map = CoreUtils.putListIntoMap(groups);
 			if (rootGroup != null) {
@@ -75,6 +81,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			CoreUtils.updateList(objectToUpdate.groups, groups);
 			CoreUtils.updateList(objectToUpdate.tasks, tasks);
 			CoreUtils.updateList(objectToUpdate.links, links);
+			CoreUtils.updateList(objectToUpdate.needs, needs);
 		}
 	}
 
@@ -122,8 +129,10 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			objectMapByUuid = new HashMap<>();
 			groupMapByPackagePath = new HashMap<>();
 			linkMapByUuid = new HashMap<>();
+			needMapByUuid = new HashMap<>();
 
 			taskChilds = new HashMap<>();
+			needChilds = new HashMap<>();
 			groupChilds = new HashMap<>();
 
 			inputs = null;
@@ -168,13 +177,31 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 					}
 				}
 			}
-		}
 
-		if (links != null) {
-			for (CMLink o : links) {
-				if (o != null) {
-					linkMapByUuid.put(o.getUuid(), o);
-					objectMapByUuid.put(o.getUuid(), o);
+			if (needs != null) {
+				for (CMNeed obj : needs) {
+					if (obj != null) {
+						needMapByUuid.put(obj.getUuid(), obj);
+						objectMapByUuid.put(obj.getUuid(), obj);
+
+						if (isNotNullOrEmpty(obj.getGroupUuid())) {
+							List<CMNeed> lst = needChilds.get(obj.getGroupUuid());
+							if (lst == null) {
+								lst = new ArrayList<>();
+								needChilds.put(obj.getGroupUuid(), lst);
+							}
+							lst.add(obj);
+						}
+					}
+				}
+			}
+
+			if (links != null) {
+				for (CMLink o : links) {
+					if (o != null) {
+						linkMapByUuid.put(o.getUuid(), o);
+						objectMapByUuid.put(o.getUuid(), o);
+					}
 				}
 			}
 		}
@@ -345,9 +372,15 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 				checkGroup(gp);
 			}
 		}
-		if (groups != null) {
+		if (tasks != null) {
 			for (CMTask tk : tasks) {
 				checkTask(tk);
+			}
+		}
+
+		if (needs != null) {
+			for (CMNeed tk : needs) {
+				checkNeed(tk);
 			}
 		}
 
@@ -357,6 +390,12 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 	}
 
 	public void checkTask(CMTask tsk) {
+		if (tsk != null) {
+			tsk.setModuleUniqueIdentifier(rootGroup.getModuleUniqueIdentifier());
+		}
+	}
+
+	public void checkNeed(CMNeed tsk) {
 		if (tsk != null) {
 			tsk.setModuleUniqueIdentifier(rootGroup.getModuleUniqueIdentifier());
 		}
@@ -390,6 +429,34 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 	public void setContainer(Object parentContainer) {
 		this.container = parentContainer;
+	}
+
+	public String findNameForNewNeed(String parentGroupUuid) {
+		CMGroup gp = getGroupByUuid(parentGroupUuid);
+		if (gp != null) {
+			List<CMNeed> childs = getNeedChilds(parentGroupUuid);
+			Map<String, CMNeed> map = new HashMap<>();
+			if (childs != null) {
+				for (CMNeed cmTask : childs) {
+					if (cmTask != null) {
+						map.put(cmTask.getName(), cmTask);
+					}
+				}
+			}
+
+			String nameTmp = "";
+			int index = 0;
+			boolean stop = false;
+			do {
+
+				index++;
+				nameTmp = "New need " + index;
+
+			} while (map.containsKey(nameTmp));
+
+			return nameTmp;
+		}
+		return "";
 	}
 
 	public String findNameForNewTask(String parentGroupUuid) {
@@ -590,6 +657,43 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		return task;
 	}
 
+	public CMNeed createNeed(String name, String parentGroupUuid, int posX, int posY) {
+		name = cleanString(name);
+		parentGroupUuid = cleanString(parentGroupUuid);
+		checkNeedName(name);
+
+		CMGroup gp = rootGroup;
+
+		if (isNotNullOrEmpty(parentGroupUuid)) {
+			// We check the group exist
+			CMGroup gpTmp = getGroupByUuid(parentGroupUuid);
+			if (gpTmp != null) {
+				gp = gpTmp;
+			}
+		}
+
+		String taskUuid = generateUuid();
+		// We check if there is already a task with same UUID
+		if (getObjectByUuid(taskUuid) != null) {
+			throwDynamicException(WeelgoException.OBJECT_ALREADY_EXIST);
+		}
+
+		CMNeed o = CMFactory.create(CMNeed.class);
+		o.setGroupUuid(gp.getUuid());
+		o.setName(name);
+		o.setUuid(taskUuid);
+		o.setPositionX(posX);
+		o.setPositionY(posY);
+		o.setModuleUniqueIdentifier(getModuleUniqueIdentifier());
+
+		needs.add(o);
+
+		checkNeed(o);
+		needReloadObjects();
+
+		return o;
+	}
+
 	public <T> T getObjectByUuid(String uuid) {
 		loadObjectsIntoMap(false);
 		if (objectMapByUuid != null) {
@@ -643,6 +747,8 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		return null;
 	}
 
+	// TODO faire la vérification de boucle sur le réseau
+
 	public CMLink getLinkByUuid(String uuid) {
 		loadObjectsIntoMap(false);
 		if (uuid != null && !uuid.isEmpty() && linkMapByUuid != null) {
@@ -676,6 +782,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 			addInList.accept(groupChilds);
 			addInList.accept(taskChilds);
+			addInList.accept(needChilds);
 
 			return arl;
 		}
@@ -694,6 +801,14 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		if (isNotNullOrEmpty(parentUuid)) {
 			loadObjectsIntoMap(false);
 			return taskChilds.get(parentUuid);
+		}
+		return null;
+	}
+
+	public List<CMNeed> getNeedChilds(String parentUuid) {
+		if (isNotNullOrEmpty(parentUuid)) {
+			loadObjectsIntoMap(false);
+			return needChilds.get(parentUuid);
 		}
 		return null;
 	}
@@ -819,6 +934,14 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 	public void setLinks(List<CMLink> links) {
 		this.links = links;
+	}
+
+	public List<CMNeed> getNeeds() {
+		return needs;
+	}
+
+	public void setNeeds(List<CMNeed> needs) {
+		this.needs = needs;
 	}
 
 }

@@ -15,6 +15,7 @@ public class JSN_CMGroup {
 	private String package_parent_path;
 	private String type;
 	private List<JSN_CMTask> tasks = new ArrayList<>();
+	private List<JSN_CMNeed> needs = new ArrayList<>();
 
 	public String getType() {
 		return type;
@@ -62,6 +63,14 @@ public class JSN_CMGroup {
 
 	public void setTasks(List<JSN_CMTask> tasks) {
 		this.tasks = tasks;
+	}
+
+	public List<JSN_CMNeed> getNeeds() {
+		return needs;
+	}
+
+	public void setNeeds(List<JSN_CMNeed> needs) {
+		this.needs = needs;
 	}
 
 }
