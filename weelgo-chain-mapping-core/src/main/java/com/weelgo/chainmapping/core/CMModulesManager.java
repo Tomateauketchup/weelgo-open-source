@@ -313,7 +313,8 @@ public class CMModulesManager implements HierarchicalTreeSystemNavProvider {
 		gp.setPackageName(modulePackageName);
 		gp.setType(CMGroup.TYPE_MODULE);
 		gp.setUuid(service.generateUuid());
-		service.check();
+		gp.setPolygon(new ArrayList<>());
+		service.checkGroup(gp);
 
 		Object moduleFolder = ds.createModule(progressMonitor, moduleParentFolder, service);
 		service.setContainer(moduleFolder);

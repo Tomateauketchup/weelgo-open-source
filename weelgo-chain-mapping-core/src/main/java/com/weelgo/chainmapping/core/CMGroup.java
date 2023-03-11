@@ -1,14 +1,16 @@
 package com.weelgo.chainmapping.core;
 
+import java.util.List;
+
+import com.weelgo.core.Bound;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.ICloneableObject;
 import com.weelgo.core.INamedObject;
 import com.weelgo.core.IUpdatableUuidObject;
 import com.weelgo.core.IUuidObject;
 
-public class CMGroup implements
-		IUuidObject, INamedObject, IModuleUniqueIdentifierObject, ICloneableObject<CMGroup>,
-IUpdatableUuidObject<CMGroup> {
+public class CMGroup implements IUuidObject, INamedObject, IModuleUniqueIdentifierObject, ICloneableObject<CMGroup>,
+		IUpdatableUuidObject<CMGroup> {
 
 	public static final String TYPE_GROUP = "group";
 	public static final String TYPE_MODULE = "module";
@@ -21,6 +23,7 @@ IUpdatableUuidObject<CMGroup> {
 	private String packageFullPath;
 	private String groupUuid;
 	private String type = TYPE_GROUP;
+	private List<Bound> polygon;
 
 	public boolean isModule() {
 		return TYPE_MODULE.equals(type);
@@ -32,7 +35,7 @@ IUpdatableUuidObject<CMGroup> {
 
 	public void calculatePackageFullPath() {
 		setPackageFullPath(CoreUtils.createPackageString(packageParentPath, packageName));
-	}	
+	}
 
 	@Override
 	public void populateObject(CMGroup gp) {
@@ -45,6 +48,7 @@ IUpdatableUuidObject<CMGroup> {
 			gp.setPackageFullPath(getPackageFullPath());
 			gp.setGroupUuid(getGroupUuid());
 			gp.setType(getType());
+			gp.setPolygon(CoreUtils.cloneList(polygon));
 		}
 	}
 
@@ -131,6 +135,14 @@ IUpdatableUuidObject<CMGroup> {
 	@Override
 	public String toString() {
 		return getPackageFullPath();
+	}
+
+	public List<Bound> getPolygon() {
+		return polygon;
+	}
+
+	public void setPolygon(List<Bound> polygon) {
+		this.polygon = polygon;
 	}
 
 }

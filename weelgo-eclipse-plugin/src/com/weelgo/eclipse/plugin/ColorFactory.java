@@ -18,6 +18,7 @@ public class ColorFactory {
 	public static Color TOOLTIP_BORDER_COLOR;
 	public static Color NEED_COLOR;
 	public static Color TASK_COLOR;
+	public static Color DEFAULT_GROUP_COLOR;
 
 	static {
 		WHITE_COLOR = Display.getCurrent().getSystemColor(SWT.COLOR_WHITE);
@@ -25,6 +26,7 @@ public class ColorFactory {
 		BLUE_COLOR = Display.getCurrent().getSystemColor(SWT.COLOR_BLUE);
 		BLACK_COLOR = Display.getCurrent().getSystemColor(SWT.COLOR_BLACK);
 		GREEN_COLOR = Display.getCurrent().getSystemColor(SWT.COLOR_GREEN);
+		DEFAULT_GROUP_COLOR = new Color(240, 238, 250);
 		RED_COLOR = Display.getCurrent().getSystemColor(SWT.COLOR_RED);
 		MOUSE_OVER_BACKGROUND_COLOR = new Color(229, 243, 255);
 		TOOLTIP_BACKGROUND_COLOR = WHITE_COLOR;

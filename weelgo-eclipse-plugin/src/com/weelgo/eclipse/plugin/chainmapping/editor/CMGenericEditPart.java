@@ -66,6 +66,7 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 				refreshVisuals();
 				refreshSourceConnections();
 				refreshTargetConnections();
+				doRefreshGroups();
 				doCalculateAdnRefreshCorners();
 			}
 		}
@@ -116,6 +117,13 @@ public abstract class CMGenericEditPart extends AbstractGraphicalEditPart implem
 					p.refreshTargetConnections();
 				}
 			}
+		}
+	}
+
+	public void doRefreshGroups() {
+		EditPart parent = getParent();
+		if (parent instanceof CMEditorEditPart p) {
+			p.refreshGroups();
 		}
 	}
 

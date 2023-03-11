@@ -3,6 +3,7 @@ package com.weelgo.chainmapping.core.tests;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -19,6 +20,7 @@ import com.weelgo.chainmapping.core.CMNode;
 import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.chainmapping.core.navigator.NavNode;
 import com.weelgo.chainmapping.core.navigator.NavigatorModel;
+import com.weelgo.core.Bound;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.exceptions.WeelgoException;
 
@@ -892,29 +894,28 @@ public class TestChainMappingCore extends CMGenericTest {
 		lst = modServ1.getInputElements(t3);
 		assertEquals(1, lst.size());
 		assertEquals(t2.getUuid(), lst.get(0).getUuid());
-		
+
 		try {
-			moveElementsIntoGroup(modServ1,gp2,rootGp);
+			moveElementsIntoGroup(modServ1, gp2, rootGp);
 			fail();
 		} catch (Exception e) {
 			assertDynamicException(WeelgoException.LOOP_IN_GROUPS, e);
 		}
-		
 
-		moveElementsIntoGroup(modServ1,gp1,t1,t2,t3,gp2);
-		
-		t1=modServ1.getObject(t1);
-		t2=modServ1.getObject(t2);
-		t3=modServ1.getObject(t3);
-		gp1=modServ1.getObject(gp1);
-		gp2=modServ1.getObject(gp2);
-		
+		moveElementsIntoGroup(modServ1, gp1, t1, t2, t3, gp2);
+
+		t1 = modServ1.getObject(t1);
+		t2 = modServ1.getObject(t2);
+		t3 = modServ1.getObject(t3);
+		gp1 = modServ1.getObject(gp1);
+		gp2 = modServ1.getObject(gp2);
+
 		assertEquals(gp1.getUuid(), t1.getGroupUuid());
 		assertEquals(gp1.getUuid(), t2.getGroupUuid());
 		assertEquals(gp1.getUuid(), t3.getGroupUuid());
 		assertEquals(gp1.getUuid(), gp2.getGroupUuid());
 		assertEquals(rootGp.getUuid(), gp1.getGroupUuid());
-		
+
 		lst = modServ1.getInputElements(t1);
 		assertNullOrEmpty(lst);
 
@@ -925,8 +926,71 @@ public class TestChainMappingCore extends CMGenericTest {
 		lst = modServ1.getInputElements(t3);
 		assertEquals(1, lst.size());
 		assertEquals(t2.getUuid(), lst.get(0).getUuid());
-		
+
 	}
 
-	
+	@Test
+	public void testGroupPolygon() throws Exception {
+
+		CMModulesManager modManager = createModulesManager();
+		String modId1 = createModule(modManager, "Module 1", "module_1");
+		CMModuleService modServ1 = modManager.getServiceByModuleUniqueIdentifierId(modId1);
+		CMGroup rootGp = modServ1.getRootGroup();
+		File rootFolder = (File) modServ1.getContainer();
+
+		List<Bound> polyRoot = rootGp.getPolygon();
+		assertNotNull(polyRoot);
+		assertEquals(0, polyRoot.size());
+
+		CMGroup gp1 = createGroup(modManager, modServ1, "gp1", rootGp);
+		List<Bound> poly1 = gp1.getPolygon();
+		polyRoot = rootGp.getPolygon();
+
+		assertNotNull(polyRoot);
+		assertEquals(0, polyRoot.size());
+		assertNotNull(poly1);
+		assertEquals(0, poly1.size());
+
+		CMGroup gp2 = createGroup(modManager, modServ1, "gp2", gp1);
+		List<Bound> poly2 = gp2.getPolygon();
+		poly1 = gp1.getPolygon();
+		polyRoot = rootGp.getPolygon();
+
+		assertNotNull(polyRoot);
+		assertEquals(0, polyRoot.size());
+		assertNotNull(poly1);
+		assertEquals(0, poly1.size());
+		assertNotNull(poly2);
+		assertEquals(0, poly2.size());
+
+		CMTask t3 = createTask(modServ1, "t3", gp2);
+
+		polyRoot = rootGp.getPolygon();
+		poly1 = gp1.getPolygon();
+		poly2 = gp2.getPolygon();
+
+		assertNotNull(polyRoot);
+		assertTrue(polyRoot.size() > 1);
+		assertNotNull(poly1);
+		assertTrue(poly1.size() > 1);
+		assertNotNull(poly2);
+		assertTrue(poly2.size() > 1);
+		
+		saveAllModules(modManager);
+		
+		loadAllModules(modManager);
+		
+		polyRoot = rootGp.getPolygon();
+		poly1 = gp1.getPolygon();
+		poly2 = gp2.getPolygon();
+
+		assertNotNull(polyRoot);
+		assertTrue(polyRoot.size() > 1);
+		assertNotNull(poly1);
+		assertTrue(poly1.size() > 1);
+		assertNotNull(poly2);
+		assertTrue(poly2.size() > 1);
+
+	}
+
 }

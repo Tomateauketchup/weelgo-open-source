@@ -140,6 +140,18 @@ public class CoreUtils {
 
 	}
 
+	public static <T extends IUuidObject> IUuidUpdateListProcessor<T> compileUuidList(List<T> oldList, List<T> newList) {
+		IUuidUpdateListProcessor<T> p = new IUuidUpdateListProcessor<T>(oldList, newList) {
+
+			@Override
+			public String generateUUid() {
+				return "";
+			}
+		};
+		p.compileList();
+		return p;
+	}
+
 	public static <T extends ICloneableObject<T>> T cloneObject(T o) {
 		if (o != null) {
 			return o.cloneObject();

@@ -16,6 +16,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
+import org.locationtech.jts.algorithm.hull.ConcaveHull;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+
+import com.weelgo.core.Bound;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.ICloneableObject;
 import com.weelgo.core.INamedObject;
@@ -146,9 +152,23 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 					if (obj != null) {
 						groupMapByUuid.put(obj.getUuid(), obj);
 						objectMapByUuid.put(obj.getUuid(), obj);
+						checkGroup(obj);
 
 						groupMapByPackagePath.put(obj.getPackageFullPath(), obj);
 
+					}
+				}
+				for (CMGroup gp : groups) {
+					if (gp != null) {
+						String parentPath = gp.getPackageParentPath();
+						CMGroup parent = groupMapByPackagePath.get(parentPath);
+						if (parent != null) {
+							gp.setGroupUuid(parent.getUuid());
+						}
+					}
+				}
+				for (CMGroup obj : groups) {
+					if (obj != null) {
 						if (isNotNullOrEmpty(obj.getGroupUuid())) {
 							List<CMGroup> lst = groupChilds.get(obj.getGroupUuid());
 							if (lst == null) {
@@ -164,6 +184,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			if (tasks != null) {
 				for (CMTask obj : tasks) {
 					if (obj != null) {
+						checkTask(obj);
 						taskMapByUuid.put(obj.getUuid(), obj);
 						objectMapByUuid.put(obj.getUuid(), obj);
 
@@ -182,6 +203,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			if (needs != null) {
 				for (CMNeed obj : needs) {
 					if (obj != null) {
+						checkNeed(obj);
 						needMapByUuid.put(obj.getUuid(), obj);
 						objectMapByUuid.put(obj.getUuid(), obj);
 
@@ -365,48 +387,6 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		return "";
 	}
 
-	public void check() {
-		assertNotNullOrEmptyFatal(rootGroup);
-		assertNotNullOrEmptyFatal(rootGroup.getModuleUniqueIdentifier());
-		if (groups != null) {
-			for (CMGroup gp : groups) {
-				checkGroup(gp);
-			}
-		}
-		if (tasks != null) {
-			for (CMTask tk : tasks) {
-				checkTask(tk);
-			}
-		}
-
-		if (needs != null) {
-			for (CMNeed tk : needs) {
-				checkNeed(tk);
-			}
-		}
-
-		if (links != null) {
-			for (CMLink tk : links) {
-				checkLink(tk);
-			}
-		}
-
-		// TODO il faut faire les vérification de noms et autres ici
-		needReloadObjects();
-		if (groups != null) {
-			for (CMGroup gp : groups) {
-				if (gp != null) {
-					String parentPath = gp.getPackageParentPath();
-					CMGroup parent = getGroupByPackageFullPath(parentPath);
-					if (parent != null) {
-						gp.setGroupUuid(parent.getUuid());
-					}
-				}
-			}
-		}
-		;
-	}
-
 	public void checkTask(CMTask tsk) {
 		if (tsk != null) {
 			tsk.setModuleUniqueIdentifier(rootGroup.getModuleUniqueIdentifier());
@@ -499,6 +479,8 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			}
 		}
 		needReloadObjects();
+
+		calculateGroupsPolygonImpactedByObject(parent);
 	}
 
 	public boolean isChildOfGroup(String parentGroupUuid, String childUuid) {
@@ -648,7 +630,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		getGroups().add(gp);
 
 		needReloadObjects();
-
+		calculateGroupsPolygonImpactedByObject(gp);
 		return gp;
 	}
 
@@ -667,6 +649,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 				}
 			}
 		}
+		calculateGroupsPolygonImpactedByObject((CMNode[]) arl.toArray(new CMNode[arl.size()]));
 		return arl;
 	}
 
@@ -689,10 +672,18 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 				}
 			}
 		}
+
+		calculateGroupsPolygonImpactedByObject((CMNode[]) arl.toArray(new CMNode[arl.size()]));
+
 		return arl;
 	}
 
 	public void removeElements(String[] elementsUuid) {
+
+		List<CMGroup> gps = new ArrayList<>();
+		gps.add(getRootGroup());
+		// TODO améliorer ici, il faut aller chercher les parents des élémens supprimé.
+
 		if (elementsUuid != null) {
 			Map<String, String> uuidsToRemoveFromLink = new HashMap<>();
 			for (String uuid : elementsUuid) {
@@ -703,6 +694,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 				CoreUtils.removeObjectFromList(uuid, tasks);
 				CoreUtils.removeObjectFromList(uuid, links);
 				CoreUtils.removeObjectFromList(uuid, needs);
+				CoreUtils.removeObjectFromList(uuid, groups);
 			}
 
 			if (links != null) {
@@ -719,7 +711,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 				links.removeAll(liksToRemove);
 			}
 		}
-
+		calculateGroupsPolygonImpactedByObject((CMGroup[]) gps.toArray(new CMGroup[gps.size()]));
 		needReloadObjects();
 	}
 
@@ -733,7 +725,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 		checkTask(task);
 		needReloadObjects();
-
+		calculateGroupsPolygonImpactedByObject(task);
 		return task;
 	}
 
@@ -771,6 +763,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		checkTask(task);
 		needReloadObjects();
 
+		calculateGroupsPolygonImpactedByObject(task);
 		return task;
 	}
 
@@ -807,7 +800,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 
 		checkNeed(o);
 		needReloadObjects();
-
+		calculateGroupsPolygonImpactedByObject(o);
 		return o;
 	}
 
@@ -905,6 +898,119 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 			return arl;
 		}
 		return null;
+	}
+
+	public void calculateGroupsPolygon() {
+		calculateGroupPolygon(getRootGroup(), true);
+	}
+
+	public void calculateGroupsPolygonImpactedByObject(Object... o) {
+
+		// TODO faire une optimisation ici
+		calculateGroupsPolygon();
+	}
+
+	public void calculateGroupPolygon(CMGroup gp, boolean forceRecalculateChilds) {
+		gp.setPolygon(calculatesPointsOfGroup(gp, forceRecalculateChilds));
+	}
+
+	public List<Coordinate> getPointsOfObject(boolean forceRecalculateChilds, String... uuids) {
+		int size = 30;
+		ArrayList<Coordinate> points = new ArrayList<>();
+		if (uuids != null) {
+
+			for (String uuid : uuids) {
+
+				Object o = getObjectByUuid(uuid);
+				if (o != null) {
+					if (o instanceof CMNode) {
+						CMNode n = (CMNode) o;
+						points.add(new Coordinate(n.getPositionX() - size, n.getPositionY() - size));
+						points.add(new Coordinate(n.getPositionX() - size, n.getPositionY() + size));
+						points.add(new Coordinate(n.getPositionX() + size, n.getPositionY() - size));
+						points.add(new Coordinate(n.getPositionX() + size, n.getPositionY() + size));
+					} else if (o instanceof CMGroup) {
+						CMGroup gp = (CMGroup) o;
+
+						List<Bound> poly = gp.getPolygon();
+						if (forceRecalculateChilds || poly == null) {
+							calculateGroupPolygon(gp, forceRecalculateChilds);
+						}
+						poly = gp.getPolygon();
+						if (poly != null) {
+							for (Bound b : poly) {
+								if (b != null) {
+									points.add(new Coordinate(b.getX() - size, b.getY() - size));
+								}
+							}
+						}
+					}
+
+				}
+			}
+		}
+		if (points.size() > 0) {
+			return points;
+		}
+		return null;
+	}
+
+	public List<Bound> calculatesPointsOfGroup(CMGroup gp, boolean forceRecalculateChilds) {
+		ArrayList<Bound> arl = new ArrayList<>();
+
+		if (gp != null) {
+			List<Object> childs = getChilds(gp.getUuid());
+			String[] uuids = CoreUtils.transformListToStringArray(childs);
+			List<Coordinate> points = getPointsOfObject(forceRecalculateChilds, uuids);
+			if (points == null) {
+				points = new ArrayList<>();
+			}
+			Geometry geo = new GeometryFactory()
+					.createLineString((Coordinate[]) points.toArray(new Coordinate[points.size()]));
+			Geometry result = ConcaveHull.concaveHullByLength(geo, 200);
+			if (result != null) {
+				Coordinate[] coordinates = result.getCoordinates();
+				if (coordinates != null) {
+					for (Coordinate coo : coordinates) {
+						if (coo != null) {
+							Bound b = new Bound();
+							b.setX((int) Math.round(coo.x));
+							b.setY((int) Math.round(coo.y));
+							arl.add(b);
+						}
+					}
+				}
+			}
+		}
+
+		return arl;
+	}
+
+	public List<CMGroup> getAllGroupChildsRecursive() {
+		return getAllGroupChildsRecursive(false);
+	}
+
+	public List<CMGroup> getAllGroupChildsRecursive(boolean incluseRoot) {
+		List<CMGroup> lst = new ArrayList<>();
+
+		if (incluseRoot) {
+			lst.add(getRootGroup());
+		}
+		getGroupChildsRecursive(getRootGroup(), lst);
+
+		return lst;
+	}
+
+	public void getGroupChildsRecursive(CMGroup gp, List<CMGroup> lst) {
+		if (gp != null && lst != null) {
+			List<CMGroup> childs = getGroupChilds(gp.getUuid());
+			if (childs != null) {
+				lst.addAll(childs);
+				for (CMGroup c : childs) {
+					getGroupChildsRecursive(c, lst);
+				}
+			}
+		}
 	}
 
 	public List<CMGroup> getGroupChilds(String parentUuid) {

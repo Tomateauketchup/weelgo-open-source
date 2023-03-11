@@ -1,5 +1,6 @@
 package com.weelgo.chainmapping.core.json.v1;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class Populator {
 			if (to.isModule()) {
 				module = new CMModuleService();
 				inputsMap = new HashMap<>();
+				to.setPolygon(new ArrayList<>());
 			}
 
 			if (module != null) {
