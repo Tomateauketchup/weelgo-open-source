@@ -5,6 +5,7 @@ import java.util.List;
 import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Polygon;
 import org.eclipse.draw2d.geometry.PointList;
+import org.eclipse.swt.graphics.Color;
 
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.core.Bound;
@@ -13,6 +14,15 @@ import com.weelgo.eclipse.plugin.ColorFactory;
 public class GroupEditPart extends CMGenericEditPart {
 
 	private Polygon polygon;
+	private Color backgroundColor = null;
+	private Color borderColor = null;
+
+	@Override
+	public void disposeObject() {
+		ColorFactory.disposeColor(backgroundColor);
+		ColorFactory.disposeColor(borderColor);
+		super.disposeObject();
+	}
 
 	@Override
 	protected IFigure createFigure() {
@@ -35,6 +45,22 @@ public class GroupEditPart extends CMGenericEditPart {
 
 		PointList points = new PointList();
 
+		com.weelgo.core.Color bgColorTmp = getModelGroup().getBackgroundColor();
+		if (bgColorTmp == null) {
+			bgColorTmp = com.weelgo.core.Color.CREATE_DEFAULT_GROUP_BACKGROUND_COLOR();
+		}
+
+		com.weelgo.core.Color borderColorTmp = getModelGroup().getBorderColor();
+		if (borderColorTmp == null) {	
+			borderColorTmp = com.weelgo.core.Color.CREATE_DEFAULT_GROUP_BORDER_COLOR();
+		}
+
+		ColorFactory.disposeColor(backgroundColor);
+		backgroundColor = getColor(bgColorTmp, getModelGroup().isBackgroundVisible());
+
+		ColorFactory.disposeColor(borderColor);
+		borderColor = getColor(borderColorTmp, getModelGroup().isBorderVisible());
+
 		List<Bound> pts = getModelGroup().getPolygon();
 		if (pts != null) {
 			for (Bound bound : pts) {
@@ -44,11 +70,19 @@ public class GroupEditPart extends CMGenericEditPart {
 			}
 		}
 		polygon.setOpaque(true);
-		polygon.setForegroundColor(ColorFactory.BLACK_COLOR);
-		polygon.setBackgroundColor(ColorFactory.DEFAULT_GROUP_COLOR);
+		polygon.setForegroundColor(borderColor);
+		polygon.setBackgroundColor(backgroundColor);
 		polygon.setFill(true);
 		polygon.setPoints(points);
 
+	}
+
+	public Color getColor(com.weelgo.core.Color c, boolean visible) {
+		if (visible) {
+			return ColorFactory.createColor(c);
+		} else {
+			return ColorFactory.createTransparentColor();
+		}
 	}
 
 	public CMGroup getModelGroup() {

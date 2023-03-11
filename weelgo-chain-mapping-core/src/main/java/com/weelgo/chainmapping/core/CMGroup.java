@@ -3,6 +3,7 @@ package com.weelgo.chainmapping.core;
 import java.util.List;
 
 import com.weelgo.core.Bound;
+import com.weelgo.core.Color;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.ICloneableObject;
 import com.weelgo.core.INamedObject;
@@ -24,6 +25,10 @@ public class CMGroup implements IUuidObject, INamedObject, IModuleUniqueIdentifi
 	private String groupUuid;
 	private String type = TYPE_GROUP;
 	private List<Bound> polygon;
+	private Color backgroundColor = Color.CREATE_DEFAULT_GROUP_BACKGROUND_COLOR();
+	private Color borderColor = Color.CREATE_DEFAULT_GROUP_BORDER_COLOR();
+	private boolean backgroundVisible = true;
+	private boolean borderVisible = true;
 
 	public boolean isModule() {
 		return TYPE_MODULE.equals(type);
@@ -49,6 +54,10 @@ public class CMGroup implements IUuidObject, INamedObject, IModuleUniqueIdentifi
 			gp.setGroupUuid(getGroupUuid());
 			gp.setType(getType());
 			gp.setPolygon(CoreUtils.cloneList(polygon));
+			gp.setBackgroundVisible(isBackgroundVisible());
+			gp.setBorderVisible(isBorderVisible());
+			CoreUtils.updateObject(this.getBackgroundColor(), gp.getBackgroundColor());
+			CoreUtils.updateObject(this.getBorderColor(), gp.getBorderColor());
 		}
 	}
 
@@ -143,6 +152,38 @@ public class CMGroup implements IUuidObject, INamedObject, IModuleUniqueIdentifi
 
 	public void setPolygon(List<Bound> polygon) {
 		this.polygon = polygon;
+	}
+
+	public Color getBackgroundColor() {
+		return backgroundColor;
+	}
+
+	public void setBackgroundColor(Color backgroundColor) {
+		this.backgroundColor = backgroundColor;
+	}
+
+	public Color getBorderColor() {
+		return borderColor;
+	}
+
+	public void setBorderColor(Color borderColor) {
+		this.borderColor = borderColor;
+	}
+
+	public boolean isBackgroundVisible() {
+		return backgroundVisible;
+	}
+
+	public void setBackgroundVisible(boolean backgroundVisible) {
+		this.backgroundVisible = backgroundVisible;
+	}
+
+	public boolean isBorderVisible() {
+		return borderVisible;
+	}
+
+	public void setBorderVisible(boolean borderVisible) {
+		this.borderVisible = borderVisible;
 	}
 
 }

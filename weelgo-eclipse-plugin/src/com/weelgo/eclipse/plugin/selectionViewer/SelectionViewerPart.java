@@ -19,6 +19,8 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
+import com.weelgo.chainmapping.core.CMGroup;
+import com.weelgo.chainmapping.core.CMNode;
 import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.IUuidObject;
@@ -27,6 +29,7 @@ import com.weelgo.eclipse.plugin.ColorFactory;
 import com.weelgo.eclipse.plugin.CurrentSelectionService;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.ImagesFactory;
+import com.weelgo.eclipse.plugin.chainmapping.editor.views.GroupView;
 import com.weelgo.eclipse.plugin.chainmapping.editor.views.TaskView;
 import com.weelgo.eclipse.plugin.job.CMJob;
 import com.weelgo.eclipse.plugin.job.CMJobHandler;
@@ -109,7 +112,7 @@ public class SelectionViewerPart {
 		ISelectionView view = null;
 		Object selectedObject = null;
 
-		List<IUuidObject> multiSelection = currentSelectionService.findList(IUuidObject.class);
+		List multiSelection = currentSelectionService.findListMulti(CMGroup.class, CMNode.class);
 		if (multiSelection != null) {
 			if (multiSelection.size() > 1) {
 				// Multi sélection
@@ -117,12 +120,14 @@ public class SelectionViewerPart {
 				view = new MultiSelectionViewer();
 				view.setPart(this);
 				selectedObject = multiSelection;
-			} else {
-				CMTask task = currentSelectionService.find(CMTask.class);
+			} else if (multiSelection.size() > 0) {
+				Object task = multiSelection.get(0);
 				if (task != null) {
 					view = createViewFromObject(task);
-					view.setPart(this);
-					selectedObject = task;
+					if (view != null) {
+						view.setPart(this);
+						selectedObject = task;
+					}
 				}
 			}
 		}
@@ -144,6 +149,7 @@ public class SelectionViewerPart {
 
 		if (currentView != null) {
 			currentView.populateView(currentData);
+			currentView.validateInputs();
 		}
 
 		messageBoxComposite.layout();
@@ -155,6 +161,8 @@ public class SelectionViewerPart {
 		if (o != null) {
 			if (o instanceof CMTask) {
 				return new TaskView();
+			} else if (o instanceof CMGroup) {
+				return new GroupView();
 			}
 		}
 		return null;

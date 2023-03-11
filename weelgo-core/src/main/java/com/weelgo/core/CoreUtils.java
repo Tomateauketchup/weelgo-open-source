@@ -19,6 +19,15 @@ public class CoreUtils {
 
 	public static IUuidGenerator uuidGenerator = new UuidGenerator();
 
+	public static String toString(Boolean b) {
+		if (b != null) {
+			if (b == true) {
+				return "true";
+			}
+		}
+		return "false";
+	}
+
 	public static void disposeMap(Map objects) {
 		if (objects != null && objects.size() > 0) {
 			for (Object o : objects.values()) {
@@ -64,6 +73,12 @@ public class CoreUtils {
 
 	public static String getLinkUUID(String source, String target) {
 		return source + "_" + target;
+	}
+
+	public static void updateObject(IUpdatablebject src, IUpdatablebject objectToUpdate) {
+		if (src != null && objectToUpdate != null) {
+			src.updateObject(objectToUpdate);
+		}
 	}
 
 	public static <T extends IUpdatableUuidObject> void updateList(List<T> listToUpdate, List<T> newList) {
@@ -140,7 +155,8 @@ public class CoreUtils {
 
 	}
 
-	public static <T extends IUuidObject> IUuidUpdateListProcessor<T> compileUuidList(List<T> oldList, List<T> newList) {
+	public static <T extends IUuidObject> IUuidUpdateListProcessor<T> compileUuidList(List<T> oldList,
+			List<T> newList) {
 		IUuidUpdateListProcessor<T> p = new IUuidUpdateListProcessor<T>(oldList, newList) {
 
 			@Override

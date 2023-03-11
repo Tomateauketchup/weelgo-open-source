@@ -29,8 +29,10 @@ public abstract class NodeEditPart extends CMGenericEditPart implements org.ecli
 
 		nodeFigure.setConstraint(nodeFigure.getLabelName(), new Rectangle(p.nameX, p.nameY, p.nameWidth, p.nameHeight));
 
-		nodeFigure.setConstraint(nodeFigure.getLabelBackground(),
-				new Rectangle(p.nameBackgroundX, p.nameBackgroundY, p.nameBackgroundWidth, p.nameBackgroundHeight));
+		if (nodeFigure.showLabelBackground()) {
+			nodeFigure.setConstraint(nodeFigure.getLabelBackground(),
+					new Rectangle(p.nameBackgroundX, p.nameBackgroundY, p.nameBackgroundWidth, p.nameBackgroundHeight));
+		}
 
 		Rectangle layout = new Rectangle(p.figureX, p.figureY, p.figureWidth, p.figureHeight);
 		parent.setLayoutConstraint(this, nodeFigure, layout);

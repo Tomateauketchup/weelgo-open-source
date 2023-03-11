@@ -914,8 +914,53 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		gp.setPolygon(calculatesPointsOfGroup(gp, forceRecalculateChilds));
 	}
 
+	public void addPoints(int x, int y, List<Coordinate> points) {
+		int size = 20;
+		if (points != null) {
+			
+			//Méthode carré
+//			points.add(new Coordinate(x - size, y - size));
+//			points.add(new Coordinate(x - size, y + size));
+//			points.add(new Coordinate(x + size, y - size));
+//			points.add(new Coordinate(x + size, y + size));
+			
+			//Méthod cercle
+			int xTmp=x;
+			int yTmp=y + size;
+			points.add(new Coordinate(xTmp,yTmp));
+			
+			xTmp=x+Math.round((float)size*((float)Math.sqrt(2)/(float)2));
+			yTmp=y+Math.round((float)size*((float)Math.sqrt(2)/(float)2));
+			points.add(new Coordinate(xTmp,yTmp));
+			
+			xTmp=x+size;
+			yTmp=y;
+			points.add(new Coordinate(xTmp,yTmp));
+			
+			xTmp=x+Math.round((float)size*((float)Math.sqrt(2)/(float)2));
+			yTmp=y-Math.round((float)size*((float)Math.sqrt(2)/(float)2));
+			points.add(new Coordinate(xTmp,yTmp));
+			
+			xTmp=x;
+			yTmp=y-size;
+			points.add(new Coordinate(xTmp,yTmp));
+			
+			xTmp=x-Math.round((float)size*((float)Math.sqrt(2)/(float)2));
+			yTmp=y-Math.round((float)size*((float)Math.sqrt(2)/(float)2));
+			points.add(new Coordinate(xTmp,yTmp));
+			
+			xTmp=x-size;
+			yTmp=y;
+			points.add(new Coordinate(xTmp,yTmp));
+			
+			xTmp=x-Math.round((float)size*((float)Math.sqrt(2)/(float)2));
+			yTmp=y+Math.round((float)size*((float)Math.sqrt(2)/(float)2));
+			points.add(new Coordinate(xTmp,yTmp));
+		}
+	}
+
 	public List<Coordinate> getPointsOfObject(boolean forceRecalculateChilds, String... uuids) {
-		int size = 30;
+
 		ArrayList<Coordinate> points = new ArrayList<>();
 		if (uuids != null) {
 
@@ -925,10 +970,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 				if (o != null) {
 					if (o instanceof CMNode) {
 						CMNode n = (CMNode) o;
-						points.add(new Coordinate(n.getPositionX() - size, n.getPositionY() - size));
-						points.add(new Coordinate(n.getPositionX() - size, n.getPositionY() + size));
-						points.add(new Coordinate(n.getPositionX() + size, n.getPositionY() - size));
-						points.add(new Coordinate(n.getPositionX() + size, n.getPositionY() + size));
+						addPoints(n.getPositionX(), n.getPositionY(), points);
 					} else if (o instanceof CMGroup) {
 						CMGroup gp = (CMGroup) o;
 
@@ -940,7 +982,7 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 						if (poly != null) {
 							for (Bound b : poly) {
 								if (b != null) {
-									points.add(new Coordinate(b.getX() - size, b.getY() - size));
+									addPoints(b.getX(), b.getY(), points);
 								}
 							}
 						}

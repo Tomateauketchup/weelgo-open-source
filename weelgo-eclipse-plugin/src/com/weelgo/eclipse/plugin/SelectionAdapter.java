@@ -101,6 +101,12 @@ public class SelectionAdapter {
 					arl.add(o);
 				}
 			}
+		}else
+		{
+			T o = find(objectToCheck, wantedClass);
+			if (o != null) {
+				arl.add(o);
+			}
 		}
 
 		if (arl.size() > 0) {

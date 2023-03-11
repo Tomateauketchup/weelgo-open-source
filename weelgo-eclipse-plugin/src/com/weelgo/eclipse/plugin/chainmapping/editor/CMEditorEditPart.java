@@ -11,13 +11,17 @@ import org.eclipse.draw2d.IFigure;
 import org.eclipse.draw2d.Viewport;
 import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
+import org.eclipse.gef.ConnectionEditPart;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPolicy;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
 
+import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMNode;
 import com.weelgo.core.Bound;
 import com.weelgo.core.CoreUtils;
+import com.weelgo.core.IUuidUpdateListProcessor;
 import com.weelgo.eclipse.plugin.Factory;
 
 public class CMEditorEditPart extends CMGenericEditPart {
@@ -29,6 +33,23 @@ public class CMEditorEditPart extends CMGenericEditPart {
 	private double zoom = 1.0;
 	private boolean firstOpen = true;
 
+	private List<CMGroup> groups = new ArrayList<CMGroup>();
+	private Map<CMGroup, GroupEditPart> groupParts = new HashMap<CMGroup, GroupEditPart>();
+
+	@Override
+	public void disposeObject() {
+		groups = null;
+		for (Map.Entry<CMGroup, GroupEditPart> entry : groupParts.entrySet()) {
+			GroupEditPart val = entry.getValue();
+			if (val != null) {
+				getGroupsLayer().remove(val.getFigure());
+				CoreUtils.dispose(val);
+			}
+		}
+		groupParts = null;
+		super.disposeObject();
+	}
+
 	@Override
 	protected IFigure createFigure() {
 		FreeformLayer layer = new FreeformLayer();
@@ -38,10 +59,13 @@ public class CMEditorEditPart extends CMGenericEditPart {
 
 	@Override
 	protected List getModelChildren() {
-		List arl = getNodes();
-		if (arl == null) {
-			arl = new ArrayList<>();
+		List arl = new ArrayList<>();
+
+		List nds = getNodes();
+		if (nds != null) {
+			arl.addAll(nds);
 		}
+
 		arl.add(bottomLeftCorner);
 		arl.add(bottomRightCorner);
 		arl.add(topLeftCorner);
@@ -49,9 +73,73 @@ public class CMEditorEditPart extends CMGenericEditPart {
 		return arl;
 	}
 
+	public void refreshGroups() {
+		List<CMGroup> newGps = getGroups();
+		if (newGps == null) {
+			newGps = new ArrayList<CMGroup>();
+		}
+
+		List<CMGroup> oldGroups = groups;
+		if (oldGroups == null) {
+			oldGroups = new ArrayList<CMGroup>();
+		}
+
+		IUuidUpdateListProcessor<CMGroup> updator = CoreUtils.compileUuidList(oldGroups, newGps);
+
+		List<CMGroup> gpsToRemove = updator.getToRemoveElements();
+		List<CMGroup> gpsToCreate = updator.getNewElements();
+		List<CMGroup> gpsToRefresh = updator.getChangedAndNotElements();
+
+		if (gpsToRemove != null) {
+			for (CMGroup o : gpsToRemove) {
+				GroupEditPart gpt = findGroupEditPart(o);
+				if (gpt != null) {
+					getGroupsLayer().remove(gpt.getFigure());
+					CoreUtils.dispose(gpt);
+				}
+				groups.remove(o);
+				groupParts.remove(o);
+			}
+		}
+
+		if (gpsToCreate != null) {
+			for (CMGroup o : gpsToCreate) {
+				GroupEditPart gpt = createGroupEditPart(o);
+				if (gpt != null) {
+					getGroupsLayer().add(gpt.getFigure());
+					groups.add(o);
+					groupParts.put(o, gpt);
+					gpt.refresh();
+				}
+			}
+		}
+		if (gpsToRefresh != null) {
+			for (CMGroup o : gpsToRefresh) {
+				GroupEditPart gpt = findGroupEditPart(o);
+				if (gpt != null) {
+					gpt.refresh();
+				}
+			}
+		}
+	}
+
+	public IFigure getGroupsLayer() {
+		return getLayer(ChainMappingEditor.GROUPS_LAYER);
+	}
+
+	public GroupEditPart findGroupEditPart(CMGroup gp) {
+		return groupParts.get(gp);
+	}
+
+	public GroupEditPart createGroupEditPart(CMGroup model) {
+		return (GroupEditPart) getViewer().getEditPartFactory().createEditPart(this, model);
+	}
+
 	@Override
 	public void refresh() {
 		super.refresh();
+		refreshGroups();
+
 		if (firstOpen) {
 			calculateAndrefreshCorners();
 		}
@@ -74,6 +162,14 @@ public class CMEditorEditPart extends CMGenericEditPart {
 			CoreUtils.putListIntoList(ser.getNeeds(), arl);
 		}
 		return arl;
+	}
+
+	public List<CMGroup> getGroups() {
+		CMModuleService ser = getModuleServiceModel();
+		if (ser != null) {
+			return ser.getAllGroupChildsRecursive();
+		}
+		return null;
 	}
 
 	@Override

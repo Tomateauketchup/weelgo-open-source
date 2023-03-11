@@ -26,13 +26,19 @@ public abstract class NodeFigure extends Figure {
 		setLayoutManager(new XYLayout());
 		mainShape = createMainShape();
 		add(mainShape);
-		labelBackground = new RectangleFigure();
-		labelBackground.setBackgroundColor(ColorFactory.WHITE_COLOR);
-		labelBackground.setForegroundColor(ColorFactory.WHITE_COLOR);
-		add(labelBackground);
+		if (showLabelBackground()) {
+			labelBackground = new RectangleFigure();
+			labelBackground.setBackgroundColor(ColorFactory.WHITE_COLOR);
+			labelBackground.setForegroundColor(ColorFactory.WHITE_COLOR);
+			add(labelBackground);
+		}
 		labelName = new Label();
 		labelName.setForegroundColor(ColorFactory.BLACK_COLOR);
 		add(labelName);
+	}
+
+	public boolean showLabelBackground() {
+		return false;
 	}
 
 	public abstract IFigure createMainShape();

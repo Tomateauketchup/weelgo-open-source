@@ -10,6 +10,7 @@ import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMNeed;
 import com.weelgo.chainmapping.core.CMNode;
 import com.weelgo.chainmapping.core.CMTask;
+import com.weelgo.core.Color;
 
 public class Populator {
 
@@ -23,6 +24,10 @@ public class Populator {
 			to.setPackageParentPath(src.getPackage_parent_path());
 			to.setType(src.getType());
 			to.setUuid(src.getUuid());
+			to.setBackgroundVisible(src.isBackground_visible());
+			to.setBorderVisible(src.isBorder_visible());
+			to.setBackgroundColor(Color.convertIntoColor(src.getBackground_color()));
+			to.setBorderColor(Color.convertIntoColor(src.getBorder_color()));
 
 			if (to.isModule()) {
 				module = new CMModuleService();
@@ -96,6 +101,11 @@ public class Populator {
 			to.setPackage_name(src.getPackageName());
 			to.setPackage_parent_path(src.getPackageParentPath());
 			to.setType(src.getType());
+			to.setBackground_color(Color.convertIntoArray(src.getBackgroundColor()));
+			to.setBorder_color(Color.convertIntoArray(src.getBorderColor()));
+			to.setBorder_visible(src.isBorderVisible());
+			to.setBackground_visible(src.isBackgroundVisible());
+
 			if (module != null) {
 				List<CMTask> tasks = module.getTaskChilds(src.getUuid());
 				if (tasks != null) {

@@ -19,6 +19,7 @@ import org.eclipse.draw2d.geometry.Point;
 import org.eclipse.draw2d.geometry.Rectangle;
 import org.eclipse.draw2d.zoom.ZoomListener;
 import org.eclipse.gef.DefaultEditDomain;
+import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartViewer;
 import org.eclipse.gef.GraphicalViewer;
 import org.eclipse.gef.KeyHandler;
@@ -26,6 +27,7 @@ import org.eclipse.gef.KeyStroke;
 import org.eclipse.gef.MouseWheelHandler;
 import org.eclipse.gef.MouseWheelZoomHandler;
 import org.eclipse.gef.RootEditPart;
+import org.eclipse.gef.editparts.LayerManager;
 import org.eclipse.gef.editparts.ScalableFreeformRootEditPart;
 import org.eclipse.gef.editparts.ZoomManager;
 import org.eclipse.gef.palette.PaletteGroup;
@@ -74,6 +76,8 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 	public static final char SELECTION_TOOL_KEY = 's';
 	public static final char LINK_TOOL_KEY = 'l';
 
+	public static final java.lang.String GROUPS_LAYER = "groups_layer";
+
 	private EventReciever eventReciever;
 	private static Logger logger = LoggerFactory.getLogger(ChainMappingEditor.class);
 	private IExecutionListener saveListener;
@@ -90,6 +94,7 @@ public class ChainMappingEditor extends GraphicalEditor implements IDisposableOb
 					@Override
 					protected LayeredPane createPrintableLayers() {
 						FreeformLayeredPane layeredPane = new FreeformLayeredPane();
+						layeredPane.add(new FreeformLayer(), GROUPS_LAYER);
 						layeredPane.add(new ConnectionLayer(), CONNECTION_LAYER);
 						layeredPane.add(new FreeformLayer(), PRIMARY_LAYER);
 						return layeredPane;

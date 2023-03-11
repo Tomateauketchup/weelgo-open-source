@@ -2,8 +2,7 @@ package com.weelgo.core;
 
 import java.util.List;
 
-public class Bound
-{
+public class Bound implements ICloneableObject<Bound>, IUuidObject, IUpdatableUuidObject<Bound> {
 	private int top;
 	private int left;
 	private int bottom;
@@ -20,160 +19,174 @@ public class Bound
 	private boolean fontBold = false;
 	private String uuid;
 
-	public int getTop()
-	{
+	@Override
+	public void populateObject(Bound toPopulate) {
+		if (toPopulate != null) {
+			toPopulate.setBackgroundColor(getBackgroundColor());
+			toPopulate.setBorderColor(getBorderColor());
+			toPopulate.setBottom(getBottom());
+			toPopulate.setEmpty(isEmpty());
+			toPopulate.setFontBold(isFontBold());
+			toPopulate.setFontSize(getFontSize());
+			toPopulate.setFontSizeString(getFontSizeString());
+			toPopulate.setHeight(getHeight());
+			toPopulate.setLeft(getLeft());
+			toPopulate.setLevel(getLevel());
+			toPopulate.setRight(getRight());
+			toPopulate.setText(getText());
+			toPopulate.setTop(getTop());
+			toPopulate.setUuid(getUuid());
+			toPopulate.setWidth(getWidth());
+		}
+	}
+
+	@Override
+	public void updateObject(Bound objectToUpdate) {
+		populateObject(objectToUpdate);
+	}
+
+	@Override
+	public Bound createThisObject() {
+		return new Bound();
+	}
+
+	public int getY() {
 		return top;
 	}
 
-	public void setTop(int top)
-	{
-		this.top = top;
+	public void setY(int y) {
+		this.top = y;
 	}
 
-	public int getLeft()
-	{
+	public int getX() {
 		return left;
 	}
 
-	public void setLeft(int left)
-	{
+	public void setX(int x) {
+		this.left = x;
+	}
+
+	public int getTop() {
+		return top;
+	}
+
+	public void setTop(int top) {
+		this.top = top;
+	}
+
+	public int getLeft() {
+		return left;
+	}
+
+	public void setLeft(int left) {
 		this.left = left;
 	}
 
-	public int getBottom()
-	{
+	public int getBottom() {
 		return bottom;
 	}
 
-	public void setBottom(int bottom)
-	{
+	public void setBottom(int bottom) {
 		this.bottom = bottom;
 	}
 
-	public int getRight()
-	{
+	public int getRight() {
 		return right;
 	}
 
-	public void setRight(int right)
-	{
+	public void setRight(int right) {
 		this.right = right;
 	}
 
-	public int getWidth()
-	{
+	public int getWidth() {
 		return width;
 	}
 
-	public void setWidth(int width)
-	{
+	public void setWidth(int width) {
 		this.width = width;
 	}
 
-	public int getHeight()
-	{
+	public int getHeight() {
 		return height;
 	}
 
-	public void setHeight(int height)
-	{
+	public void setHeight(int height) {
 		this.height = height;
 	}
 
-	public String getBackgroundColor()
-	{
+	public String getBackgroundColor() {
 		return backgroundColor;
 	}
 
-	public void setBackgroundColor(String backgroundColor)
-	{
+	public void setBackgroundColor(String backgroundColor) {
 		this.backgroundColor = backgroundColor;
 	}
 
-	public String getBorderColor()
-	{
+	public String getBorderColor() {
 		return borderColor;
 	}
 
-	public void setBorderColor(String borderColor)
-	{
+	public void setBorderColor(String borderColor) {
 		this.borderColor = borderColor;
 	}
 
-	public int getLevel()
-	{
+	public int getLevel() {
 		return level;
 	}
 
-	public void setLevel(int level)
-	{
+	public void setLevel(int level) {
 		this.level = level;
 	}
 
-	public boolean isEmpty()
-	{
+	public boolean isEmpty() {
 		return empty;
 	}
 
-	public void setEmpty(boolean empty)
-	{
+	public void setEmpty(boolean empty) {
 		this.empty = empty;
 	}
 
-	public String getText()
-	{
+	public String getText() {
 		return text;
 	}
 
-	public void setText(String text)
-	{
+	public void setText(String text) {
 		this.text = text;
 	}
 
-	public String getFontSizeString()
-	{
+	public String getFontSizeString() {
 		return fontSizeString;
 	}
 
-	public void setFontSizeString(String fontSizeString)
-	{
+	public void setFontSizeString(String fontSizeString) {
 		this.fontSizeString = fontSizeString;
 	}
 
-	public float getFontSize()
-	{
+	public float getFontSize() {
 		return fontSize;
 	}
 
-	public void setFontSize(float fontSize)
-	{
+	public void setFontSize(float fontSize) {
 		this.fontSize = fontSize;
 	}
 
-	public String getUuid()
-	{
+	public String getUuid() {
 		return uuid;
 	}
 
-	public void setUuid(String uuid)
-	{
+	public void setUuid(String uuid) {
 		this.uuid = uuid;
 	}
 
-	public boolean isFontBold()
-	{
+	public boolean isFontBold() {
 		return fontBold;
 	}
 
-	public void setFontBold(boolean fontBold)
-	{
+	public void setFontBold(boolean fontBold) {
 		this.fontBold = fontBold;
 	}
 
-	public static Bound calculateBound(List<Bound> arl,
-			boolean invertedXAxis,
-			boolean invertedYAxis)
-	{
+	public static Bound calculateBound(List<Bound> arl, boolean invertedXAxis, boolean invertedYAxis) {
 		int top = 0;
 		boolean topInit = false;
 		int right = 0;
@@ -182,61 +195,46 @@ public class Bound
 		boolean bottomInit = false;
 		int left = 0;
 		boolean leftInit = false;
-		if (arl != null && arl.size() > 0)
-		{
+		if (arl != null && arl.size() > 0) {
 
-			for (Bound a : arl)
-			{
-				if (a != null)
-				{
-					if (invertedYAxis)
-					{
-						if (topInit == false || top > a.getTop())
-						{
+			for (Bound a : arl) {
+				if (a != null) {
+					if (invertedYAxis) {
+						if (topInit == false || top > a.getTop()) {
 							top = a.getTop();
 							topInit = true;
 						}
-						if (bottomInit == false || bottom < a.getBottom())
-						{
+						if (bottomInit == false || bottom < a.getBottom()) {
 							bottom = a.getBottom();
 							bottomInit = true;
 						}
-					} else
-					{
-						if (topInit == false || top < a.getTop())
-						{
+					} else {
+						if (topInit == false || top < a.getTop()) {
 							top = a.getTop();
 							topInit = true;
 						}
-						if (bottomInit == false || bottom > a.getBottom())
-						{
+						if (bottomInit == false || bottom > a.getBottom()) {
 							bottom = a.getBottom();
 							bottomInit = true;
 						}
 					}
-					if (invertedXAxis)
-					{
-						if (rightInit == false || right > a.getRight())
-						{
+					if (invertedXAxis) {
+						if (rightInit == false || right > a.getRight()) {
 							right = a.getRight();
 							rightInit = true;
 						}
 
-						if (leftInit == false || left < a.getLeft())
-						{
+						if (leftInit == false || left < a.getLeft()) {
 							left = a.getLeft();
 							leftInit = true;
 						}
-					} else
-					{
-						if (rightInit == false || right < a.getRight())
-						{
+					} else {
+						if (rightInit == false || right < a.getRight()) {
 							right = a.getRight();
 							rightInit = true;
 						}
 
-						if (leftInit == false || left > a.getLeft())
-						{
+						if (leftInit == false || left > a.getLeft()) {
 							left = a.getLeft();
 							leftInit = true;
 						}
@@ -256,4 +254,5 @@ public class Bound
 		b.setWidth(Math.abs(right - left));
 		return b;
 	}
+
 }

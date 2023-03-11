@@ -4,6 +4,7 @@ import org.eclipse.gef.EditPart;
 import org.eclipse.gef.EditPartFactory;
 import org.eclipse.gef.editparts.AbstractGraphicalEditPart;
 
+import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMLink;
 import com.weelgo.chainmapping.core.CMModuleService;
 import com.weelgo.chainmapping.core.CMNeed;
@@ -30,6 +31,8 @@ public class CMEditorEditPartFactory implements EditPartFactory {
 			part = Factory.create(CornerEditPart.class);
 		} else if (model instanceof CMLink) {
 			part = Factory.create(LinkEditPart.class);
+		} else if (model instanceof CMGroup) {
+			part = Factory.create(GroupEditPart.class);
 		}
 
 		part.setModel(model);

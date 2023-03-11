@@ -61,8 +61,8 @@ public class CMFileSystemDataSource extends CMGenericDataSource {
 				for (Map.Entry<String, CMModuleService> entry : loadedServices.entrySet()) {
 					String key = entry.getKey();
 					CMModuleService val = entry.getValue();
-					if (val != null) {
-						val.check();
+					if (val != null) {						
+						val.calculateGroupsPolygon();
 					}
 				}
 

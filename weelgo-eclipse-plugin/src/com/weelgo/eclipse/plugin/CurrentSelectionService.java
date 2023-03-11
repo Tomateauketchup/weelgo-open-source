@@ -74,6 +74,10 @@ public class CurrentSelectionService {
 		return null;
 	}
 
+	public List findListMulti(Class... wantedClass) {
+		return selectionAdapter.findListMulti(currentSelection, wantedClass);
+	}
+
 	public <T> T find(Class<T> wantedClass) {
 		return selectionAdapter.find(currentSelection, wantedClass);
 	}
