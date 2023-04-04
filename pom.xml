@@ -17,6 +17,7 @@
   <modules>
 		<module>weelgo-core</module>
 		<module>weelgo-chain-mapping-core</module>		
+		<module>weelgo-central</module>				
   </modules>
   
   
