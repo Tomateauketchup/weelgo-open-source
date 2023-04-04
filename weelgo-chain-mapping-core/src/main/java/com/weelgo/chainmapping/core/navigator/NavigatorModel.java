@@ -21,6 +21,11 @@ public class NavigatorModel extends NavNode {
 	Map<String, NavNode> nodesMapByUuid;
 	private Map<String, List<NavNode>> childsMapByUuid;
 
+	public boolean moveNodes(List<NavNode> sources,	NavNode target)
+	{
+		return true;
+	}
+
 	public void update(CMModulesManager manager) {
 		Collection<CMGenericDataSource> sources = manager.getDataSources();
 		Map<String, NavNode> newNodesMap = new HashMap<>();

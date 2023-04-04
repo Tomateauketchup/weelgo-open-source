@@ -72,6 +72,12 @@ public class CMEditorEditPart extends CMGenericEditPart {
 		arl.add(topRightCorner);
 		return arl;
 	}
+	
+	@Override
+	protected void refreshVisuals() {		
+		super.refreshVisuals();
+		refreshGroups();
+	}
 
 	public void refreshGroups() {
 		List<CMGroup> newGps = getGroups();
@@ -106,6 +112,7 @@ public class CMEditorEditPart extends CMGenericEditPart {
 			for (CMGroup o : gpsToCreate) {
 				GroupEditPart gpt = createGroupEditPart(o);
 				if (gpt != null) {
+					gpt.setParent(this);
 					getGroupsLayer().add(gpt.getFigure());
 					groups.add(o);
 					groupParts.put(o, gpt);

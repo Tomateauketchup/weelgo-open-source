@@ -11,17 +11,25 @@ import org.eclipse.e4.core.di.annotations.Optional;
 import org.eclipse.e4.ui.di.UIEventTopic;
 import org.eclipse.e4.ui.services.EMenuService;
 import org.eclipse.e4.ui.workbench.modeling.ESelectionService;
+import org.eclipse.jface.util.LocalSelectionTransfer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DragSourceAdapter;
+import org.eclipse.swt.dnd.DragSourceEvent;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.widgets.Composite;
 
 import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMLink;
 import com.weelgo.chainmapping.core.CMNeed;
 import com.weelgo.chainmapping.core.CMTask;
+import com.weelgo.chainmapping.core.navigator.NavNode;
 import com.weelgo.chainmapping.core.navigator.NavigatorModel;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.eclipse.plugin.CMEvents;
@@ -71,6 +79,49 @@ public class WeelgoNavigatorViewPart {
 					ChainMappingEditor.openEditor(serviceUuid);
 				}
 			}
+		});
+		Transfer[] transferTypes = { LocalSelectionTransfer.getTransfer() };
+		viewer.addDragSupport(DND.DROP_MOVE, transferTypes, new DragSourceAdapter() {
+
+			@Override
+			public void dragSetData(DragSourceEvent event) {
+				IStructuredSelection selection = (IStructuredSelection) viewer.getSelection();
+
+				LocalSelectionTransfer transfer = LocalSelectionTransfer.getTransfer();
+				if (transfer.isSupportedType(event.dataType)) {
+					transfer.setSelection(selection);
+					transfer.setSelectionSetTime(event.time & 0xFFFF);
+				}
+			}
+
+		});
+		viewer.addDropSupport(DND.DROP_MOVE, transferTypes, new DropTargetAdapter() {
+
+			@Override
+			public void drop(DropTargetEvent event) {
+
+				boolean succeed = false;
+
+				List<NavNode> sources = null;
+				NavNode target = null;
+				if (event.data instanceof IStructuredSelection selec) {
+					sources = selectionAdapter.findList(selec, NavNode.class);
+				}
+				if (event.item != null && event.item.getData() instanceof NavNode n) {
+					target = n;
+				}
+
+				if (sources != null && sources.size() > 0 && target != null && model != null) {
+					boolean isOk = model.moveNodes(sources, target);
+					if(isOk)
+					{
+						refreshView();
+					}
+				}
+
+				super.drop(event);
+			}
+
 		});
 		menuService.registerContextMenu(viewer.getControl(), "com.weelgo.eclipse.plugin.navigator.ContextMenu");
 
@@ -145,7 +196,7 @@ public class WeelgoNavigatorViewPart {
 	public void getNodesNamePositionChangedEvent(@UIEventTopic(CMEvents.NODES_NAME_POSITION_CHANGED) Object nodes) {
 		refreshView();
 	}
-	
+
 	@Inject
 	@Optional
 	public void getNeedCreatedEvent(@UIEventTopic(CMEvents.NEED_CREATED) CMNeed tsk) {
@@ -157,7 +208,7 @@ public class WeelgoNavigatorViewPart {
 	public void getTaskCreatedEvent(@UIEventTopic(CMEvents.TASK_CREATED) CMTask tsk) {
 		refreshView();
 	}
-	
+
 	@Inject
 	@Optional
 	public void getElementsMovedIntoGroupEvent(@UIEventTopic(CMEvents.ELEMENTS_MOVED_INTO_GROUP) Object o) {
@@ -173,6 +224,44 @@ public class WeelgoNavigatorViewPart {
 	@Inject
 	@Optional
 	public void getTaskNameModifiedEvent(@UIEventTopic(CMEvents.TASK_NAME_MODIFIED) CMTask tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupNameModifiedEvent(@UIEventTopic(CMEvents.GROUP_NAME_MODIFIED) CMGroup tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupPackageNameModifiedEvent(@UIEventTopic(CMEvents.GROUP_PACKAGE_NAME_MODIFIED) CMGroup tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupBackgroundColorModifiedEvent(
+			@UIEventTopic(CMEvents.GROUP_BACKGROUND_COLOR_MODIFIED) CMGroup tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupBackgroundVisibleModifiedEvent(
+			@UIEventTopic(CMEvents.GROUP_BACKGROUND_VISIBLE_MODIFIED) CMGroup tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupBorderColorModifiedEvent(@UIEventTopic(CMEvents.GROUP_BORDER_COLOR_MODIFIED) CMGroup tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupBorderVisibleModifiedEvent(@UIEventTopic(CMEvents.GROUP_BORDER_VISIBLE_MODIFIED) CMGroup tsk) {
 		refreshView();
 	}
 

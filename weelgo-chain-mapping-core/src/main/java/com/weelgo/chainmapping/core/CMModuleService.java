@@ -22,6 +22,7 @@ import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
 
 import com.weelgo.core.Bound;
+import com.weelgo.core.Color;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.ICloneableObject;
 import com.weelgo.core.INamedObject;
@@ -478,9 +479,24 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 				checkGroup(gpTmp);
 			}
 		}
+		initGroupPackageParentPathRecursive(parent);
 		needReloadObjects();
 
 		calculateGroupsPolygonImpactedByObject(parent);
+	}
+
+	public void initGroupPackageParentPathRecursive(CMGroup parent) {
+		if (parent != null) {
+
+			List<CMGroup> childs = getGroupChilds(parent.getUuid());
+			if (childs != null) {
+				for (CMGroup child : childs) {
+					child.setPackageParentPath(createPackageParentPath(parent));
+					checkGroup(child);
+					initGroupPackageParentPathRecursive(child);
+				}
+			}
+		}
 	}
 
 	public boolean isChildOfGroup(String parentGroupUuid, String childUuid) {
@@ -583,6 +599,57 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		}
 
 		return true;
+	}
+
+	public CMGroup modifyGroupPackageName(String packageName, String groupUuid) {
+		packageName = cleanString(packageName);
+		checkPackageName(packageName);
+
+		CMGroup gp = getObjectByUuid(groupUuid);
+		assertNotNullOrEmpty(gp);
+		String parentGroupUuid = gp.getUuid();
+
+		if (isPackageAlreadyExists(packageName, parentGroupUuid)) {
+			throwDynamicException(WeelgoException.GROUP_ALREADY_EXIST);
+		}
+
+		gp.setPackageName(packageName);
+
+		initGroupPackageParentPathRecursive(gp);
+
+		return gp;
+	}
+
+	public CMGroup modifyGroupBackgroundVisible(boolean visible, String groupUuid) {
+
+		CMGroup gp = getObjectByUuid(groupUuid);
+		assertNotNullOrEmpty(gp);
+		gp.setBackgroundVisible(visible);
+		return gp;
+	}
+
+	public CMGroup modifyGroupBorderVisible(boolean visible, String groupUuid) {
+
+		CMGroup gp = getObjectByUuid(groupUuid);
+		assertNotNullOrEmpty(gp);
+		gp.setBorderVisible(visible);
+		return gp;
+	}
+
+	public CMGroup modifyGroupBorderColor(Color color, String groupUuid) {
+
+		CMGroup gp = getObjectByUuid(groupUuid);
+		assertNotNullOrEmpty(gp);
+		gp.setBorderColor(color);
+		return gp;
+	}
+
+	public CMGroup modifyGroupBackgroundColor(Color color, String groupUuid) {
+
+		CMGroup gp = getObjectByUuid(groupUuid);
+		assertNotNullOrEmpty(gp);
+		gp.setBackgroundColor(color);
+		return gp;
 	}
 
 	public CMGroup createGroup(CMModulesManager mm, String name, String packageName, String parentGroupUuid) {
@@ -713,6 +780,19 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 		}
 		calculateGroupsPolygonImpactedByObject((CMGroup[]) gps.toArray(new CMGroup[gps.size()]));
 		needReloadObjects();
+	}
+
+	public CMGroup modifyGroupName(String groupName, String groupUuid) {
+		groupName = cleanString(groupName);
+		checkGroupName(groupName);
+
+		CMGroup gp = getObjectByUuid(groupUuid);
+		assertNotNullOrEmpty(gp);
+		gp.setName(groupName);
+
+		checkGroup(gp);
+		needReloadObjects();
+		return gp;
 	}
 
 	public CMTask modifyTaskName(String taskName, String taskUuid) {
@@ -917,45 +997,45 @@ public class CMModuleService implements IUuidObject, INamedObject, IModuleUnique
 	public void addPoints(int x, int y, List<Coordinate> points) {
 		int size = 20;
 		if (points != null) {
-			
-			//Méthode carré
+
+			// Méthode carré
 //			points.add(new Coordinate(x - size, y - size));
 //			points.add(new Coordinate(x - size, y + size));
 //			points.add(new Coordinate(x + size, y - size));
 //			points.add(new Coordinate(x + size, y + size));
-			
-			//Méthod cercle
-			int xTmp=x;
-			int yTmp=y + size;
-			points.add(new Coordinate(xTmp,yTmp));
-			
-			xTmp=x+Math.round((float)size*((float)Math.sqrt(2)/(float)2));
-			yTmp=y+Math.round((float)size*((float)Math.sqrt(2)/(float)2));
-			points.add(new Coordinate(xTmp,yTmp));
-			
-			xTmp=x+size;
-			yTmp=y;
-			points.add(new Coordinate(xTmp,yTmp));
-			
-			xTmp=x+Math.round((float)size*((float)Math.sqrt(2)/(float)2));
-			yTmp=y-Math.round((float)size*((float)Math.sqrt(2)/(float)2));
-			points.add(new Coordinate(xTmp,yTmp));
-			
-			xTmp=x;
-			yTmp=y-size;
-			points.add(new Coordinate(xTmp,yTmp));
-			
-			xTmp=x-Math.round((float)size*((float)Math.sqrt(2)/(float)2));
-			yTmp=y-Math.round((float)size*((float)Math.sqrt(2)/(float)2));
-			points.add(new Coordinate(xTmp,yTmp));
-			
-			xTmp=x-size;
-			yTmp=y;
-			points.add(new Coordinate(xTmp,yTmp));
-			
-			xTmp=x-Math.round((float)size*((float)Math.sqrt(2)/(float)2));
-			yTmp=y+Math.round((float)size*((float)Math.sqrt(2)/(float)2));
-			points.add(new Coordinate(xTmp,yTmp));
+
+			// Méthod cercle
+			int xTmp = x;
+			int yTmp = y + size;
+			points.add(new Coordinate(xTmp, yTmp));
+
+			xTmp = x + Math.round((float) size * ((float) Math.sqrt(2) / (float) 2));
+			yTmp = y + Math.round((float) size * ((float) Math.sqrt(2) / (float) 2));
+			points.add(new Coordinate(xTmp, yTmp));
+
+			xTmp = x + size;
+			yTmp = y;
+			points.add(new Coordinate(xTmp, yTmp));
+
+			xTmp = x + Math.round((float) size * ((float) Math.sqrt(2) / (float) 2));
+			yTmp = y - Math.round((float) size * ((float) Math.sqrt(2) / (float) 2));
+			points.add(new Coordinate(xTmp, yTmp));
+
+			xTmp = x;
+			yTmp = y - size;
+			points.add(new Coordinate(xTmp, yTmp));
+
+			xTmp = x - Math.round((float) size * ((float) Math.sqrt(2) / (float) 2));
+			yTmp = y - Math.round((float) size * ((float) Math.sqrt(2) / (float) 2));
+			points.add(new Coordinate(xTmp, yTmp));
+
+			xTmp = x - size;
+			yTmp = y;
+			points.add(new Coordinate(xTmp, yTmp));
+
+			xTmp = x - Math.round((float) size * ((float) Math.sqrt(2) / (float) 2));
+			yTmp = y + Math.round((float) size * ((float) Math.sqrt(2) / (float) 2));
+			points.add(new Coordinate(xTmp, yTmp));
 		}
 	}
 

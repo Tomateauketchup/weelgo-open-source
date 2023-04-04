@@ -228,13 +228,13 @@ public class WeelgoUndoRedoViewPart {
 	public void getTaskCreatedEvent(@UIEventTopic(CMEvents.TASK_CREATED) CMTask tsk) {
 		refreshView();
 	}
-	
+
 	@Inject
 	@Optional
 	public void getElementsMovedIntoGroupEvent(@UIEventTopic(CMEvents.ELEMENTS_MOVED_INTO_GROUP) Object o) {
 		refreshView();
 	}
-	
+
 	@Inject
 	@Optional
 	public void getNeedCreatedEvent(@UIEventTopic(CMEvents.NEED_CREATED) CMNeed tsk) {
@@ -250,6 +250,44 @@ public class WeelgoUndoRedoViewPart {
 	@Inject
 	@Optional
 	public void getTaskNameModifiedEvent(@UIEventTopic(CMEvents.TASK_NAME_MODIFIED) CMTask tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupNameModifiedEvent(@UIEventTopic(CMEvents.GROUP_NAME_MODIFIED) CMGroup tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupPackageNameModifiedEvent(@UIEventTopic(CMEvents.GROUP_PACKAGE_NAME_MODIFIED) CMGroup tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupBackgroundColorModifiedEvent(
+			@UIEventTopic(CMEvents.GROUP_BACKGROUND_COLOR_MODIFIED) CMGroup tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupBackgroundVisibleModifiedEvent(
+			@UIEventTopic(CMEvents.GROUP_BACKGROUND_VISIBLE_MODIFIED) CMGroup tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupBorderColorModifiedEvent(@UIEventTopic(CMEvents.GROUP_BORDER_COLOR_MODIFIED) CMGroup tsk) {
+		refreshView();
+	}
+
+	@Inject
+	@Optional
+	public void getGroupBorderVisibleModifiedEvent(@UIEventTopic(CMEvents.GROUP_BORDER_VISIBLE_MODIFIED) CMGroup tsk) {
 		refreshView();
 	}
 

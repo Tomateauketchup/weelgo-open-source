@@ -30,8 +30,7 @@ public class TaskNameUiProperty extends NamedObjectUiProperty {
 		INamedObject o = getData();
 		if (o instanceof CMNode node) {
 			n.setModuleUniqueIdentifier(node.getModuleUniqueIdentifier());
-			n.setUuid(node.getUuid());
-			n.setModuleUniqueIdentifier(node.getModuleUniqueIdentifier());
+			n.setUuid(node.getUuid());			
 		}
 
 		j.setModuleUniqueIdentifier(n.getModuleUniqueIdentifier());

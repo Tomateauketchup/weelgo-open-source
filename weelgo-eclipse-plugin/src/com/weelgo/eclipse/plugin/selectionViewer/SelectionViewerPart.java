@@ -30,6 +30,7 @@ import com.weelgo.eclipse.plugin.CurrentSelectionService;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.ImagesFactory;
 import com.weelgo.eclipse.plugin.chainmapping.editor.views.GroupView;
+import com.weelgo.eclipse.plugin.chainmapping.editor.views.RootGroupView;
 import com.weelgo.eclipse.plugin.chainmapping.editor.views.TaskView;
 import com.weelgo.eclipse.plugin.job.CMJob;
 import com.weelgo.eclipse.plugin.job.CMJobHandler;
@@ -161,8 +162,13 @@ public class SelectionViewerPart {
 		if (o != null) {
 			if (o instanceof CMTask) {
 				return new TaskView();
-			} else if (o instanceof CMGroup) {
-				return new GroupView();
+			} else if (o instanceof CMGroup gp) {
+				if (gp.isModule()) {
+					return new RootGroupView();
+				} else {
+					return new GroupView();
+				}
+
 			}
 		}
 		return null;

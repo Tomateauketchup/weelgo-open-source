@@ -1,28 +1,28 @@
 package com.weelgo.eclipse.plugin.job;
 
+import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
-import com.weelgo.chainmapping.core.CMNode;
-import com.weelgo.chainmapping.core.CMTask;
+import com.weelgo.core.Color;
 import com.weelgo.core.IProgressMonitor;
 import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.ImagesFactory;
 
-public class CMModifyTaskNameJob extends CMJob {
+public class CMModifyGroupBorderColorJob extends CMJob {
 
-	private String newName;
+	private Color color;
 
-	public static CMModifyTaskNameJob CREATE() {
-		return Factory.create(CMModifyTaskNameJob.class);
+	public static CMModifyGroupBorderColorJob CREATE() {
+		return Factory.create(CMModifyGroupBorderColorJob.class);
 	}
 
-	public CMModifyTaskNameJob() {
-		super("Modify task name", "Modifying task name ...");
+	public CMModifyGroupBorderColorJob() {
+		super("Modify group border color", "Modifying group border color ...");
 	}
 
 	@Override
 	public String getUndoRedoLabel() {
-		return "Modify task name";
+		return "Modify group border color";
 	}
 
 	@Override
@@ -38,22 +38,22 @@ public class CMModifyTaskNameJob extends CMJob {
 	@Override
 	public void doRun(IProgressMonitor monitor) {
 
-		CMNode nd = getSelectedObject(CMNode.class);
+		CMGroup nd = getSelectedObject(CMGroup.class);
 		CMModuleService ser = getModuleService(nd);
 		if (ser != null && nd != null) {
 			setModuleUniqueIdentifier(ser.getModuleUniqueIdentifier());
-			CMTask tsk = ser.modifyTaskName(newName, nd.getUuid());
-			sentEvent(CMEvents.TASK_NAME_MODIFIED, tsk);
+			CMGroup gp = ser.modifyGroupBorderColor(color, nd.getUuid());
+			sentEvent(CMEvents.GROUP_BORDER_COLOR_MODIFIED, gp);
 		}
 
 	}
 
-	public String getNewName() {
-		return newName;
+	public Color getColor() {
+		return color;
 	}
 
-	public void setNewName(String newName) {
-		this.newName = newName;
+	public void setColor(Color color) {
+		this.color = color;
 	}
 
 }

@@ -1,28 +1,27 @@
 package com.weelgo.eclipse.plugin.job;
 
+import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
-import com.weelgo.chainmapping.core.CMNode;
-import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.core.IProgressMonitor;
 import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.ImagesFactory;
 
-public class CMModifyTaskNameJob extends CMJob {
+public class CMModifyGroupBorderVisibleJob extends CMJob {
 
-	private String newName;
+	private boolean visible;
 
-	public static CMModifyTaskNameJob CREATE() {
-		return Factory.create(CMModifyTaskNameJob.class);
+	public static CMModifyGroupBorderVisibleJob CREATE() {
+		return Factory.create(CMModifyGroupBorderVisibleJob.class);
 	}
 
-	public CMModifyTaskNameJob() {
-		super("Modify task name", "Modifying task name ...");
+	public CMModifyGroupBorderVisibleJob() {
+		super("Modify group border visibility", "Modifying group border visibility ...");
 	}
 
 	@Override
 	public String getUndoRedoLabel() {
-		return "Modify task name";
+		return "Modify group border visibility";
 	}
 
 	@Override
@@ -38,22 +37,22 @@ public class CMModifyTaskNameJob extends CMJob {
 	@Override
 	public void doRun(IProgressMonitor monitor) {
 
-		CMNode nd = getSelectedObject(CMNode.class);
+		CMGroup nd = getSelectedObject(CMGroup.class);
 		CMModuleService ser = getModuleService(nd);
 		if (ser != null && nd != null) {
 			setModuleUniqueIdentifier(ser.getModuleUniqueIdentifier());
-			CMTask tsk = ser.modifyTaskName(newName, nd.getUuid());
-			sentEvent(CMEvents.TASK_NAME_MODIFIED, tsk);
+			CMGroup gp = ser.modifyGroupBorderVisible(visible, nd.getUuid());
+			sentEvent(CMEvents.GROUP_BORDER_VISIBLE_MODIFIED, gp);
 		}
 
 	}
 
-	public String getNewName() {
-		return newName;
+	public boolean isVisible() {
+		return visible;
 	}
 
-	public void setNewName(String newName) {
-		this.newName = newName;
+	public void setVisible(boolean visible) {
+		this.visible = visible;
 	}
 
 }

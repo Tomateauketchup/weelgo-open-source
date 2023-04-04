@@ -9,7 +9,9 @@ public class GroupView extends PurePropertiesViewer<CMTask> {
 		addProperty(new GroupNameUiProperty());
 		addProperty(new GroupPackageNameUiProperty());
 		addProperty(new GroupBackgroundVisibleUiProperty());
+		addProperty(new GroupBackgroundColorUiProperty());
 		addProperty(new GroupBorderVisibleUiProperty());
+		addProperty(new GroupBorderColorUiProperty());
 	}
 
 }

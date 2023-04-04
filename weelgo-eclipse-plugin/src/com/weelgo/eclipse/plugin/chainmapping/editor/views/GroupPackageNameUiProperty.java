@@ -3,8 +3,12 @@ package com.weelgo.eclipse.plugin.chainmapping.editor.views;
 import java.util.List;
 
 import com.weelgo.chainmapping.core.CMGroup;
+import com.weelgo.core.CoreUtils;
+import com.weelgo.core.INamedObject;
 import com.weelgo.core.ValidatorUtils;
 import com.weelgo.eclipse.plugin.job.CMJob;
+import com.weelgo.eclipse.plugin.job.CMModifyGroupNameJob;
+import com.weelgo.eclipse.plugin.job.CMModifyGroupPackageNameJob;
 import com.weelgo.eclipse.plugin.ui.TextUiProperty;
 
 public class GroupPackageNameUiProperty extends TextUiProperty<CMGroup> {
@@ -44,7 +48,22 @@ public class GroupPackageNameUiProperty extends TextUiProperty<CMGroup> {
 
 	@Override
 	public List<CMJob> applyChanges(String dataFromIHM) {
-		return null;
+		CMModifyGroupPackageNameJob j=CMModifyGroupPackageNameJob.CREATE();
+		j.setNewName(dataFromIHM);
+
+		CMGroup n = new CMGroup();
+
+		INamedObject o = getData();
+		if (o instanceof CMGroup node) {
+			n.setModuleUniqueIdentifier(node.getModuleUniqueIdentifier());
+			n.setUuid(node.getUuid());
+		}
+
+		j.setModuleUniqueIdentifier(n.getModuleUniqueIdentifier());
+		j.setSelectedObject(n);
+		j.setOrderIndex(getJobOrder());
+
+		return CoreUtils.putObjectIntoList(j);
 	}
 
 }

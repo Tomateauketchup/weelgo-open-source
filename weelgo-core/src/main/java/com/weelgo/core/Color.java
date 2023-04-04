@@ -1,5 +1,7 @@
 package com.weelgo.core;
 
+import java.util.Iterator;
+
 public class Color implements ICloneableObject<Color>, IUpdatablebject<Color> {
 
 	public static Color CREATE_DEFAULT_GROUP_BACKGROUND_COLOR() {
@@ -117,6 +119,36 @@ public class Color implements ICloneableObject<Color>, IUpdatablebject<Color> {
 			i = 255;
 		}
 		return i;
+	}
+
+	public static Color convertIntoColor(String str) {
+		if (str != null) {
+			String[] a = str.split(";");
+			if (a != null && a.length > 3) {
+				int[] ar = new int[4];
+				for (int i = 0; i < ar.length; i++) {
+					ar[i] = Integer.valueOf(a[i]);
+				}
+				return convertIntoColor(ar);
+			}
+		}
+		return CREATE_WHITE();
+	}
+
+	public static String convertIntoString(Color c) {
+		if (c != null) {
+			int[] a = convertIntoArray(c);
+			if (a != null) {
+				String str = "";
+				for (int i : a) {
+
+					str = str + i + ";";
+				}
+				str = CoreUtils.removeEnd(str, ";");
+				return str;
+			}
+		}
+		return "";
 	}
 
 }

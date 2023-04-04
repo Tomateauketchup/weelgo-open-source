@@ -51,15 +51,15 @@ public class GroupEditPart extends CMGenericEditPart {
 		}
 
 		com.weelgo.core.Color borderColorTmp = getModelGroup().getBorderColor();
-		if (borderColorTmp == null) {	
+		if (borderColorTmp == null) {
 			borderColorTmp = com.weelgo.core.Color.CREATE_DEFAULT_GROUP_BORDER_COLOR();
 		}
 
 		ColorFactory.disposeColor(backgroundColor);
-		backgroundColor = getColor(bgColorTmp, getModelGroup().isBackgroundVisible());
+		backgroundColor = getColor(bgColorTmp, getModelGroup().isBackgroundVisible(), getParentBackgroundColor());
 
 		ColorFactory.disposeColor(borderColor);
-		borderColor = getColor(borderColorTmp, getModelGroup().isBorderVisible());
+		borderColor = getColor(borderColorTmp, getModelGroup().isBorderVisible(), getParentBackgroundColor());
 
 		List<Bound> pts = getModelGroup().getPolygon();
 		if (pts != null) {
@@ -77,10 +77,24 @@ public class GroupEditPart extends CMGenericEditPart {
 
 	}
 
-	public Color getColor(com.weelgo.core.Color c, boolean visible) {
+	public com.weelgo.core.Color getParentBackgroundColor() {
+		CMGroup gp = getModelGroup();
+		if (gp != null) {
+			CMGroup parentGp = getModuleService().getObjectByUuid(gp.getGroupUuid());
+			if (parentGp != null) {
+				return parentGp.getBackgroundColor();
+			}
+		}
+		return com.weelgo.core.Color.CREATE_WHITE();
+	}
+
+	public Color getColor(com.weelgo.core.Color c, boolean visible, com.weelgo.core.Color parent) {
 		if (visible) {
 			return ColorFactory.createColor(c);
 		} else {
+			if (parent != null) {
+				return ColorFactory.createColor(parent);
+			}
 			return ColorFactory.createTransparentColor();
 		}
 	}

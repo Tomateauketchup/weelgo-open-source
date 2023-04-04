@@ -3,50 +3,53 @@ package com.weelgo.eclipse.plugin.chainmapping.editor.views;
 import java.util.List;
 
 import com.weelgo.chainmapping.core.CMGroup;
+import com.weelgo.core.Color;
 import com.weelgo.core.CoreUtils;
 import com.weelgo.core.INamedObject;
 import com.weelgo.eclipse.plugin.job.CMJob;
-import com.weelgo.eclipse.plugin.job.CMModifyGroupBackgroundVisibleJob;
-import com.weelgo.eclipse.plugin.job.CMModifyGroupNameJob;
-import com.weelgo.eclipse.plugin.ui.CheckboxUiProperty;
+import com.weelgo.eclipse.plugin.job.CMModifyGroupBackgroundColorJob;
+import com.weelgo.eclipse.plugin.ui.ColorPickupUiProperty;
 
-public class GroupBackgroundVisibleUiProperty extends CheckboxUiProperty<CMGroup> {
+public class GroupBackgroundColorUiProperty extends ColorPickupUiProperty<CMGroup> {
 
-	public GroupBackgroundVisibleUiProperty() {
-		setName("Background visible");
-		setId("BACKGROUND_VISIBLE");
+	public GroupBackgroundColorUiProperty() {
+		setName("Background color");
+		setId("BACKGROUND_COLOR");
 	}
 
 	@Override
 	public void doPopulate(CMGroup data) {
 
-		boolean isVisible = false;
+		Color color = null;
 		if (data != null) {
-			isVisible = data.isBackgroundVisible();
+			color = data.getBackgroundColor();
 		}
-		if (getWidget() != null) {
-			getWidget().setSelection(isVisible);
-		}
+		setColorToIHM(color);
 	}
 
 	@Override
-	public String validateInput(Boolean dataToValidate) {
+	public Color getDefaultColor() {
+		return Color.CREATE_DEFAULT_GROUP_BACKGROUND_COLOR();
+	}
+
+	@Override
+	public String validateInput(Color dataToValidate) {
 		return null;
 	}
 
 	@Override
 	public String getDataFromObjectString(CMGroup object) {
 		if (object != null) {
-			return CoreUtils.toString(object.isBackgroundVisible());
+			return CoreUtils.toString(object.getBackgroundColor());
 		}
 
-		return CoreUtils.toString(false);
+		return "";
 	}
 
 	@Override
 	public List<CMJob> applyChanges(String dataFromIHM) {
-		CMModifyGroupBackgroundVisibleJob j=CMModifyGroupBackgroundVisibleJob.CREATE();
-		j.setVisible(CoreUtils.toBoolean(dataFromIHM));
+		CMModifyGroupBackgroundColorJob j=CMModifyGroupBackgroundColorJob.CREATE();
+		j.setColor(CoreUtils.toColor(dataFromIHM));
 
 		CMGroup n = new CMGroup();
 
@@ -61,6 +64,7 @@ public class GroupBackgroundVisibleUiProperty extends CheckboxUiProperty<CMGroup
 		j.setOrderIndex(getJobOrder());
 
 		return CoreUtils.putObjectIntoList(j);
+
 	}
 
 }

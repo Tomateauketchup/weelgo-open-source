@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -21,11 +20,31 @@ public class CoreUtils {
 
 	public static String toString(Boolean b) {
 		if (b != null) {
-			if (b == true) {
+			if (b) {
 				return "true";
 			}
 		}
 		return "false";
+	}
+
+	public static String toString(Color b) {
+		if (b != null) {
+			return Color.convertIntoString(b);
+		}
+		return "false";
+	}
+
+	public static boolean toBoolean(String str) {
+		if (str != null) {
+			if ("true".equals(str.toLowerCase()) || "1".equals(str.toLowerCase())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public static Color toColor(String str) {
+		return Color.convertIntoColor(str);
 	}
 
 	public static void disposeMap(Map objects) {
@@ -439,7 +458,7 @@ public class CoreUtils {
 
 	public static <T> void removeObjectFromList(String uuid, List<T> list) {
 		if (list != null && uuid != null) {
-			ArrayList<T> arlToRemove = new ArrayList<T>();
+			ArrayList<T> arlToRemove = new ArrayList<>();
 
 			for (T t : list) {
 				if (t != null && t instanceof IUuidObject && uuid.equals(((IUuidObject) t).getUuid()))
@@ -478,13 +497,13 @@ public class CoreUtils {
 				}
 			}
 		}
-		return (String[]) arl.toArray(new String[arl.size()]);
+		return arl.toArray(new String[arl.size()]);
 	}
 
 	public static String[] transformListToStringArray(List lst) {
 		List<String> arl = transformListToStringList(lst);
 		if (arl != null && arl.size() > 0) {
-			return (String[]) arl.toArray(new String[arl.size()]);
+			return arl.toArray(new String[arl.size()]);
 		}
 		return null;
 	}

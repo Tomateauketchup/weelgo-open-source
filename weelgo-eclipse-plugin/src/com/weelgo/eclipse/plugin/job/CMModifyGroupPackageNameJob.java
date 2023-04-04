@@ -1,28 +1,27 @@
 package com.weelgo.eclipse.plugin.job;
 
+import com.weelgo.chainmapping.core.CMGroup;
 import com.weelgo.chainmapping.core.CMModuleService;
-import com.weelgo.chainmapping.core.CMNode;
-import com.weelgo.chainmapping.core.CMTask;
 import com.weelgo.core.IProgressMonitor;
 import com.weelgo.eclipse.plugin.CMEvents;
 import com.weelgo.eclipse.plugin.Factory;
 import com.weelgo.eclipse.plugin.ImagesFactory;
 
-public class CMModifyTaskNameJob extends CMJob {
+public class CMModifyGroupPackageNameJob extends CMJob {
 
 	private String newName;
 
-	public static CMModifyTaskNameJob CREATE() {
-		return Factory.create(CMModifyTaskNameJob.class);
+	public static CMModifyGroupPackageNameJob CREATE() {
+		return Factory.create(CMModifyGroupPackageNameJob.class);
 	}
 
-	public CMModifyTaskNameJob() {
-		super("Modify task name", "Modifying task name ...");
+	public CMModifyGroupPackageNameJob() {
+		super("Modify group package name", "Modifying group package name ...");
 	}
 
 	@Override
 	public String getUndoRedoLabel() {
-		return "Modify task name";
+		return "Modify group package name";
 	}
 
 	@Override
@@ -38,12 +37,12 @@ public class CMModifyTaskNameJob extends CMJob {
 	@Override
 	public void doRun(IProgressMonitor monitor) {
 
-		CMNode nd = getSelectedObject(CMNode.class);
+		CMGroup nd = getSelectedObject(CMGroup.class);
 		CMModuleService ser = getModuleService(nd);
 		if (ser != null && nd != null) {
 			setModuleUniqueIdentifier(ser.getModuleUniqueIdentifier());
-			CMTask tsk = ser.modifyTaskName(newName, nd.getUuid());
-			sentEvent(CMEvents.TASK_NAME_MODIFIED, tsk);
+			CMGroup gp = ser.modifyGroupPackageName(newName, nd.getUuid());
+			sentEvent(CMEvents.GROUP_PACKAGE_NAME_MODIFIED, gp);
 		}
 
 	}

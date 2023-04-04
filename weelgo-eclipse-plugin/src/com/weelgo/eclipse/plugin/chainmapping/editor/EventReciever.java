@@ -60,6 +60,12 @@ public class EventReciever implements IDisposableObject, EventHandler {
 		eventBroker.subscribe(CMEvents.CHECK_EDITOR_DIRTY, this);
 		eventBroker.subscribe(CMEvents.TASK_NAME_MODIFIED, this);
 		eventBroker.subscribe(CMEvents.ELEMENTS_MOVED_INTO_GROUP, this);
+		eventBroker.subscribe(CMEvents.GROUP_BACKGROUND_COLOR_MODIFIED, this);
+		eventBroker.subscribe(CMEvents.GROUP_BACKGROUND_VISIBLE_MODIFIED, this);
+		eventBroker.subscribe(CMEvents.GROUP_BORDER_COLOR_MODIFIED, this);
+		eventBroker.subscribe(CMEvents.GROUP_BORDER_VISIBLE_MODIFIED, this);
+		eventBroker.subscribe(CMEvents.GROUP_NAME_MODIFIED, this);
+		eventBroker.subscribe(CMEvents.GROUP_PACKAGE_NAME_MODIFIED, this);
 
 	}
 
@@ -71,13 +77,21 @@ public class EventReciever implements IDisposableObject, EventHandler {
 		if (CMEvents.isTopicForMe(topic, CMEvents.TASK_CREATED, CMEvents.NEED_CREATED, CMEvents.ELEMENTS_REMOVED,
 				CMEvents.MODULE_UNDO_REDO_OPERATION_DONE, CMEvents.MODULE_SAVED, CMEvents.GROUP_CREATED,
 				CMEvents.ALL_MODULE_SAVED, CMEvents.NODES_POSITION_CHANGED, CMEvents.NODES_NAME_POSITION_CHANGED,
-				CMEvents.TASK_NAME_MODIFIED, CMEvents.CHECK_EDITOR_DIRTY, CMEvents.ELEMENTS_MOVED_INTO_GROUP)) {
+				CMEvents.TASK_NAME_MODIFIED, CMEvents.CHECK_EDITOR_DIRTY, CMEvents.ELEMENTS_MOVED_INTO_GROUP,
+				CMEvents.GROUP_BACKGROUND_COLOR_MODIFIED, CMEvents.GROUP_BACKGROUND_VISIBLE_MODIFIED,
+				CMEvents.GROUP_BORDER_COLOR_MODIFIED, CMEvents.GROUP_BORDER_VISIBLE_MODIFIED,
+				CMEvents.GROUP_NAME_MODIFIED, CMEvents.GROUP_PACKAGE_NAME_MODIFIED)) {
 
 			if (CMEvents.CHECK_EDITOR_DIRTY.equals(topic)) {
 				getChainMappingEditor().checkDirty();
 			}
 
 			if (isForMe(object)) {
+
+				boolean refreshGroups = CMEvents.isTopicForMe(topic, CMEvents.GROUP_BACKGROUND_COLOR_MODIFIED,
+						CMEvents.GROUP_BACKGROUND_VISIBLE_MODIFIED, CMEvents.GROUP_BORDER_COLOR_MODIFIED,
+						CMEvents.GROUP_BORDER_VISIBLE_MODIFIED, CMEvents.GROUP_NAME_MODIFIED,
+						CMEvents.GROUP_PACKAGE_NAME_MODIFIED);
 
 				boolean refreshForCreationOrRemove = CMEvents.isTopicForMe(topic, CMEvents.TASK_CREATED,
 						CMEvents.NEED_CREATED, CMEvents.ELEMENTS_REMOVED, CMEvents.MODULE_UNDO_REDO_OPERATION_DONE,
@@ -89,7 +103,7 @@ public class EventReciever implements IDisposableObject, EventHandler {
 				if (refreshForCreationOrRemove) {
 					getChainMappingEditor().refreshForCreationOrRemove();
 				}
-				if (refreshVisuals) {
+				if (refreshVisuals || refreshGroups) {
 					getChainMappingEditor().refreshVisualsOnly();
 				}
 			}
